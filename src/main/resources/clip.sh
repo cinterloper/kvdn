@@ -22,7 +22,8 @@ while [ $# -gt 0 ]; do
 	case ${1} in
 		-g=*|--g=*) getpath="$(echo ${1} | awk -F= '{print $2;}')" ;;
 		-s=*|--s=*) setpath="$(echo ${1} | awk -F= '{print $2;}')" ;;
-		-d=*|--d=*) setpath="$(echo ${1} | awk -F= '{print $2;}')" ;;
+		-d=*|--d=*) delpath="$(echo ${1} | awk -F= '{print $2;}')" ;;
+		-v|--v) verbose_mode=1 ;;
 		-h|--h|?) usage ;;
 		*) usage ;;
 		esac
@@ -39,6 +40,11 @@ fi
 if [ "$getpath" != "" ]; then
     curl -XGET  $PROTO://$KVDN_HOST:$KVDN_PORT/$getpath
     if [ "$verbose_mode" = "true" ]; then echo curl -XGET  $PROTO://$KVDN_HOST:$KVDN_PORT/$getpath ; fi
+
+fi
+if [ "$delpath" != "" ]; then
+    curl -XDELETE  $PROTO://$KVDN_HOST:$KVDN_PORT/$delpath
+    if [ "$verbose_mode" = "true" ]; then echo curl -XDELETE  $PROTO://$KVDN_HOST:$KVDN_PORT/$delpath ; fi
 
 fi
 
