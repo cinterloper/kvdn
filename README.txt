@@ -9,3 +9,6 @@ this should enable the chouse of underlieing algorithms as the plugs are finishe
  - Atomix / Raft (new)
  
  
+https://github.com/vert-x3/vertx-zookeeper
+http://atomix.io/ 
+https://github.com/atomix/atomix-vertx
