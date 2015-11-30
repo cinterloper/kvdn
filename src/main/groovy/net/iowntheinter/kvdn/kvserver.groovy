@@ -94,7 +94,7 @@ class kvserver {
         } else {
             def tx = session.newTx("${sName}:${mName}")
             tx.get(kName, { resGet ->
-                if (resGet.succeeded()) {
+                if (resGet.error == null) {
                     response.end(resGet.result().toString())
                 } else {
                     response.setStatusCode(501).end(resGet.error)
