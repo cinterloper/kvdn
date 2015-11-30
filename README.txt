@@ -72,8 +72,11 @@ INFO: Succeeded in deploying verticle
 ....
 
 
-grant@nighthawk ~/sandbox/vertx/kvdn (git)-[master] % cd Client/cli/
-grant@nighthawk ~/sandbox/vertx/kvdn/Client/cli (git)-[master] % echo "hello" | bash clip.sh -s=this/that/izbifdgasdd
-that:izbifdgasdd%                                                                                                                        grant@nighthawk ~/sandbox/vertx/kvdn/Client/cli (git)-[master] % echo "hello" | bash clip.sh -s=this/that/anotherkey
-that:anotherkey%                                                                                                                         grant@nighthawk ~/sandbox/vertx/kvdn/Client/cli (git)-[master] % curl http://192.168.7.101:9090/KEYS/this/that/
+cd Client/cli/
+
+$ echo "hello" | bash clip.sh -s=this/that/izbifdgasdd
+that:izbifdgasdd%                                                                                                              
+$ echo "hello" | bash clip.sh -s=this/that/anotherkey
+that:anotherkey%  
+$ curl http://192.168.7.101:9090/KEYS/this/that/
 [result:[izbifdgasdd, anotherkey], error:null]
