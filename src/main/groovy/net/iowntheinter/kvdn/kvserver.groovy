@@ -38,7 +38,7 @@ class kvserver {
         sockJSHandler = SockJSHandler.create(v)
         def options = [:]
         sockJSHandler.bridge(options)
-        router.route().handler(BodyHandler.create())
+            router.route().handler(BodyHandler.create())
         router.route("/kvbus/*").handler(sockJSHandler)
         start(c.getJsonObject("System").getInteger("Port"), router, vertx)
     }
@@ -47,11 +47,11 @@ class kvserver {
         logger = new LoggerFactory().getLogger("kvdn")
         eb = v.eventBus()
 
-        r.delete("/:str/:map/:key").handler(this.&handleMapDel)
+        r.delete("/X/:str/:map/:key").handler(this.&handleMapDel)
         //r.post("/:str/:map").handler(this.&handleMapPost)
-        r.get("/:str/:map/:key").handler(this.&handleMapGet)
-        r.get("/KEYS/:str/:map/:key").handler(this.&handleMapKeys)
-        r.put("/:str/:map/:key").handler(this.&handleMapSet)
+        r.get("/X/:str/:map/:key").handler(this.&handleMapGet)
+        r.get("/KEYS/:str/:map/").handler(this.&handleMapKeys)
+        r.put("/X/:str/:map/:key").handler(this.&handleMapSet)
 
         try {
             def server = v.createHttpServer()
@@ -68,7 +68,7 @@ class kvserver {
         def sName = routingContext.request().getParam("str")
 
         def response = routingContext.response()
-        if (mName == null || kName == null) {
+        if (mName == null || sName == null) {
             response.setStatusCode(400).end()
         } else {
             def tx = session.newTx("${sName}:${mName}")
@@ -95,7 +95,7 @@ class kvserver {
             def tx = session.newTx("${sName}:${mName}")
             tx.get(kName, { resGet ->
                 if (resGet.error == null) {
-                    response.end(resGet.result().toString())
+                    response.end(resGet.result.toString())
                 } else {
                     response.setStatusCode(501).end(resGet.error)
                 }
