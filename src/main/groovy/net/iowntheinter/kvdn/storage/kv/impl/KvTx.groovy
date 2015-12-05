@@ -4,6 +4,8 @@ import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryo.io.Input
 import com.esotericsoftware.kryo.io.Output
 import io.vertx.core.AsyncResult
+import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.groovy.core.Vertx
 import io.vertx.groovy.core.eventbus.EventBus
@@ -57,7 +59,7 @@ class KvTx implements TSKV {
             keys = new ORSet()
         keys.merge(update)
         KeySets.put(uaddr, keys)
-        cb([result:keys.get(),error:null])
+        cb(new JsonObject().put("result", new JsonArray(keys.get().toList())))
     }
     def bailTx(ctx) { //something went wrong, bail out of the transaction
 
@@ -88,7 +90,6 @@ class KvTx implements TSKV {
     }
 
     public void createMap(strAddr, cb) {
-        sd.getSync
         def exists = false
         def id = null;
         getMapRootId(strAddr, { Map ar ->
@@ -178,17 +179,16 @@ class KvTx implements TSKV {
 
     }
     def keyReqHandler = { message ->
-        logger.info("Got a remote key req: ${message.body()}")
+        logger.info("Got a remote key req: ${message.body().strAddr}")
         Map keyReqCtx = message.body()
         def strAddr = keyReqCtx["strAddr"]
-        logger.info("got a request for ${strAddr}, replying ")
         def baos = new ByteArrayOutputStream();
         def out = new Output(baos);
         def keys = KeySets.get(strAddr)
         serializer.writeObjectOrNull(out, keys, ORSet.class)
         def replContents = baos.toByteArray()
         message.reply(replContents)
-        logger.info("replyed with : ${replContents}")
+        logger.info("replyed to keyreq ")
     }
 
     void set(key, content, cb) {
@@ -238,13 +238,12 @@ class KvTx implements TSKV {
 
             eb.send("keyreq_${strAddr}", [strAddr: strAddr], { resp ->
                 def data =resp.result().body()
-                logger.info("got response from keyreq_${strAddr}: f: ${resp.cause()}  d: ${data}")
+                logger.info("got response from keyreq_${strAddr}: err if any: ${resp.cause()}  ")
                 def inp = new Input(data as byte[])
                 peerUpdateHdlr(serializer.readObjectOrNull(inp, ORSet.class),strAddr, cb)
             })
         } else
-            cb([result: keys.get(), error: null])
-
+            cb(new JsonObject().put("result", new JsonArray(keys.get().toList())))
 
     }
 

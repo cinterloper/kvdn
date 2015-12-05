@@ -1,5 +1,6 @@
 package net.iowntheinter.kvdn
 
+import com.google.common.collect.Multimap
 import io.vertx.core.json.JsonObject
 import io.vertx.groovy.core.Vertx
 import io.vertx.groovy.ext.web.Router
@@ -73,10 +74,10 @@ class kvserver {
         } else {
             def tx = session.newTx("${sName}:${mName}")
             tx.getKeys( { resGetK ->
-                if (resGetK.error == null) {
-                    response.end(resGetK.toString())
+                if (resGetK.getString('error') == null) {
+                    response.end(resGetK.getJsonArray("result").toString())
                 } else {
-                    response.setStatusCode(501).end(resGet.error)
+                    response.setStatusCode(501).end(resGetK.error)
                 }
             })
 
