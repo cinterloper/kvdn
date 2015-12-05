@@ -1,0 +1,18 @@
+peerA:
+  image: kvdn
+  expose:
+    - "9090"
+  dns: 
+    - 172.17.0.1
+peerB:
+  image: kvdn
+  expose:
+    - "9090"
+  dns: 
+    - 172.17.0.1
+peerC:
+  image: kvdn
+  expose:
+    - "9090"
+  dns: 
+    - 172.17.0.1

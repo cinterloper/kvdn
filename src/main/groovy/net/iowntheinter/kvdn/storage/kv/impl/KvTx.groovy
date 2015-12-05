@@ -28,10 +28,10 @@ class KvTx implements TSKV {
     Map KeySets
     Kryo serializer
 
-    def KvTx(String sa, Map keysets, s, vertx) {
+    def KvTx(String sa, session, kryo, vertx) {
         // keys = new ORSet()
         strAddr = sa
-        serializer = s
+        serializer = kryo
         logger = new LoggerFactory().getLogger("KvTx:" + strAddr)
         sd = vertx.sharedData() as SharedData
         eb = vertx.eventBus() as EventBus
@@ -40,17 +40,25 @@ class KvTx implements TSKV {
       //            NamesToRoots = ar.result() as AsyncMap
           })
   */
-        KeySets = keysets
+        KeySets = session.keysets
 
     }
 
-    def peerUpdateHdlr(ORSet update) {
-        keys = KeySets.get(strAddr) as ORSet
+    def peerUpdateHdlr(ORSet update, uaddr) {
+        ORSet keys = KeySets.get(uaddr) as ORSet
+        if(keys == null)
+            keys = new ORSet()
         keys.merge(update)
-        KeySets.put(strAddr, keys)
+        KeySets.put(uaddr, keys)
     }
-
-
+    def peerUpdateHdlr(ORSet update, uaddr,cb) {
+        ORSet keys = KeySets.get(uaddr) as ORSet
+        if(keys == null)
+            keys = new ORSet()
+        keys.merge(update)
+        KeySets.put(uaddr, keys)
+        cb([result:keys.get(),error:null])
+    }
     def bailTx(ctx) { //something went wrong, bail out of the transaction
 
     }
@@ -169,6 +177,19 @@ class KvTx implements TSKV {
 
 
     }
+    def keyReqHandler = { message ->
+        logger.info("Got a remote key req: ${message.body()}")
+        Map keyReqCtx = message.body()
+        def strAddr = keyReqCtx["strAddr"]
+        logger.info("got a request for ${strAddr}, replying ")
+        def baos = new ByteArrayOutputStream();
+        def out = new Output(baos);
+        def keys = KeySets.get(strAddr)
+        serializer.writeObjectOrNull(out, keys, ORSet.class)
+        def replContents = baos.toByteArray()
+        message.reply(replContents)
+        logger.info("replyed with : ${replContents}")
+    }
 
     void set(key, content, cb) {
         sd.getClusterWideMap("${strAddr}", { res ->
@@ -176,13 +197,14 @@ class KvTx implements TSKV {
                 def AsyncMap map = res.result();
                 map.put(key, content, { resPut ->
                     if (resPut.succeeded()) {
-                        keys = KeySets.get(strAddr) as ORSet
+                        def atmt = KeySets.get(strAddr)
+                        if (atmt != null)
+                            keys = atmt as ORSet
                         if (keys == null) {
+                            logger.info("setting up keyset for ${strAddr} ")
                             keys = new ORSet()
-                            eb.consumer("keysync_" + strAddr, { message -> //listen for updates on this keyset
-                                ORSet foreign;
-                                def inp = new Input(message.body() as byte[])
-                                peerUpdateHdlr(serializer.readObjectOrNull(inp, ORSet.class))
+                            eb.consumer("keyreq_${strAddr}").handler(keyReqHandler).completionHandler({ ar ->
+                                logger.info("completed setting up handler for ${strAddr} + ${ar.cause()}")
                             })
                         }
                         keys.add(key)
@@ -194,7 +216,7 @@ class KvTx implements TSKV {
                         def out = new Output(baos);
                         serializer.writeObjectOrNull(out, keys, ORSet.class)
 
-                        eb.publish("keysync_${strAddr}", baos.toByteArray())
+                        eb.publish("_keysync_${strAddr}", baos.toByteArray())
                         logger.info("set:${strAddr}:${key}");
                         cb([result: resPut.result().toString(), error: null])
                     } else {
@@ -207,9 +229,23 @@ class KvTx implements TSKV {
         })
     }
 
+
     Object getKeys(cb) {
-        keys = KeySets.get(strAddr) as ORSet
-        cb([result:keys.get(),error:null])
+        def atmt = KeySets.get(strAddr)
+        if (atmt != null)
+            keys = atmt as ORSet
+        if (keys == null) {
+
+            eb.send("keyreq_${strAddr}", [strAddr: strAddr], { resp ->
+                def data =resp.result().body()
+                logger.info("got response from keyreq_${strAddr}: f: ${resp.cause()}  d: ${data}")
+                def inp = new Input(data as byte[])
+                peerUpdateHdlr(serializer.readObjectOrNull(inp, ORSet.class),strAddr, cb)
+            })
+        } else
+            cb([result: keys.get(), error: null])
+
+
     }
 
     void get(key, cb) {
@@ -244,7 +280,7 @@ class KvTx implements TSKV {
                         def baos = new ByteArrayOutputStream();
                         def out = new Output(baos);
                         serializer.writeObjectOrNull(out, keys, ORSet.class)
-                        eb.publish("keysync_${strAddr}", baos.toByteArray())
+                        eb.publish("_keysync_${strAddr}", baos.toByteArray())
                         logger.info("del:${strAddr}:${key}");
                         cb([result: resDel.result().toString(), error: null])
 

@@ -32,19 +32,19 @@ done
 # Source the output file ----------------------------------------------------------
 if [ "$setpath" != "" ]; then
     read INPUT_DATA
-    curl -XPUT -d$($JQPath -c -n --arg output "$INPUT_DATA" '{content: $output}') $PROTO://$KVDN_HOST:$KVDN_PORT/$setpath
+    curl -XPUT -d$($JQPath -c -n --arg output "$INPUT_DATA" '{content: $output}') $PROTO://$KVDN_HOST:$KVDN_PORT/X/$setpath
     if [ "$verbose_mode" = "true" ]; then
-     echo >&2 curl -XPUT -d$($JQPath -c -n --arg output "$INPUT_DATA" '{content: $output}') $PROTO://$KVDN_HOST:$KVDN_PORT/$setpath;
+     echo >&2 curl -XPUT -d$($JQPath -c -n --arg output "$INPUT_DATA" '{content: $output}') $PROTO://$KVDN_HOST:$KVDN_PORT/X/$setpath;
     fi
 fi
 if [ "$getpath" != "" ]; then
-    curl -XGET  $PROTO://$KVDN_HOST:$KVDN_PORT/$getpath
-    if [ "$verbose_mode" = "true" ]; then echo curl -XGET  $PROTO://$KVDN_HOST:$KVDN_PORT/$getpath ; fi
+    curl -XGET  $PROTO://$KVDN_HOST:$KVDN_PORT/X/$getpath
+    if [ "$verbose_mode" = "true" ]; then echo curl -XGET  $PROTO://$KVDN_HOST:$KVDN_PORT/X/$getpath ; fi
 
 fi
 if [ "$delpath" != "" ]; then
-    curl -XDELETE  $PROTO://$KVDN_HOST:$KVDN_PORT/$delpath
-    if [ "$verbose_mode" = "true" ]; then echo curl -XDELETE  $PROTO://$KVDN_HOST:$KVDN_PORT/$delpath ; fi
+    curl -XDELETE  $PROTO://$KVDN_HOST:$KVDN_PORT/X/$delpath
+    if [ "$verbose_mode" = "true" ]; then echo curl -XDELETE  $PROTO://$KVDN_HOST:$KVDN_PORT/X/$delpath ; fi
 
 fi
 
@@ -55,7 +55,7 @@ if [ "$verbose_mode" = "true" ]; then
 	echo >&2 "setpath  : $setpath"
 	echo >&2 "delpath: $delpath"
 	echo >&2 "clpth : $clpth"
-	echo >&2 "basepath : $PROTO://$KVDN_HOST:$KVDN_PORT/"
+	echo >&2 "basepath : $PROTO://$KVDN_HOST:$KVDN_PORT/X/"
 fi
 
 # Check if input file exists
