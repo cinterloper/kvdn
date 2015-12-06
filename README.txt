@@ -13,14 +13,14 @@ https://github.com/vert-x3/vertx-zookeeper
 http://atomix.io/ 
 https://github.com/atomix/atomix-vertx
 
-grant@nighthawk ~/sandbox/vertx/kvdn (git)-[master] % bats/bin/bats  kvdn.bats
+grant@nighthawk ~/sandbox/vertx/kvdn (git)-[master] % bats/bin/bats kvdn.bats
  ✓ build kvdn
- ✓ build kvdn docker image
- ✓ start a group of kv servers
+ ✓ build docker image
+ ✓ start a group of kv servers with docker-compose
  ✓ are they still running after 10 seconds?
- ✓ insert a value
- ✓ get keys
- ✓ get the value
+ ✓ insert a value to alpha
+ ✓ get keys from beta
+ ✓ get the value from gamma
  ✓ cleanup instances
 
 8 tests, 0 failures
