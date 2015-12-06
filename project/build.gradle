@@ -9,6 +9,7 @@ apply plugin: 'java'
 apply plugin: 'groovy'
 apply plugin: 'com.github.johnrengelman.shadow'
 
+group = 'net.iowntheinter'
 version = '0.1'
 
 if (!JavaVersion.current().java8Compatible) {
@@ -28,19 +29,23 @@ repositories {
 dependencies {
     compile 'io.vertx:vertx-web:3.1.0'
     compile 'io.vertx:vertx-core:3.1.0'
+    compile 'io.vertx:vertx-sync:3.1.0'
     compile 'io.vertx:vertx-lang-groovy:3.1.0'
     compile 'org.codehaus.groovy:groovy:2.4.3'
     compile 'io.vertx:vertx-hazelcast:3.1.0'
     compile 'com.hazelcast:hazelcast-all:3.5'
     compile 'io.vertx:vertx-auth-common:3.1.0'
     compile 'io.vertx:vertx-auth-jwt:3.1.0'
+    compile 'com.hubspot.jinjava:jinjava:2.1.0'
+    compile 'com.esotericsoftware:kryo:3.0.3'
+
 }
 
 shadowJar {
     classifier = 'fat'
     manifest {
        attributes 'Main-Class': 'io.vertx.core.Starter'
-       attributes 'Main-Verticle': 'groovy:start.groovy'
+       attributes 'Main-Verticle': 'groovy:kvdn-start.groovy'
     }
     mergeServiceFiles {
         include 'META-INF/services/io.vertx.core.spi.VerticleFactory'

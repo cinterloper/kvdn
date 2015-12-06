@@ -20,6 +20,7 @@ export LANG="en_US"
 
 while [ $# -gt 0 ]; do
 	case ${1} in
+		-k=*|--k=*) keypath="$(echo ${1} | awk -F= '{print $2;}')" ;;
 		-g=*|--g=*) getpath="$(echo ${1} | awk -F= '{print $2;}')" ;;
 		-s=*|--s=*) setpath="$(echo ${1} | awk -F= '{print $2;}')" ;;
 		-d=*|--d=*) delpath="$(echo ${1} | awk -F= '{print $2;}')" ;;
@@ -40,6 +41,11 @@ fi
 if [ "$getpath" != "" ]; then
     curl -XGET  $PROTO://$KVDN_HOST:$KVDN_PORT/X/$getpath
     if [ "$verbose_mode" = "true" ]; then echo curl -XGET  $PROTO://$KVDN_HOST:$KVDN_PORT/X/$getpath ; fi
+
+fi
+if [ "$keypath" != "" ]; then
+    curl -XGET  $PROTO://$KVDN_HOST:$KVDN_PORT/KEYS/$keypath
+    if [ "$verbose_mode" = "true" ]; then echo  curl -XGET  $PROTO://$KVDN_HOST:$KVDN_PORT/KEYS/$keypath ; fi
 
 fi
 if [ "$delpath" != "" ]; then
