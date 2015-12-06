@@ -2,8 +2,10 @@
 kvdn.iml
 .idea
 .gradle
-.jar
-.class
-.zip
-.tgz
+*.jar
+*.xml
+*.class
+*.zip
+*.tgz
+*.iml
 note*.txt
