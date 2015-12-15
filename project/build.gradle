@@ -8,10 +8,20 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'groovy'
 apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
 
 group = 'net.iowntheinter'
 version = '0.1'
 
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "file://localhost/tmp/repo/")
+        }
+    }
+}
 if (!JavaVersion.current().java8Compatible) {
     throw new IllegalStateException('''A Haiku:
                                       |  This needs Java 8,
@@ -40,7 +50,11 @@ dependencies {
     compile 'com.esotericsoftware:kryo:3.0.3'
 
 }
-
+model {
+    tasks.generatePomFileForMavenCustomPublication {
+        destination = file("$buildDir/generated-pom.xml")
+    }
+}
 shadowJar {
     classifier = 'fat'
     manifest {

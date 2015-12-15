@@ -1,22 +1,26 @@
 talpha:
+  container_name: kvdn_talpha
   image: kvdn
   expose:
     - "9090"
   dns: 
     - 172.17.0.1
 tbeta:
+  container_name: kvdn_tbeta
   image: kvdn
   expose:
     - "9090"
   dns: 
     - 172.17.0.1
 tgamma:
+  container_name: kvdn_tgamma
   image: kvdn
   expose:
     - "9090"
   dns: 
     - 172.17.0.1
 test:
+  container_name: kvdn_test
   image: kvdn
   expose:
     - "9090"
