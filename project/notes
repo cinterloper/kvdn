@@ -1,0 +1,5 @@
+aborted write stack:
+  a buffer of writes you tried by aborted
+aborted write alert hook:
+  a hook that will pass aborted writes back to an endpoint you describe, so your app logic can process them
+

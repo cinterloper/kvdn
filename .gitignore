@@ -1,0 +1,11 @@
+
+kvdn.iml
+.idea
+.gradle
+*.jar
+*.xml
+*.class
+*.zip
+*.tgz
+*.iml
+note*.txt
