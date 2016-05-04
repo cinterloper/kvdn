@@ -4,17 +4,15 @@
 @test "build kvdn" {
   cd project/; ./gradlew clean shadowJar
   result=$?
-  [ "$result" -eq 0 ]
+  if [ $result -eq 0 ]; then
+    rm kvdn.jar
+    ln build/libs/*fat.jar kvdn.jar
+  fi
+  [ $result -eq 0 ]
 }
 
 @test "remove old docker image" {
   docker-compose rm -f
-  result=$?
-  [ "$result" -eq 0 ]
-}
-
-@test "build kvdn" {
-  cd project/; ./gradlew clean; ./gradlew shadowJar
   result=$?
   [ "$result" -eq 0 ]
 }
@@ -38,7 +36,8 @@
 }
 @test "insert a value" {
   result=$(docker exec -t -i kvdn_test /bin/bash -c "cd /opt/Client/cli; cp alpha.sh config.sh; echo hello | bash clip.sh -s=test/str/firstkey")
-  [ $(echo "$result" | grep -c str:firstkey ) -eq 1 ]
+  echo $result > /tmp/result.res
+  [ $(echo "$result" | grep -c firstkey ) -eq 1 ]
 }
 @test "get keys" {
   result=$(docker exec -t -i kvdn_test /bin/bash -c "cd /opt/Client/cli; cp beta.sh config.sh; bash clip.sh -k=test/str/")
@@ -52,7 +51,7 @@
 }
 
 @test "cleanup instances" {
-  docker-compose kill
+  # docker-compose kill
   result=$?
   [ "$result" -eq 0 ]
 }

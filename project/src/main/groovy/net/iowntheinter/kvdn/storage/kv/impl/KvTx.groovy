@@ -46,6 +46,10 @@ class KvTx implements TSKV {
 
     }
 
+    def getMap(String name, Closure cb){
+
+    }
+
     def peerUpdateHdlr(ORSet update, uaddr) {
         ORSet keys = KeySets.get(uaddr) as ORSet
         if(keys == null)
@@ -136,48 +140,7 @@ class KvTx implements TSKV {
         }
     }
 
-    def acquireLock(strAddr, cb) {
-        acquireLockResources(strAddr as String, { Map resrc ->
-            if (resrc['error'] != null) {
-                def c = resrc['ctr']
-                def l = resrc['lock']
-                next = c + 1
 
-                try {
-                    worked = txCounter.compareandset(c, next)
-                } catch (failedException) {
-                    //         bail out of this transaction
-                }
-                //no one can do shit till i release this, if blocked i should listen for an unlock event
-                //possiably warn if blocked for to long
-            }
-        })
-
-
-    }
-
-    def acquireLockResources(String mName, cb) {
-        def mapLock, mapTxCtr
-        try {
-            sd.getLock(mName, { AsyncResult lar ->
-                if (!lar.failed()) {
-                    mapLock = lar.result()
-                    sd.getCounter(mName, { AsyncResult car ->
-                        if (!car.failed()) {
-                            mapTxCtr = car.result()
-                            cb([lck: mapLock, ctr: mapTxCtr, error: null])
-                        } else {
-                            cb([lck: null, ctr: null, error: car.cause()])
-                        }
-                    })
-                }
-            })
-        } catch (e) {
-            log.error(e)
-        }
-
-
-    }
     def keyReqHandler = { message ->
         logger.info("Got a remote key req: ${message.body().strAddr}")
         Map keyReqCtx = message.body()
@@ -236,11 +199,16 @@ class KvTx implements TSKV {
             keys = atmt as ORSet
         if (keys == null) {
 
-            eb.send("keyreq_${strAddr}", [strAddr: strAddr], { resp ->
-                def data =resp.result().body()
-                logger.info("got response from keyreq_${strAddr}: err if any: ${resp.cause()}  ")
-                def inp = new Input(data as byte[])
-                peerUpdateHdlr(serializer.readObjectOrNull(inp, ORSet.class),strAddr, cb)
+            eb.send("keyreq_${strAddr}", [strAddr: strAddr], { res ->
+                if(res.succeded()) {
+                    def data = resp.result().body()
+                    logger.info("got response from keyreq_${strAddr}: err if any: ${resp.cause()}  ")
+                    def inp = new Input(data as byte[])
+                    peerUpdateHdlr(serializer.readObjectOrNull(inp, ORSet.class), strAddr, cb)
+                }
+                else{
+                    logger.error("no response from key request")
+                }
             })
         } else
             cb(new JsonObject().put("result", new JsonArray(keys.get().toList())))
