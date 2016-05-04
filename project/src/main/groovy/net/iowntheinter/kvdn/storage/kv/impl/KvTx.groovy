@@ -199,8 +199,8 @@ class KvTx implements TSKV {
             keys = atmt as ORSet
         if (keys == null) {
 
-            eb.send("keyreq_${strAddr}", [strAddr: strAddr], { res ->
-                if(res.succeded()) {
+            eb.send("keyreq_${strAddr}", [strAddr: strAddr], { resp ->
+                if(resp.result().body()) {
                     def data = resp.result().body()
                     logger.info("got response from keyreq_${strAddr}: err if any: ${resp.cause()}  ")
                     def inp = new Input(data as byte[])

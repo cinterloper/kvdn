@@ -5,7 +5,7 @@
   cd project/; ./gradlew clean shadowJar
   result=$?
   if [ $result -eq 0 ]; then
-    rm kvdn.jar
+    run rm kvdn.jar
     ln build/libs/*fat.jar kvdn.jar
   fi
   [ $result -eq 0 ]
@@ -18,7 +18,7 @@
 }
 
 @test "build kvdn docker image" {
-  docker build -t kvdn .
+  docker build --no-cache -t kvdn .
   result=$?
   [ "$result" -eq 0 ]
 }
