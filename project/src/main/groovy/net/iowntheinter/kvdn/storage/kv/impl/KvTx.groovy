@@ -15,7 +15,8 @@ import io.vertx.groovy.core.shareddata.SharedData
 import net.iowntheinter.kvdn.storage.kv.TSKV
 import net.iowntheinter.crdts.sets.ORSet
 import net.iowntheinter.crdts.CRDT;
-
+import java.security.MessageDigest
+import io.vertx.core.buffer.Buffer
 //import com.hazelcast.replicatedmap.impl.record.VectorClockTimestamp
 
 /**
@@ -154,6 +155,44 @@ class KvTx implements TSKV {
         logger.info("replyed to keyreq ")
     }
 
+    void submit(content, cb) {
+        sd.getClusterWideMap("${strAddr}", { res ->
+            if (res.succeeded()) {
+                def AsyncMap map = res.result();
+                def String key = MessageDigest.getInstance("MD5").digest(Buffer.buffer(content).getBytes()).encodeHex().toString()
+                map.put( key , content, { resPut ->
+                    if (resPut.succeeded()) {
+                        def atmt = KeySets.get(strAddr)
+                        if (atmt != null)
+                            keys = atmt as ORSet
+                        if (keys == null) {
+                            logger.info("setting up keyset for ${strAddr} ")
+                            keys = new ORSet()
+                            eb.consumer("keyreq_${strAddr}").handler(keyReqHandler).completionHandler({ ar ->
+                                logger.info("completed setting up handler for ${strAddr} + ${ar.cause()}")
+                            })
+                        }
+                        keys.add(key)
+                        KeySets.put(strAddr, keys)
+
+                        //notify those subscribing to the map that a key has ben updated
+                        eb.publish("+_${strAddr}", key)
+                        def baos = new ByteArrayOutputStream();
+                        def out = new Output(baos);
+                        serializer.writeObjectOrNull(out, keys, ORSet.class)
+
+                        eb.publish("_keysync_${strAddr}", baos.toByteArray())
+                        logger.info("set:${strAddr}:${key}");
+                        cb([result: resPut.result().toString(),key:key, error: null])
+                    } else {
+                        cb([result: null, error: resPut.cause()])
+                    }
+                })
+            } else {
+                cb([result: null, error: res.cause()])
+            }
+        })
+    }
     void set(key, content, cb) {
         sd.getClusterWideMap("${strAddr}", { res ->
             if (res.succeeded()) {
@@ -191,6 +230,7 @@ class KvTx implements TSKV {
             }
         })
     }
+
 
 
     Object getKeys(cb) {

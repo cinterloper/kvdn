@@ -6,6 +6,7 @@ package net.iowntheinter.kvdn.storage.kv
 interface TSKV {
     Object bailTx(context)
     void snapshot()
+    void submit(content,cb)
     void set(key,content,cb)
     void get(key,cb)
     void del(key,cb)

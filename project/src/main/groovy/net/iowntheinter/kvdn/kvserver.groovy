@@ -55,7 +55,7 @@ class kvserver {
         eb = v.eventBus()
 
         r.delete("/X/:str/:map/:key").handler(this.&handleMapDel)
-        //r.post("/:str/:map").handler(this.&handleMapPost)
+        r.post("/X/:str/:map").handler(this.&handleMapSubmit)
         r.get("/X/:str/:map/:key").handler(this.&handleMapGet)
         r.get("/KEYS/:str/:map/").handler(this.&handleMapKeys)
         r.put("/X/:str/:map/:key").handler(this.&handleMapSet)
@@ -129,6 +129,35 @@ class kvserver {
                 tx.set(kName, content, { resPut ->
                     if (resPut.error == null) {
                         response.end(mName + ":" + kName)
+                    } else {
+                        response.setStatusCode(501).end(resPut.error)
+                    }
+                })
+            }
+
+        }
+    }
+    def handleMapSubmit(routingContext) {
+        def mName = routingContext.request().getParam("map")
+        def sName = routingContext.request().getParam("str")
+        def response = routingContext.response()
+        if (mName == null) {
+            response.setStatusCode(400).end()
+        } else {
+            def content;
+            def JsonObject entry = routingContext.getBodyAsJson()
+            try {
+                content = entry.getJsonObject("content").toString()
+            } catch (ClassCastException e) {
+                content = entry.getString("content").toString()
+            }
+            if (entry == null) {
+                response.sendError(400, response.toString())
+            } else {
+                KvTx tx = session.newTx("${sName}:${mName}")
+                tx.submit( content, { resPut ->
+                    if (resPut.error == null) {
+                        response.end(mName + ":" + resPut.key)
                     } else {
                         response.setStatusCode(501).end(resPut.error)
                     }
