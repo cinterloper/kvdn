@@ -1,0 +1,20 @@
+{
+  "name": "kvdn",
+  "env_vars": [],
+  "startup": {
+    "vx": {
+      "groovy:kvdn-start.groovy": {
+        "deps": [],
+        "startReady": true
+      }
+    },
+    "ext": {
+      "docker": {
+
+      }
+    }
+  },
+  "optionBlocks": {
+
+  }
+}

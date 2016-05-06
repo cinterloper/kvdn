@@ -1,41 +1,67 @@
-buildscript {
-    repositories { jcenter() }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:1.1.1'
-    }
+plugins {
+    id 'groovy'
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '1.2.2'
+    id 'maven-publish'
 }
+def libversion = '3.2.1'
+version = '3.2.1'
+def GITHUB_TOKEN = System.getenv("GITHUB_TOKEN")
+def AWS_MVN_BUCKET = System.getenv("AWS_MVN_BUCKET")
+def AWS_DEFAULT_REGION = System.getenv("AWS_DEFAULT_REGION")
+def AWS_ACCESS_KEY_ID = System.getenv("AWS_ACCESS_KEY_ID")
+def AWS_SECRET_ACCESS_KEY = System.getenv("AWS_SECRET_ACCESS_KEY")
+def USER = System.getenv("USER")
 
-apply plugin: 'java'
-apply plugin: 'groovy'
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'maven'
-apply plugin: 'maven-publish'
 
-group = 'net.iowntheinter'
-version = '0.1'
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "file://localhost/tmp/repo/")
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { url 'http://dl.bintray.com/gesellix/docker-utils' }
+    flatDir { dirs '/usr/share/java' }
+    flatDir { dirs 'lib/' }
+    flatDir { dirs '/usr/share/java/shadow' }
+    maven {
+        url "file:///home/$USER/maven_repo"
+    }
+    if (AWS_MVN_BUCKET && !AWS_MVN_BUCKET.allWhitespace) {
+        maven {
+            url "s3://$AWS_MVN_BUCKET/maven2"
+            credentials(AwsCredentials) {
+                accessKey AWS_ACCESS_KEY_ID
+                secretKey AWS_SECRET_ACCESS_KEY
+            }
         }
     }
 }
-if (!JavaVersion.current().java8Compatible) {
-    throw new IllegalStateException('''A Haiku:
-                                      |  This needs Java 8,
-                                      |  You are using something else,
-                                      |  Refresh. Try again.'''.stripMargin())
-}
-
-repositories {
-    mavenCentral()
-    maven {
-        url = 'http://oss.sonatype.org/content/repositories/snapshots/'
+publishing {
+    repositories {
+        maven {
+            url "file:///home/$USER/maven_repo"
+        }
+        if (AWS_MVN_BUCKET && !AWS_MVN_BUCKET.allWhitespace) {
+            maven {
+                url "s3://$AWS_MVN_BUCKET/maven2"
+                credentials(AwsCredentials) {
+                    accessKey AWS_ACCESS_KEY_ID
+                    secretKey AWS_SECRET_ACCESS_KEY
+                }
+            }
+        }
     }
-maven { url = "file:///tmp/repo/" }
 
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'net.iowntheinter'
+            artifactId 'kvdn'
+            from components.java
+        }
+    }
 }
+
+sourceCompatibility = '1.8'
+mainClassName = 'net.iowntheinter.vertx.coreLauncher.impl.coreStarter'
 
 dependencies {
     compile 'io.vertx:vertx-web:3.2.1'
@@ -46,18 +72,18 @@ dependencies {
     compile 'io.vertx:vertx-auth-common:3.2.1'
     compile 'io.vertx:vertx-auth-jwt:3.2.1'
     compile 'com.esotericsoftware:kryo:3.0.3'
+    compile "net.iowntheinter:cornerstone:3.2.1-11"
 
 }
-model {
-    tasks.generatePomFileForMavenCustomPublication {
-        destination = file("$buildDir/generated-pom.xml")
-    }
+
+processResources {
+    from 'src/main/groovy'
 }
+
 shadowJar {
     classifier = 'fat'
     manifest {
-       attributes 'Main-Class': 'io.vertx.core.Starter'
-       attributes 'Main-Verticle': 'groovy:kvdn-start.groovy'
+        attributes 'Main-Verticle': 'net.iowntheinter.vertx.componentRegister.impl.CoreLauncher'
     }
     mergeServiceFiles {
         include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
@@ -65,6 +91,5 @@ shadowJar {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.0'
+    gradleVersion = '2.8'
 }
-
