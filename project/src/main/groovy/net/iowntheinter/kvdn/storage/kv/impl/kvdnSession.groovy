@@ -5,9 +5,9 @@ import com.esotericsoftware.kryo.io.Input
 import com.esotericsoftware.kryo.io.Output
 import com.esotericsoftware.kryo.serializers.JavaSerializer
 import io.vertx.core.logging.LoggerFactory
-import io.vertx.groovy.core.Vertx
-import io.vertx.groovy.core.shareddata.AsyncMap
-import io.vertx.groovy.core.shareddata.LocalMap
+import io.vertx.core.Vertx
+import io.vertx.core.shareddata.AsyncMap
+import io.vertx.core.shareddata.LocalMap
 import net.iowntheinter.crdts.CRDT
 import net.iowntheinter.crdts.sets.ORSet
 import com.esotericsoftware.kryo.serializers.DefaultSerializers.StringSerializer;

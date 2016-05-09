@@ -2,15 +2,16 @@ package net.iowntheinter.kvdn
 
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
-import io.vertx.groovy.core.Context
-import io.vertx.groovy.core.Vertx
-import io.vertx.groovy.core.eventbus.EventBus
-import io.vertx.groovy.ext.web.Router
-import io.vertx.groovy.ext.web.handler.BodyHandler
+import io.vertx.core.Context
+import io.vertx.core.Vertx
+import io.vertx.core.eventbus.EventBus
+import io.vertx.ext.web.Router
+import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.core.logging.LoggerFactory
-import io.vertx.groovy.ext.web.handler.sockjs.SockJSHandler
+import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
 import net.iowntheinter.kvdn.storage.kv.impl.kvdnSession
+import io.vertx.ext.web.handler.sockjs.BridgeOptions
 
 class kvserver {
     def Logger logger
@@ -43,9 +44,9 @@ class kvserver {
         vertx = v
         router = r
         ctx = vertx.getOrCreateContext()
-        config = new JsonObject(ctx.config())
+        config = ctx.config()
         sjsh = SockJSHandler.create(v)
-        def options = [:]
+        def options = new BridgeOptions()
         sjsh.bridge(options)
         router.route().handler(BodyHandler.create())
         router.route("/kvbus/*").handler(sjsh)

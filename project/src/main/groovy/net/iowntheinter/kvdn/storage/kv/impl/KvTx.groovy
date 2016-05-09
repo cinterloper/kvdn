@@ -7,11 +7,11 @@ import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.LoggerFactory
-import io.vertx.groovy.core.Vertx
-import io.vertx.groovy.core.eventbus.EventBus
-import io.vertx.groovy.core.shareddata.AsyncMap
-import io.vertx.groovy.core.shareddata.LocalMap
-import io.vertx.groovy.core.shareddata.SharedData
+import io.vertx.core.Vertx
+import io.vertx.core.eventbus.EventBus
+import io.vertx.core.shareddata.AsyncMap
+import io.vertx.core.shareddata.LocalMap
+import io.vertx.core.shareddata.SharedData
 import net.iowntheinter.kvdn.storage.kv.TSKV
 import net.iowntheinter.crdts.sets.ORSet
 import net.iowntheinter.crdts.CRDT;
