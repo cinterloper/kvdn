@@ -4,19 +4,17 @@ import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryo.io.Input
 import com.esotericsoftware.kryo.io.Output
 import io.vertx.core.AsyncResult
+import io.vertx.core.buffer.Buffer
+import io.vertx.core.eventbus.EventBus
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.LoggerFactory
-import io.vertx.core.Vertx
-import io.vertx.core.eventbus.EventBus
 import io.vertx.core.shareddata.AsyncMap
-import io.vertx.core.shareddata.LocalMap
 import io.vertx.core.shareddata.SharedData
-import net.iowntheinter.kvdn.storage.kv.TSKV
 import net.iowntheinter.crdts.sets.ORSet
-import net.iowntheinter.crdts.CRDT;
+import net.iowntheinter.kvdn.storage.kv.TSKV
+
 import java.security.MessageDigest
-import io.vertx.core.buffer.Buffer
 //import com.hazelcast.replicatedmap.impl.record.VectorClockTimestamp
 
 /**
@@ -239,8 +237,8 @@ class KvTx implements TSKV {
             keys = atmt as ORSet
         if (keys == null) {
 
-            eb.send("keyreq_${strAddr}", [strAddr: strAddr], { resp ->
-                if(resp.result().body()) {
+            eb.send("keyreq_${strAddr}", new JsonObject([strAddr: strAddr]), { resp ->
+                if(resp.result()) {
                     def data = resp.result().body()
                     logger.info("got response from keyreq_${strAddr}: err if any: ${resp.cause()}  ")
                     def inp = new Input(data as byte[])
@@ -248,6 +246,7 @@ class KvTx implements TSKV {
                 }
                 else{
                     logger.error("no response from key request")
+                    cb(new JsonObject().put("error","no response from key request"))
                 }
             })
         } else
@@ -282,13 +281,18 @@ class KvTx implements TSKV {
                 map.remove(key, { resDel ->
                     if (resDel.succeeded()) {
                         keys = KeySets.get(strAddr) as ORSet
-                        keys.remove(key)
-                        KeySets.put(strAddr, keys)
-                        def baos = new ByteArrayOutputStream();
-                        def out = new Output(baos);
-                        serializer.writeObjectOrNull(out, keys, ORSet.class)
-                        eb.publish("_keysync_${strAddr}", baos.toByteArray())
-                        logger.info("del:${strAddr}:${key}");
+                        try{
+                            keys.remove(key)
+                            KeySets.put(strAddr, keys)
+                            def baos = new ByteArrayOutputStream();
+                            def out = new Output(baos);
+                            serializer.writeObjectOrNull(out, keys, ORSet.class)
+                            eb.publish("_keysync_${strAddr}", baos.toByteArray())
+                            logger.info("del:${strAddr}:${key}");
+                        }catch(e){
+                            logger.warn(e)
+                        }
+
                         cb([result: resDel.result().toString(), error: null])
 
                     } else {
