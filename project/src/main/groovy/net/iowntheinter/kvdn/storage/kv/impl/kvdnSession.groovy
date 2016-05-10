@@ -40,7 +40,7 @@ class kvdnSession {
         if (!maps.contains(strAddr)) {
             maps.push(strAddr)
             eb.consumer("_keysync_${strAddr}", { message -> //listen for updates on this keyset
-                logger.info("got keysync message")
+                logger.trace("got keysync message")
                 def b = message.body()
                 def updateORSet = b
                 def inp = new Input(updateORSet as byte[])

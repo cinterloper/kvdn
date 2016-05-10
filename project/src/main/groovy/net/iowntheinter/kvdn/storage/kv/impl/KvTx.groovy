@@ -141,7 +141,7 @@ class KvTx implements TSKV {
 
 
     def keyReqHandler = { message ->
-        logger.info("Got a remote key req: ${message.body().strAddr}")
+        logger.trace("Got a remote key req: ${message.body().strAddr}")
         Map keyReqCtx = message.body()
         def strAddr = keyReqCtx["strAddr"]
         def baos = new ByteArrayOutputStream();
@@ -150,7 +150,7 @@ class KvTx implements TSKV {
         serializer.writeObjectOrNull(out, keys, ORSet.class)
         def replContents = baos.toByteArray()
         message.reply(replContents)
-        logger.info("replyed to keyreq ")
+        logger.trace("replyed to keyreq ")
     }
 
     void submit(content, cb) {
@@ -164,10 +164,10 @@ class KvTx implements TSKV {
                         if (atmt != null)
                             keys = atmt as ORSet
                         if (keys == null) {
-                            logger.info("setting up keyset for ${strAddr} ")
+                            logger.trace("setting up keyset for ${strAddr} ")
                             keys = new ORSet()
                             eb.consumer("keyreq_${strAddr}").handler(keyReqHandler).completionHandler({ ar ->
-                                logger.info("completed setting up handler for ${strAddr} + ${ar.cause()}")
+                                logger.trace("completed setting up handler for ${strAddr} + ${ar.cause()}")
                             })
                         }
                         keys.add(key)
@@ -180,7 +180,7 @@ class KvTx implements TSKV {
                         serializer.writeObjectOrNull(out, keys, ORSet.class)
 
                         eb.publish("_keysync_${strAddr}", baos.toByteArray())
-                        logger.info("set:${strAddr}:${key}");
+                        logger.trace("set:${strAddr}:${key}");
                         cb([result: resPut.result().toString(),key:key, error: null])
                     } else {
                         cb([result: null, error: resPut.cause()])
@@ -201,10 +201,10 @@ class KvTx implements TSKV {
                         if (atmt != null)
                             keys = atmt as ORSet
                         if (keys == null) {
-                            logger.info("setting up keyset for ${strAddr} ")
+                            logger.trace("setting up keyset for ${strAddr} ")
                             keys = new ORSet()
                             eb.consumer("keyreq_${strAddr}").handler(keyReqHandler).completionHandler({ ar ->
-                                logger.info("completed setting up handler for ${strAddr} + ${ar.cause()}")
+                                logger.trace("completed setting up handler for ${strAddr} + ${ar.cause()}")
                             })
                         }
                         keys.add(key)
@@ -217,7 +217,7 @@ class KvTx implements TSKV {
                         serializer.writeObjectOrNull(out, keys, ORSet.class)
 
                         eb.publish("_keysync_${strAddr}", baos.toByteArray())
-                        logger.info("set:${strAddr}:${key}");
+                        logger.trace("set:${strAddr}:${key}");
                         cb([result: resPut.result().toString(), error: null])
                     } else {
                         cb([result: null, error: resPut.cause()])
@@ -240,7 +240,7 @@ class KvTx implements TSKV {
             eb.send("keyreq_${strAddr}", new JsonObject([strAddr: strAddr]), { resp ->
                 if(resp.result()) {
                     def data = resp.result().body()
-                    logger.info("got response from keyreq_${strAddr}: err if any: ${resp.cause()}  ")
+                    logger.trace("got response from keyreq_${strAddr}: err if any: ${resp.cause()}  ")
                     def inp = new Input(data as byte[])
                     peerUpdateHdlr(serializer.readObjectOrNull(inp, ORSet.class), strAddr, cb)
                 }
@@ -261,7 +261,7 @@ class KvTx implements TSKV {
                 def AsyncMap map = res.result();
                 map.get(key, { resGet ->
                     if (resGet.succeeded()) {
-                        logger.info("get:${strAddr}:${key}");
+                        logger.trace("get:${strAddr}:${key}");
                         cb([result: resGet.result().toString(), error: null])
                     } else {
                         cb([result: null, error: resGet.cause()])
@@ -288,7 +288,7 @@ class KvTx implements TSKV {
                             def out = new Output(baos);
                             serializer.writeObjectOrNull(out, keys, ORSet.class)
                             eb.publish("_keysync_${strAddr}", baos.toByteArray())
-                            logger.info("del:${strAddr}:${key}");
+                            logger.trace("del:${strAddr}:${key}");
                         }catch(e){
                             logger.warn(e)
                         }

@@ -45,11 +45,7 @@ class kvserver {
         router = r
         ctx = vertx.getOrCreateContext()
         config = ctx.config()
-        sjsh = SockJSHandler.create(v)
-        def options = new BridgeOptions()
-        sjsh.bridge(options)
-        router.route().handler(BodyHandler.create())
-        router.route("/kvbus/*").handler(sjsh)
+
         session = new kvdnSession(vertx)
 
         logger = new LoggerFactory().getLogger("kvdn")
