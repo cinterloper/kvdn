@@ -30,7 +30,8 @@ discovery:
   container_name: dnsdock
   image: tonistiigi/dnsdock
   ports:
-    - "0.0.0.0:53:53/udp"
+    - "172.17.0.1:53:53/udp"
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
+  command: ["-docker=tcp://172.17.0.1:4243"]
 
