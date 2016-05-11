@@ -6,6 +6,7 @@ import com.esotericsoftware.kryo.serializers.JavaSerializer
 import io.vertx.core.Vertx
 import io.vertx.core.logging.LoggerFactory
 import net.iowntheinter.crdts.sets.ORSet
+
 /**
  * Created by grant on 11/30/15.
  */
@@ -51,5 +52,21 @@ class kvdnSession {
         return (new KvTx(strAddr, this, serializer, v))
 
     }
+    void snapshot(String strAddr, Closure cb) {
+       cb([error:"unimplemented"])
+    }
+
+    void onWrite(String strAddr, Closure cb) {
+        eb.consumer("_+${strAddr}", { message -> //listen for updates on this keyset
+            cb(message.body())
+        })
+    }
+
+    void onDelete(String strAddr, Closure cb) {
+        eb.consumer("_-${strAddr}", { message -> //listen for updates on this keyset
+            cb(message.body())
+        })
+    }
+
 
 }

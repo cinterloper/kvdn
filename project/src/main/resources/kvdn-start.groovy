@@ -24,7 +24,9 @@ s.init(router,v, {
     try {
         def server = v.createHttpServer()
         def sjsh = SockJSHandler.create(v)
-        def options = new BridgeOptions().addOutboundPermitted(new PermittedOptions().setAddressRegex(".*"));
+        def options = new BridgeOptions()
+                .addOutboundPermitted(new PermittedOptions()
+                .setAddressRegex(".*"));
         sjsh.bridge(options)
         router.route("/eb/*").handler(sjsh)
         server.requestHandler(router.&accept).listen(9090)
