@@ -57,13 +57,13 @@ class kvdnSession {
     }
 
     void onWrite(String strAddr, Closure cb) {
-        eb.consumer("_+${strAddr}", { message -> //listen for updates on this keyset
+        eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this keyset
             cb(message.body())
         })
     }
 
     void onDelete(String strAddr, Closure cb) {
-        eb.consumer("_-${strAddr}", { message -> //listen for updates on this keyset
+        eb.consumer("_KVDN_-${strAddr}", { message -> //listen for updates on this keyset
             cb(message.body())
         })
     }

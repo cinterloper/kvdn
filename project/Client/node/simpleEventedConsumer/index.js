@@ -3,7 +3,7 @@ var eb = new EventBus("http://localhost:9090/eb/")
 
 eb.onopen=function(){
     console.log("opened");
-    eb.registerHandler('+_this:that', function (e, mes) {
+    eb.registerHandler('_KVDN_+this:that', function (e, mes) {
 
         console.log('incoming');
 

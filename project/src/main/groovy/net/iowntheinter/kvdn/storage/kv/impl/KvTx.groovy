@@ -174,7 +174,7 @@ class KvTx implements TSKV {
                         KeySets.put(strAddr, keys)
 
                         //notify those subscribing to the map that a key has ben updated
-                        eb.publish("+_${strAddr}", key)
+                        eb.publish("_KVDN_+${strAddr}", key)
                         def baos = new ByteArrayOutputStream();
                         def out = new Output(baos);
                         serializer.writeObjectOrNull(out, keys, ORSet.class)
@@ -211,12 +211,13 @@ class KvTx implements TSKV {
                         KeySets.put(strAddr, keys)
 
                         //notify those subscribing to the map that a key has ben updated
-                        eb.publish("+_${strAddr}", key)
                         def baos = new ByteArrayOutputStream();
                         def out = new Output(baos);
                         serializer.writeObjectOrNull(out, keys, ORSet.class)
 
                         eb.publish("_keysync_${strAddr}", baos.toByteArray())
+                        eb.publish("_KVDN_+${strAddr}", key)
+
                         logger.trace("set:${strAddr}:${key}");
                         cb([result: resPut.result().toString(), error: null])
                     } else {
@@ -288,6 +289,8 @@ class KvTx implements TSKV {
                             def out = new Output(baos);
                             serializer.writeObjectOrNull(out, keys, ORSet.class)
                             eb.publish("_keysync_${strAddr}", baos.toByteArray())
+                            eb.publish("_KVDN_-${strAddr}", key)
+
                             logger.trace("del:${strAddr}:${key}");
                         }catch(e){
                             logger.warn(e)
