@@ -5,7 +5,7 @@ package net.iowntheinter.kvdn.storage.kv.impl
  */
 //when createing snapshot:
 // need cow-style key writeing
-// we have to traverse a snaped view of the keys, and lock a version of each data to a key name
+// we have to traverse a snaped view of the keys, and lock a version of each D to a key name
 // -- if no dat available for that keyname, just skip over it and remove it from the key set
 // -- store this erratum somewhere
 

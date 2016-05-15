@@ -4,15 +4,19 @@ import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryo.io.Input
 import com.esotericsoftware.kryo.io.Output
 import io.vertx.core.AsyncResult
+import io.vertx.core.Handler
+import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.AsyncMap
+import io.vertx.core.shareddata.LocalMap
 import io.vertx.core.shareddata.SharedData
 import net.iowntheinter.crdts.sets.ORSet
 import net.iowntheinter.kvdn.storage.kv.TSKV
+import io.vertx.core.Future;
 
 import java.security.MessageDigest
 //import com.hazelcast.replicatedmap.impl.record.VectorClockTimestamp
@@ -20,6 +24,100 @@ import java.security.MessageDigest
 /**
  * Created by grant on 11/19/15.
  */
+
+class data {
+    SharedData sd;
+
+    void getMap(Vertx vertx, String name,cb){
+        if(vertx.isClustered()){
+            this.sd = vertx.sharedData()
+            sd.getClusterWideMap("${name}",cb)
+        }else
+        {
+            cb(Future.succeededFuture(new shimAsyncMap(vertx,name)))
+        }
+    }
+}
+
+class shimAsyncMap implements AsyncMap{
+    LocalMap sham;
+    SharedData sd;
+    shimAsyncMap(Vertx vertx,String name){
+        this.sd = vertx.sharedData()
+        sham = sd.getLocalMap(name)
+    }
+    @Override
+    void get(Object o, Handler handler) {
+        handler.handle(Future.succeededFuture(sham.get(o)))
+    }
+
+    @Override
+    void put(Object o, Object o2, Handler completionHandler) {
+        completionHandler.handle(Future.succeededFuture(sham.put(o,o2)))
+    }
+
+    @Override
+    void put(Object o, Object o2, long ttl, Handler completionHandler) {
+        completionHandler.handle(Future.succeededFuture(sham.put(o,o2)))
+    }
+
+    @Override
+    void putIfAbsent(Object o, Object o2, Handler completionHandler) {
+        if(!sham.get(o))
+            completionHandler.handle(Future.succeededFuture(sham.put(o,o2)))
+        else
+            completionHandler.handle(Future.failedFuture(false as String))
+    }
+
+    @Override
+    void putIfAbsent(Object o, Object o2, long ttl, Handler completionHandler) {
+        if(!sham.get(o))
+            completionHandler.handle(Future.succeededFuture(sham.put(o,o2)))
+        else
+            completionHandler.handle(Future.failedFuture(false as String))
+    }
+
+    @Override
+    void remove(Object o, Handler handler) {
+        handler.handle(Future.succeededFuture(sham.remove(o)))
+    }
+
+    @Override
+    void removeIfPresent(Object o, Object o2, Handler handler) {
+        if(sham.get(o))
+            handler.handle(Future.succeededFuture(sham.remove(o)))
+        else
+            handler.handle(Future.failedFuture(false as String))
+    }
+
+    @Override
+    void replace(Object o, Object o2, Handler handler) {
+        handler.handle(Future.succeededFuture(sham.put(o,o2)))
+
+    }
+
+    @Override
+    void replaceIfPresent(Object o, Object oldValue, Object newValue, Handler handler) {
+        if(sham.get(o) == oldValue)
+            handler.handle(Future.succeededFuture(sham.put(o,newValue)))
+        else
+            handler.handle(Future.failedFuture(false as String))
+    }
+
+    @Override
+    void clear(Handler handler) {
+        handler.handle(Future.succeededFuture(sham.clear()))
+    }
+
+    @Override
+    void size(Handler handler) {
+        handler.handle(Future.succeededFuture(sham.size()))
+    }
+}
+
+
+
+
 class KvTx implements TSKV {
     SharedData sd;
     def logger
@@ -28,15 +126,17 @@ class KvTx implements TSKV {
     ORSet keys
     Map KeySets
     Kryo serializer
-
+    Vertx vertx
+    def D = new data()
     def KvTx(String sa, session, kryo, vertx) {
         // keys = new ORSet()
+        this.vertx = vertx
         strAddr = sa
         serializer = kryo
         logger = new LoggerFactory().getLogger("KvTx:" + strAddr)
         sd = vertx.sharedData() as SharedData
         eb = vertx.eventBus() as EventBus
-        /*  sd.getClusterWideMap('k_NamesToRoots', { AsyncResult ar ->
+        /*  D.getMap(vertx,'k_NamesToRoots', { AsyncResult ar ->
               if (!ar.failed())
       //            NamesToRoots = ar.result() as AsyncMap
           })
@@ -116,7 +216,7 @@ class KvTx implements TSKV {
 
     public void getMapFromId(mapId, cb) {
         def resp = [error: null]
-        sd.getClusterWideMap('k_NamesToRoots', { AsyncResult ar ->
+        D.getMap(vertx,'k_NamesToRoots', { AsyncResult ar ->
             if (!ar.failed())
                 resp['map'] = ar.result() as AsyncMap
             else
@@ -154,7 +254,7 @@ class KvTx implements TSKV {
     }
 
     void submit(content, cb) {
-        sd.getClusterWideMap("${strAddr}", { res ->
+        D.getMap(vertx,"${strAddr}", { res ->
             if (res.succeeded()) {
                 def AsyncMap map = res.result();
                 def String key = MessageDigest.getInstance("MD5").digest(Buffer.buffer(content).getBytes()).encodeHex().toString()
@@ -192,7 +292,7 @@ class KvTx implements TSKV {
         })
     }
     void set(key, content, cb) {
-        sd.getClusterWideMap("${strAddr}", { res ->
+        D.getMap(vertx,"${strAddr}", { res ->
             if (res.succeeded()) {
                 def AsyncMap map = res.result();
                 map.put(key, content, { resPut ->
@@ -257,7 +357,7 @@ class KvTx implements TSKV {
 
     void get(key, cb) {
 
-        sd.getClusterWideMap("${strAddr}", { res ->
+        D.getMap(vertx,"${strAddr}", { res ->
             if (res.succeeded()) {
                 def AsyncMap map = res.result();
                 map.get(key, { resGet ->
@@ -276,7 +376,7 @@ class KvTx implements TSKV {
 
 
     void del(key, cb) {
-        sd.getClusterWideMap("${strAddr}", { res ->
+        D.getMap(vertx,"${strAddr}", { res ->
             if (res.succeeded()) {
                 def AsyncMap map = res.result();
                 map.remove(key, { resDel ->
@@ -307,6 +407,14 @@ class KvTx implements TSKV {
             }
         })
     }
+
+
+
+
+
+
+
+
 }
 
 
