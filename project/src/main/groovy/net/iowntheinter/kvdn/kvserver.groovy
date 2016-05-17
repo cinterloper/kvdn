@@ -1,5 +1,5 @@
 package net.iowntheinter.kvdn
-
+import io.vertx.ext.web.RoutingContext
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.Context
@@ -53,6 +53,7 @@ class kvserver {
 
         r.delete("/X/:str/:map/:key").handler(this.&handleMapDel)
         r.post("/X/:str/:map").handler(this.&handleMapSubmit)
+        r.post("/U/:str/:map").handler(this.&handleMapSubmitUUID)
         r.get("/X/:str/:map/:key").handler(this.&handleMapGet)
         r.get("/KEYS/:str/:map/").handler(this.&handleMapKeys)
         r.put("/X/:str/:map/:key").handler(this.&handleMapSet)
@@ -61,7 +62,7 @@ class kvserver {
 
     }
 
-    def handleMapKeys(routingContext) {
+    def handleMapKeys(RoutingContext routingContext) {
         def mName = routingContext.request().getParam("map")
         def kName = routingContext.request().getParam("key")
         def sName = routingContext.request().getParam("str")
@@ -82,7 +83,7 @@ class kvserver {
         }
     }
 
-    def handleMapGet(routingContext) {
+    def handleMapGet(RoutingContext routingContext) {
         def mName = routingContext.request().getParam("map")
         def kName = routingContext.request().getParam("key")
         def sName = routingContext.request().getParam("str")
@@ -102,12 +103,17 @@ class kvserver {
 
         }
     }
+    def handleMapSubmitUUID(RoutingContext routingContext){
+        routingContext.put('keyOverride',UUID.randomUUID().toString())
+        handleMapSet(routingContext)
+    }
 
+    def handleMapSet(RoutingContext routingContext) {
 
-    def handleMapSet(routingContext) {
         def mName = routingContext.request().getParam("map")
-        def kName = routingContext.request().getParam("key")
         def sName = routingContext.request().getParam("str")
+        def kName = routingContext.get('keyOverride') ?:  routingContext.request().getParam("key")
+
         def response = routingContext.response()
         if (mName == null || kName == null) {
             response.setStatusCode(400).end()
@@ -134,7 +140,7 @@ class kvserver {
 
         }
     }
-    def handleMapSubmit(routingContext) {
+    def handleMapSubmit(RoutingContext routingContext) {
         def mName = routingContext.request().getParam("map")
         def sName = routingContext.request().getParam("str")
         def response = routingContext.response()
@@ -164,7 +170,7 @@ class kvserver {
         }
     }
 
-    def handleMapDel(routingContext) {
+    def handleMapDel(RoutingContext routingContext) {
         def mName = routingContext.request().getParam("map")
         def kName = routingContext.request().getParam("key")
         def sName = routingContext.request().getParam("str")

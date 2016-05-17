@@ -9,7 +9,8 @@ usage () {
 	echo "  -g=PATH             get path."
 	echo "  -s=PATH             set path."
 	echo "  -k=PATH             get keys."
-	echo "  -u=PATH             submit value to map."
+	echo "  -u=PATH             (CAS MD5) submit value to map."
+	echo "  -U=PATH             (UUID)    submit value to map."
 	echo "  -d=PATH             del path."
 	echo "  -h                  This message."
 	exit 0
@@ -25,6 +26,7 @@ while [ $# -gt 0 ]; do
 		-k=*|--k=*) keypath="$(echo ${1} | awk -F= '{print $2;}')" ;;
 		-g=*|--g=*) getpath="$(echo ${1} | awk -F= '{print $2;}')" ;;
 		-u=*|--u=*) subpath="$(echo ${1} | awk -F= '{print $2;}')" ;;
+		-U=*|--U=*) usubpath="$(echo ${1} | awk -F= '{print $2;}')" ;;
 		-s=*|--s=*) setpath="$(echo ${1} | awk -F= '{print $2;}')" ;;
 		-d=*|--d=*) delpath="$(echo ${1} | awk -F= '{print $2;}')" ;;
 		-v|--v) verbose_mode="true" ;;
@@ -46,6 +48,13 @@ if [ "$subpath" != "" ]; then
     curl -s -XPOST -d$($JQPath -c -n --arg output "$INPUT_DATA" '{content: $output}') $PROTO://$KVDN_HOST:$KVDN_PORT/X/$subpath
     if [ "$verbose_mode" = "true" ]; then
      echo >&2 curl -s -XPOST -d$($JQPath -c -n --arg output "$INPUT_DATA" '{content: $output}') $PROTO://$KVDN_HOST:$KVDN_PORT/X/$subpath;
+    fi
+fi
+if [ "$usubpath" != "" ]; then
+    read INPUT_DATA
+    curl -s -XPOST -d$($JQPath -c -n --arg output "$INPUT_DATA" '{content: $output}') $PROTO://$KVDN_HOST:$KVDN_PORT/U/$usubpath
+    if [ "$verbose_mode" = "true" ]; then
+     echo >&2 curl -s -XPOST -d$($JQPath -c -n --arg output "$INPUT_DATA" '{content: $output}') $PROTO://$KVDN_HOST:$KVDN_PORT/U/$usubpath;
     fi
 fi
 if [ "$getpath" != "" ]; then
