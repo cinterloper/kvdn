@@ -1,4 +1,6 @@
 package net.iowntheinter.kvdn
+
+import io.vertx.core.http.HttpServerResponse
 import io.vertx.ext.web.RoutingContext
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
@@ -34,13 +36,13 @@ class kvserver {
         sjsh.bridge(options)
         router.route().handler(BodyHandler.create())
         router.route("/kvbus/*").handler(sjsh)
-        
-        init( router, vertx, {
-           console.log("initalized vertx and kvdn") 
+
+        init(router, vertx, {
+            console.log("initalized vertx and kvdn")
         });
     }
 
-    def init(Router r,Vertx v, cb) { //real initializaion function
+    def init(Router r, Vertx v, cb) { //real initializaion function
         vertx = v
         router = r
         ctx = vertx.getOrCreateContext()
@@ -57,6 +59,7 @@ class kvserver {
         r.get("/X/:str/:map/:key").handler(this.&handleMapGet)
         r.get("/KEYS/:str/:map/").handler(this.&handleMapKeys)
         r.put("/X/:str/:map/:key").handler(this.&handleMapSet)
+        r.put("/R/:str/:map/:key").handler(this.&handleMapSetRaw)
 
         cb();
 
@@ -103,8 +106,9 @@ class kvserver {
 
         }
     }
-    def handleMapSubmitUUID(RoutingContext routingContext){
-        routingContext.put('keyOverride',UUID.randomUUID().toString())
+
+    def handleMapSubmitUUID(RoutingContext routingContext) {
+        routingContext.put('keyOverride', UUID.randomUUID().toString())
         handleMapSet(routingContext)
     }
 
@@ -112,7 +116,7 @@ class kvserver {
 
         def mName = routingContext.request().getParam("map")
         def sName = routingContext.request().getParam("str")
-        def kName = routingContext.get('keyOverride') ?:  routingContext.request().getParam("key")
+        def kName = routingContext.get('keyOverride') ?: routingContext.request().getParam("key")
 
         def response = routingContext.response()
         if (mName == null || kName == null) {
@@ -126,7 +130,7 @@ class kvserver {
                 content = entry.getString("content").toString()
             }
             if (entry == null) {
-                response.sendError(400, response.toString())
+                response.setStatusCode(400).end()
             } else {
                 KvTx tx = session.newTx("${sName}:${mName}")
                 tx.set(kName, content, { resPut ->
@@ -140,6 +144,34 @@ class kvserver {
 
         }
     }
+
+    def handleMapSetRaw(RoutingContext routingContext) {
+
+        def mName = routingContext.request().getParam("map")
+        def sName = routingContext.request().getParam("str")
+        def kName = routingContext.get('keyOverride') ?: routingContext.request().getParam("key")
+
+        HttpServerResponse response = routingContext.response()
+        if (mName == null || kName == null) {
+            response.setStatusCode(400).end()
+        } else {
+            String content = routingContext.getBodyAsString()
+            if (content == null) {
+                response.setStatusCode(400).end(response.toString())
+            } else {
+                KvTx tx = session.newTx("${sName}:${mName}")
+                tx.set(kName, content, { resPut ->
+                    if (resPut.error == null) {
+                        response.end(mName + ":" + kName)
+                    } else {
+                        response.setStatusCode(501).end(resPut.error)
+                    }
+                })
+            }
+
+        }
+    }
+
     def handleMapSubmit(RoutingContext routingContext) {
         def mName = routingContext.request().getParam("map")
         def sName = routingContext.request().getParam("str")
@@ -155,10 +187,10 @@ class kvserver {
                 content = entry.getString("content").toString()
             }
             if (entry == null) {
-                response.sendError(400, response.toString())
+                response.setStatusCode(400).end()
             } else {
                 KvTx tx = session.newTx("${sName}:${mName}")
-                tx.submit( content, { resPut ->
+                tx.submit(content, { resPut ->
                     if (resPut.error == null) {
                         response.end(mName + ":" + resPut.key)
                     } else {
