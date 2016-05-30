@@ -18,6 +18,7 @@ def USER = System.getenv("USER")
 repositories {
     jcenter()
     mavenCentral()
+    mavenLocal()
     maven { url 'http://dl.bintray.com/gesellix/docker-utils' }
     flatDir { dirs '/usr/share/java' }
     flatDir { dirs 'lib/' }

@@ -1,5 +1,6 @@
 #!/bin/bash
-LIBPATH=.
+LIBPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 source $LIBPATH/config.sh
 
 usage () {
