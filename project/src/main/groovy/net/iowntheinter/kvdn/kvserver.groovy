@@ -60,6 +60,7 @@ class kvserver {
         r.get("/KEYS/:str/:map/").handler(this.&handleMapKeys)
         r.put("/X/:str/:map/:key").handler(this.&handleMapSet)
         r.put("/R/:str/:map/:key").handler(this.&handleMapSetRaw)
+        r.post("/R/:str/:map/:key").handler(this.&handleMapSetRaw)
 
         cb();
 

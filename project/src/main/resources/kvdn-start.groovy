@@ -29,7 +29,7 @@ s.init(router,v, {
                 .setAddressRegex(".*"));
         sjsh.bridge(options)
         router.route("/eb/*").handler(sjsh)
-        server.requestHandler(router.&accept).listen(9091)
+        server.requestHandler(router.&accept).listen(9099)
     } catch (e) {
         logger.error "could not setup http server:" + e.getMessage()
     }
