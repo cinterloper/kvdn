@@ -73,7 +73,7 @@ dependencies {
     compile 'io.vertx:vertx-auth-common:3.2.1'
     compile 'io.vertx:vertx-auth-jwt:3.2.1'
     compile 'com.esotericsoftware:kryo:3.0.3'
-    compile "net.iowntheinter:cornerstone:3.2.1-11"
+    compile "net.iowntheinter:cornerstone:3.2.1-14"
 
 }
 
