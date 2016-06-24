@@ -5,8 +5,8 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '1.2.2'
     id 'maven-publish'
 }
-def libversion = '3.2.1'
-version = '3.2.1-10'
+def libversion = '3.3.0'
+version = '3.3.0-16'
 def GITHUB_TOKEN = System.getenv("GITHUB_TOKEN")
 def AWS_MVN_BUCKET = System.getenv("AWS_MVN_BUCKET")
 def AWS_DEFAULT_REGION = System.getenv("AWS_DEFAULT_REGION")
@@ -16,16 +16,13 @@ def USER = System.getenv("USER")
 
 
 repositories {
-    jcenter()
     mavenCentral()
     mavenLocal()
+    jcenter()
     maven { url 'http://dl.bintray.com/gesellix/docker-utils' }
     flatDir { dirs '/usr/share/java' }
     flatDir { dirs 'lib/' }
-    flatDir { dirs '/usr/share/java/shadow' }
-    maven {
-        url "file:///home/$USER/maven_repo"
-    }
+
     if (AWS_MVN_BUCKET && !AWS_MVN_BUCKET.allWhitespace) {
         maven {
             url "s3://$AWS_MVN_BUCKET/maven2"
@@ -38,9 +35,7 @@ repositories {
 }
 publishing {
     repositories {
-        maven {
-            url "file:///home/$USER/maven_repo"
-        }
+	mavenLocal()
         if (AWS_MVN_BUCKET && !AWS_MVN_BUCKET.allWhitespace) {
             maven {
                 url "s3://$AWS_MVN_BUCKET/maven2"
@@ -62,18 +57,16 @@ publishing {
 }
 
 sourceCompatibility = '1.8'
-mainClassName = 'net.iowntheinter.vertx.coreLauncher.impl.coreStarter'
+mainClassName = 'io.vertx.core.Launcher'
 
 dependencies {
-    compile 'io.vertx:vertx-web:3.2.1'
-    compile 'io.vertx:vertx-core:3.2.1'
-    compile 'io.vertx:vertx-web:3.2.1'
+    compile 'io.vertx:vertx-web:3.3.0'
+    compile 'io.vertx:vertx-core:3.3.0'
     compile 'com.google.guava:guava:19.0'
-    compile 'io.vertx:vertx-lang-groovy:3.2.1'
-    compile 'io.vertx:vertx-auth-common:3.2.1'
-    compile 'io.vertx:vertx-auth-jwt:3.2.1'
+    compile 'io.vertx:vertx-lang-groovy:3.3.0'
+    compile 'io.vertx:vertx-auth-common:3.3.0'
+    compile 'io.vertx:vertx-auth-jwt:3.3.0'
     compile 'com.esotericsoftware:kryo:3.0.3'
-    compile "net.iowntheinter:cornerstone:3.2.1-14"
 
 }
 
@@ -84,7 +77,7 @@ processResources {
 shadowJar {
     classifier = 'fat'
     manifest {
-        attributes 'Main-Verticle': 'net.iowntheinter.vertx.componentRegister.impl.CoreLauncher'
+        attributes 'Main-Verticle': 'groovy:kvdn-start.groovy'
     }
     mergeServiceFiles {
         include 'META-INF/services/io.vertx.core.spi.VerticleFactory'

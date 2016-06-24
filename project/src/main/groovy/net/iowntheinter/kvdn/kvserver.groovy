@@ -53,6 +53,7 @@ class kvserver {
         logger = new LoggerFactory().getLogger("kvdn")
         eb = v.eventBus()
 
+
         r.delete("/X/:str/:map/:key").handler(this.&handleMapDel)
         r.post("/X/:str/:map").handler(this.&handleMapSubmit)
         r.post("/U/:str/:map").handler(this.&handleMapSubmitUUID)
@@ -124,24 +125,29 @@ class kvserver {
             response.setStatusCode(400).end()
         } else {
             def content;
-            def JsonObject entry = routingContext.getBodyAsJson()
             try {
-                content = entry.getJsonObject("content").toString()
-            } catch (ClassCastException e) {
-                content = entry.getString("content").toString()
+                def JsonObject entry = routingContext.getBodyAsJson()
+                try {
+                    content = entry.getJsonObject("content").toString()
+                } catch (ClassCastException e) {
+                    content = entry.getString("content").toString()
+                }
+                if (entry == null) {
+                    response.setStatusCode(400).end()
+                } else {
+                    KvTx tx = session.newTx("${sName}:${mName}")
+                    tx.set(kName, content, { resPut ->
+                        if (resPut.error == null) {
+                            response.end(mName + ":" + kName)
+                        } else {
+                            response.setStatusCode(501).end(resPut.error)
+                        }
+                    })
+                }
+            } catch (e) {
+                response.setStatusCode(501).end(e.toString())
             }
-            if (entry == null) {
-                response.setStatusCode(400).end()
-            } else {
-                KvTx tx = session.newTx("${sName}:${mName}")
-                tx.set(kName, content, { resPut ->
-                    if (resPut.error == null) {
-                        response.end(mName + ":" + kName)
-                    } else {
-                        response.setStatusCode(501).end(resPut.error)
-                    }
-                })
-            }
+
 
         }
     }
@@ -181,23 +187,27 @@ class kvserver {
             response.setStatusCode(400).end()
         } else {
             def content;
-            def JsonObject entry = routingContext.getBodyAsJson()
             try {
-                content = entry.getJsonObject("content").toString()
-            } catch (ClassCastException e) {
-                content = entry.getString("content").toString()
-            }
-            if (entry == null) {
-                response.setStatusCode(400).end()
-            } else {
-                KvTx tx = session.newTx("${sName}:${mName}")
-                tx.submit(content, { resPut ->
-                    if (resPut.error == null) {
-                        response.end(mName + ":" + resPut.key)
-                    } else {
-                        response.setStatusCode(501).end(resPut.error)
-                    }
-                })
+                def JsonObject entry = new JsonObject(routingContext.getBodyAsString())
+                try {
+                    content = entry.getJsonObject("content").toString()
+                } catch (ClassCastException e) {
+                    content = entry.getString("content").toString()
+                }
+                if (entry == null) {
+                    response.setStatusCode(400).end()
+                } else {
+                    KvTx tx = session.newTx("${sName}:${mName}")
+                    tx.submit(content, { resPut ->
+                        if (resPut.error == null) {
+                            response.end(mName + ":" + resPut.key)
+                        } else {
+                            response.setStatusCode(501).end(resPut.error)
+                        }
+                    })
+                }
+            } catch (Exception e) {
+                response.setStatusCode(501).end(e.getMessage())
             }
 
         }

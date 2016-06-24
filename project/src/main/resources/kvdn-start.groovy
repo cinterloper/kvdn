@@ -2,6 +2,7 @@
 //you can also just include the jar in your project, in which case this file will not run, but you can do it yourself
 
 import io.vertx.ext.web.Router
+
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
