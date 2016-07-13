@@ -5,11 +5,11 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '1.2.2'
     id 'maven-publish'
 }
-def libversion = System.getenv("VERTX_VERSION")
-if(libversion == "" || libversion.isEmpty())
-    libversion = '3.3.1'
+def libversion = '3.3.2'
+if(System.getenv("VERTX_VERSION") != null)
+    libversion = System.getenv("VERTX_VERSION")
 
-version =  "$libversion-17"
+version =  "$libversion-19"
 def GITHUB_TOKEN = System.getenv("GITHUB_TOKEN")
 def AWS_MVN_BUCKET = System.getenv("AWS_MVN_BUCKET")
 def AWS_DEFAULT_REGION = System.getenv("AWS_DEFAULT_REGION")
