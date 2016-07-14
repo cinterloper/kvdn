@@ -121,7 +121,6 @@ def _authenticate(conn):
     """ Determine the appropriate authentication method and authenticate
         for a token, if necesssary.
     """
-
     # Check for explicit token, first
     if CONF["token"]:
         conn["token"] = CONF["token"]
@@ -157,11 +156,11 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
         return kvdn_pillar
 
     if not CONF["url"]:
-        LOG.error("'url' must be specified for KVDN configuration");
+        LOG.error("'url' must be specified for KVDN configuration")
         return kvdn_pillar
 
     #  KVDN
-    kvdn = kvdn_client.kvdn_client()
+    kvdn = kvdn_client.kvdn_client(baseurl=CONF.url)
     
     _authenticate(kvdn)
     

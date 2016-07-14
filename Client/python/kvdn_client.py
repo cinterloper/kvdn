@@ -27,3 +27,17 @@ class kvdn_client(object):
         resp, content = h.request(CONF['baseurl'] +CONF['prefix'] +'/KEYS/'+ straddr +'/' )
         return content
 
+    def delete(self, straddr, key, **kwargs):
+        h = httplib2.Http()
+        resp, content = h.request(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'DELETE')
+        return content
+
+    def submit_cas(self, straddr, data, **kwargs):
+        h = httplib2.Http()
+        resp, content = h.request(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' , 'POST', body=data)
+        return content #the returned content should be the hash of data as a key
+
+    def submit_uuid(self, straddr, data, **kwargs):
+        h = httplib2.Http()
+        resp, content = h.request(CONF['baseurl'] +CONF['prefix'] +'/U/'+ straddr +'/' , 'POST', body=data)
+        return content # the returned content should be a uuid key
