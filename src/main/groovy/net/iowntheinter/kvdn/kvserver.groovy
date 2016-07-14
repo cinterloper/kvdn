@@ -35,7 +35,7 @@ class kvserver {
         def options = [:]
         sjsh.bridge(options)
         router.route().handler(BodyHandler.create())
-        router.route("/kvbus/*").handler(sjsh)
+        router.route("/eb/*").handler(sjsh)
 
         init(router, vertx, {
             console.log("initalized vertx and kvdn")
@@ -43,25 +43,28 @@ class kvserver {
     }
 
     def init(Router r, Vertx v, cb) { //real initializaion function
-        vertx = v
+        Vertx vertx = v
         router = r
         ctx = vertx.getOrCreateContext()
-        config = ctx.config()
+        config = ctx.config() as JsonObject
 
         session = new kvdnSession(vertx)
 
         logger = new LoggerFactory().getLogger("kvdn")
         eb = v.eventBus()
+        def prefix = ""
+        if(config.containsKey('kvdn_prefix'))
+            prefix="/${config.getString('kvdn_prefix')}"
 
 
-        r.delete("/X/:str/:map/:key").handler(this.&handleMapDel)
-        r.post("/X/:str/:map").handler(this.&handleMapSubmit)
-        r.post("/U/:str/:map").handler(this.&handleMapSubmitUUID)
-        r.get("/X/:str/:map/:key").handler(this.&handleMapGet)
-        r.get("/KEYS/:str/:map/").handler(this.&handleMapKeys)
-        r.put("/X/:str/:map/:key").handler(this.&handleMapSet)
-        r.put("/R/:str/:map/:key").handler(this.&handleMapSetRaw)
-        r.post("/R/:str/:map/:key").handler(this.&handleMapSetRaw)
+        r.delete("${prefix}/X/:str/:map/:key").handler(this.&handleMapDel)
+        r.post("${prefix}/X/:str/:map").handler(this.&handleMapSubmit)
+        r.post("${prefix}/U/:str/:map").handler(this.&handleMapSubmitUUID)
+        r.get("${prefix}/X/:str/:map/:key").handler(this.&handleMapGet)
+        r.get("${prefix}/KEYS/:str/:map/").handler(this.&handleMapKeys)
+        r.put("${prefix}/X/:str/:map/:key").handler(this.&handleMapSet)
+        r.put("${prefix}/R/:str/:map/:key").handler(this.&handleMapSetRaw)
+        r.post("${prefix}/R/:str/:map/:key").handler(this.&handleMapSetRaw)
 
         cb();
 
