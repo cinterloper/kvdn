@@ -3,16 +3,12 @@ package net.iowntheinter.kvdn.storage.kv.impl
 import io.vertx.core.Vertx
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
-import io.vertx.core.json.JsonArray
-import io.vertx.core.json.JsonObject
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.logging.Logger
 import io.vertx.core.shareddata.AsyncMap
 import io.vertx.core.shareddata.SharedData
 import io.vertx.core.logging.LoggerFactory
-import net.iowntheinter.kvdn.storage.kv.TSKV
-import net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider
-import net.iowntheinter.kvdn.storage.kv.key.keyProvider
+import net.iowntheinter.kvdn.storage.kv.TXKV
 import net.iowntheinter.kvdn.storage.kv.local.shimAsyncMap
 
 import java.security.MessageDigest
@@ -21,7 +17,7 @@ import java.security.MessageDigest
  * Created by grant on 11/19/15.
  */
 
-class KvTx implements TSKV {
+class KvTx implements TXKV {
     SharedData sd
     Logger logger
     EventBus eb

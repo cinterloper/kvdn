@@ -3,7 +3,7 @@ package net.iowntheinter.kvdn.storage.kv
 /**
  * Created by grant on 11/15/15.
  */
-interface TSKV {
+interface TXKV {
     Object bailTx(context)
     void snapshot()
     void submit(content,cb)
