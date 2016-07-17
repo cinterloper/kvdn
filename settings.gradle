@@ -1,2 +1,5 @@
 rootProject.name = 'kvdn'
+include 'Extensions'
+include 'hazelcast-keys'
+include 'crdt-keys'
 

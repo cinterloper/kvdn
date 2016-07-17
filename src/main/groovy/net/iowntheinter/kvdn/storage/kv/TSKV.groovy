@@ -7,8 +7,8 @@ interface TSKV {
     Object bailTx(context)
     void snapshot()
     void submit(content,cb)
-    void set(key,content,cb)
-    void get(key,cb)
-    void del(key,cb)
-    Object getKeys(cb)
+    void set(String key,content,cb)
+    void get(String key,cb)
+    void del(String key,cb)
+    void getKeys(cb)
 }

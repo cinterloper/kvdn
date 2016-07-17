@@ -1,0 +1,39 @@
+plugins {
+  id 'java'
+  id 'application'
+}
+apply plugin: 'groovy'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+repositories {
+  mavenCentral()
+  mavenLocal()
+  jcenter()
+}
+
+
+def libversion = '3.3.2'
+if(System.getenv("VERTX_VERSION") != null)
+  libversion = System.getenv("VERTX_VERSION")
+
+version =  "$libversion"
+sourceCompatibility = '1.8'
+
+dependencies {
+  compile "io.vertx:vertx-core:$version"
+  compile "net.iowntheinter:kvdn:$libversion-20"
+
+}
+
+mainClassName = 'io.vertx.example.HelloWorldEmbedded'
+
+shadowJar {
+  classifier = 'fat'
+  mergeServiceFiles {
+    include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+  }
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.8'
+}

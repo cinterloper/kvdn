@@ -1,59 +1,33 @@
 package net.iowntheinter.kvdn.storage.kv.impl
 
-import com.esotericsoftware.kryo.Kryo
-import com.esotericsoftware.kryo.io.Input
-import com.esotericsoftware.kryo.serializers.JavaSerializer
 import io.vertx.core.Vertx
 import io.vertx.core.logging.LoggerFactory
-import net.iowntheinter.crdts.sets.ORSet
+import net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider
+import net.iowntheinter.kvdn.storage.kv.key.keyProvider
 
-/**
- * Created by grant on 11/30/15.
- */
+
 class kvdnSession {
-    Vertx v
+    Vertx vertx
     def eb
     def logger
-    Kryo serializer
-    public Map keysets
-    public List maps
-    UUID sessionid
+    def sessionid
+    def keyprov
 
     kvdnSession(Vertx vx) {
-        v = vx
-        sessionid = UUID.randomUUID();
+        vertx = vx
+        sessionid = UUID.randomUUID().toString()
         logger = new LoggerFactory().getLogger("Kvdnsession:${sessionid.toString()}")
-        keysets = new HashMap()
-        eb = v.eventBus();
-        serializer = new Kryo()
-        serializer.register(ORSet.class, new JavaSerializer())
-        maps = new ArrayList();
-    }
+        eb = vertx.eventBus();
 
-    def peerUpdateHdlr(ORSet update, uaddr) {
-        def keys = keysets.get(uaddr) as ORSet
-        keys.merge(update)
-        keysets.put(uaddr, keys)
+        if (vertx.isClustered()) {  //vertx cluster mode
+         //load cluster key provider
+        } else {                    // vertx local mode
+            this.keyprov = new LocalKeyProvider(vertx)
+        }
     }
-
 
     KvTx newTx(String strAddr) {
-        if (!maps.contains(strAddr)) {
-            maps.push(strAddr)
-            eb.consumer("_keysync_${strAddr}", { message -> //listen for updates on this keyset
-                logger.trace("got keysync message")
-                def b = message.body()
-                def updateORSet = b
-                def inp = new Input(updateORSet as byte[])
-                peerUpdateHdlr(serializer.readObjectOrNull(inp, ORSet.class), strAddr)
-            })
-        }
-
-        return (new KvTx(strAddr, this, serializer, v))
-
-    }
-    void snapshot(String strAddr, Closure cb) {
-       cb([error:"unimplemented"])
+        return (new KvTx(strAddr, this,  vertx))
     }
 
     void onWrite(String strAddr, Closure cb) {
@@ -67,6 +41,4 @@ class kvdnSession {
             cb(message.body())
         })
     }
-
-
 }

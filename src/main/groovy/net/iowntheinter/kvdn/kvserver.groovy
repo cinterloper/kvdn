@@ -26,6 +26,7 @@ class kvserver {
     def session
     //used in a vertx program, or standalone
     def kvserver() {
+
     }
     //if being used as a library, create our own Vert.x instance.
     def kvserver(c) {
@@ -38,7 +39,7 @@ class kvserver {
         router.route("/eb/*").handler(sjsh)
 
         init(router, vertx, {
-            console.log("initalized vertx and kvdn")
+            logger.info("initalized vertx and kvdn")
         });
     }
 

@@ -1,17 +1,43 @@
 package net.iowntheinter.kvdn.storage.kv.key.impl
 
-import com.esotericsoftware.kryo.io.Input
-import com.esotericsoftware.kryo.io.Output
+import io.vertx.core.Vertx
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
+import io.vertx.core.logging.LoggerFactory
 import net.iowntheinter.crdts.sets.ORSet
 import net.iowntheinter.kvdn.storage.kv.key.keyProvider
+import com.esotericsoftware.kryo.io.Input
+import com.esotericsoftware.kryo.io.Output
 
 /**
  * Created by g on 7/12/16.
  */
-class defaultKeyProvider implements keyProvider  {
+class CRDTKeyProvider implements keyProvider  {
+//this provides a CRDT based implementation of keysets for KVDN maps
+//Vert.X does not expose built-in methods for enumerating the keySet() on an async map
 
+    CRDTKeyProvider(Vertx v){
+        def eb = v.eventBus();
+        def logger = LoggerFactory.getLogger(this.class.getName())
+        eb.consumer("_kvdn_keysync", { message -> //listen for updates on this keyset
+            logger.trace("got keysync message")
+            def b = message.body()
+            def updateORSet = b
+            def inp = new Input(updateORSet as byte[])
+            peerUpdateHdlr(serializer.readObjectOrNull(inp, ORSet.class), strAddr)
+        })
+
+
+    }
+    def addListener = { strAddr ->
+        eb.consumer("_keysync_${strAddr}", { message -> //listen for updates on this keyset
+            logger.trace("got keysync message")
+            def b = message.body()
+            def updateORSet = b
+            def inp = new Input(updateORSet as byte[])
+            peerUpdateHdlr(serializer.readObjectOrNull(inp, ORSet.class), strAddr)
+        })
+    }
 
     def peerUpdateHdlr(ORSet update, uaddr) {
         ORSet keys = KeySets.get(uaddr) as ORSet
@@ -41,7 +67,7 @@ class defaultKeyProvider implements keyProvider  {
         logger.trace("replyed to keyreq ")
     }
 
-    Object getKeys(cb) {
+    void getKeys(cb) {
         def atmt = KeySets.get(strAddr)
         if (atmt != null)
             keys = atmt as ORSet

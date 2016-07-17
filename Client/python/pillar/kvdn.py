@@ -64,7 +64,7 @@ Each ``filter`` is a compound matcher:
     https://docs.saltstack.com/en/latest/topics/targeting/compound.html
 
 ``variable`` is the name of the variable which will be injected into the
-pillar data.
+pillar _data_impl.
 
 ``path`` is the path the desired secret on the KVDN server.
 
@@ -130,7 +130,7 @@ def _authenticate(conn):
 
 
 def ext_pillar(minion_id, pillar, *args, **kwargs):
-    """ Main handler. Compile pillar data for the specified minion ID
+    """ Main handler. Compile pillar _data_impl for the specified minion ID
     """
     kvdn_pillar = {}
 
@@ -181,8 +181,8 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                 # the entire kvdn_value json structure
                 kvdn_value = kvdn.read(path)
                 if key:
-                    kvdn_value = kvdn_value["data"].get(key, None)
-                    # Decode base64 data, if detected
+                    kvdn_value = kvdn_value["_data_impl"].get(key, None)
+                    # Decode base64 _data_impl, if detected
                     prefix = "base64:"
                     if kvdn_value.startswith(prefix):
                         kvdn_value = base64.b64decode(kvdn_value[len(prefix):]).rstrip()

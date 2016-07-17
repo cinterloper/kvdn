@@ -21,7 +21,7 @@ router = Router.router(v)
 router.route().handler(BodyHandler.create())
 
 
-s.init(router,v, {
+s.init(router as Router,v as Vertx, {
     try {
         def server = v.createHttpServer()
         def sjsh = SockJSHandler.create(v)
