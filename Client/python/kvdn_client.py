@@ -29,7 +29,7 @@ class kvdn_client(object):
 
     def delete(self, straddr, key, **kwargs):
         h = httplib2.Http()
-        resp, content = h.request(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'DELETE')
+        resp, content = h.request(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'DELETE', body='')
         return content
 
     def submit_cas(self, straddr, data, **kwargs):
