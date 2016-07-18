@@ -9,7 +9,7 @@ def libversion = '3.3.2'
 if(System.getenv("VERTX_VERSION") != null)
     libversion = System.getenv("VERTX_VERSION")
 
-version =  "$libversion-20"
+version =  "$libversion-1.0.0"
 def GITHUB_TOKEN = System.getenv("GITHUB_TOKEN")
 def AWS_MVN_BUCKET = System.getenv("AWS_MVN_BUCKET")
 def AWS_DEFAULT_REGION = System.getenv("AWS_DEFAULT_REGION")
@@ -69,7 +69,6 @@ dependencies {
     compile "io.vertx:vertx-lang-groovy:$libversion"
     compile "io.vertx:vertx-auth-common:$libversion"
     compile "io.vertx:vertx-auth-jwt:$libversion"
-    compile 'com.esotericsoftware:kryo:3.0.3'
 
 }
 
