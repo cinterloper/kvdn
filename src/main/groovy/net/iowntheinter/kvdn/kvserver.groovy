@@ -82,10 +82,10 @@ class kvserver {
         } else {
             KvTx tx = session.newTx("${sName}:${mName}")
             tx.getKeys({ resGetK ->
-                if (resGetK.getString('error') == null) {
-                    response.end(resGetK.getJsonArray("result").toString())
+                if (resGetK.error == null) {
+                    response.end(resGetK.result.toString())
                 } else {
-                    response.setStatusCode(501).end(resGetK.getString("error"))
+                    response.setStatusCode(501).end(resGetK.error.toString())
                 }
             })
 
@@ -106,7 +106,7 @@ class kvserver {
                 if (resGet.error == null) {
                     response.end(resGet.result.toString())
                 } else {
-                    response.setStatusCode(501).end(resGet.error)
+                    response.setStatusCode(501).end(resGet.error.toString())
                 }
             })
 
@@ -140,11 +140,11 @@ class kvserver {
                     response.setStatusCode(400).end()
                 } else {
                     KvTx tx = session.newTx("${sName}:${mName}")
-                    tx.set(kName, content, { resPut ->
+                    tx.set(kName as String, content, { resPut ->
                         if (resPut.error == null) {
                             response.end(mName + ":" + kName)
                         } else {
-                            response.setStatusCode(501).end(resPut.error)
+                            response.setStatusCode(501).end(resPut.error.toString())
                         }
                     })
                 }
@@ -171,11 +171,11 @@ class kvserver {
                 response.setStatusCode(400).end(response.toString())
             } else {
                 KvTx tx = session.newTx("${sName}:${mName}")
-                tx.set(kName, content, { resPut ->
+                tx.set(kName as String, content, { resPut ->
                     if (resPut.error == null) {
                         response.end(mName + ":" + kName)
                     } else {
-                        response.setStatusCode(501).end(resPut.error)
+                        response.setStatusCode(501).end(resPut.error.toString())
                     }
                 })
             }
@@ -206,7 +206,7 @@ class kvserver {
                         if (resPut.error == null) {
                             response.end(mName + ":" + resPut.key)
                         } else {
-                            response.setStatusCode(501).end(resPut.error)
+                            response.setStatusCode(501).end(resPut.error.toString())
                         }
                     })
                 }
@@ -221,7 +221,7 @@ class kvserver {
         def mName = routingContext.request().getParam("map")
         def kName = routingContext.request().getParam("key")
         def sName = routingContext.request().getParam("str")
-
+        logger.info("full uri on delete: " + routingContext.request().absoluteURI())
         def response = routingContext.response()
         if (mName == null || kName == null) {
             response.setStatusCode(400).end()
@@ -230,9 +230,10 @@ class kvserver {
 
             tx.del(kName, { resDel ->
                 if (resDel.error == null) {
-                    response.end(mName + ":" + kName)
+                    if (!response.ended()) //why ?
+                        response.end(mName + ":" + kName)
                 } else {
-                    response.setStatusCode(501).end(resDel.error)
+                    response.setStatusCode(501).end(resDel.error.toString())
                 }
             })
 
