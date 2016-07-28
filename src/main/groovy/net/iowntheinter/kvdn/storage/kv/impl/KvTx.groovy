@@ -4,6 +4,7 @@ import io.vertx.core.Vertx
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.EventBus
+import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.shareddata.AsyncMap
 import io.vertx.core.shareddata.SharedData
@@ -73,7 +74,7 @@ class KvTx implements TXKV {
 
                         keyprov.addKey(strAddr, key, {
                             logger.trace("set:${strAddr}:${key}");
-                            eb.publish("_KVDN_+${strAddr}", key)
+                            eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key',key))
                             cb([result: resPut.result().toString(), key: key, error: null])
                         })
 
@@ -96,7 +97,7 @@ class KvTx implements TXKV {
                     if (resPut.succeeded()) {
                         keyprov.addKey(strAddr, key, {
                             logger.trace("set:${strAddr}:${key}");
-                            eb.publish("_KVDN_+${strAddr}", key)
+                            eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key',key))
                             cb([result: resPut.result().toString(), key: key, error: null])
                         })
                     } else {
@@ -145,7 +146,7 @@ class KvTx implements TXKV {
                     if (resDel.succeeded()) {
                         keyprov.deleteKey(strAddr, key, {
                             logger.trace("set:${strAddr}:${key}");
-                            eb.publish("_KVDN_+${strAddr}", key)
+                            eb.publish("_KVDN_-${strAddr}", new JsonObject().put('key'))
                             cb([result: resDel.result().toString(), key: key, error: null])
                         })
                         cb([result: resDel.result().toString(), error: null])
