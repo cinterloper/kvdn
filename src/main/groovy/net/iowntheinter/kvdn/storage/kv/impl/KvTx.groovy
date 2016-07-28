@@ -26,7 +26,7 @@ class KvTx implements TXKV {
     def  keyprov
     def Vertx vertx
     def D = new _data_impl()
-
+    def session
     class _data_impl {
         SharedData sd;
         Vertx vertx
@@ -38,7 +38,9 @@ class KvTx implements TXKV {
             if (vertx.isClustered()) {  //vertx cluster mode
                 this.sd = vertx.sharedData()
                 sd.getClusterWideMap("${name}", cb)
+                logger.trace("starting clustered kvdn operation with vertx.isClustered() == ${vertx.isClustered()}")
             } else {                    // vertx local mode
+                logger.trace("starting local kvdn operation with vertx.isClustered() == ${vertx.isClustered()}")
                 cb(Future.succeededFuture(new shimAsyncMap(vertx, name)))
             }
         }
@@ -48,6 +50,7 @@ class KvTx implements TXKV {
         // keys = new ORSet()
         this.vertx = vertx
         this.keyprov = session.keyprov
+        this.session = session
         strAddr = sa
         logger = new LoggerFactory().getLogger("KvTx:" + strAddr)
         sd = vertx.sharedData() as SharedData
@@ -79,10 +82,14 @@ class KvTx implements TXKV {
                         })
 
                     } else {
+                        logger.error("an error occured in a submit() transaction on key: ${key} straddr: ${strAddr} session: ${this.session} ")
+
                         cb([result: null, error: resPut.cause()])
                     }
                 })
             } else {
+                logger.error("an error occured in a submit() transaction on key: ${key} straddr: ${strAddr} session: ${this.session} ")
+
                 cb([result: null, error: res.cause()])
             }
         })
@@ -101,10 +108,12 @@ class KvTx implements TXKV {
                             cb([result: resPut.result().toString(), key: key, error: null])
                         })
                     } else {
+                        logger.error("an error occured in a set() transaction on key: ${key} straddr: ${strAddr} session: ${this.session} ")
                         cb([result: null, error: resPut.cause()])
                     }
                 })
             } else {
+                logger.error("an error occured in a set() transaction on key: ${key} straddr: ${strAddr} session: ${this.session} ")
                 cb([result: null, error: res.cause()])
             }
         })
@@ -128,6 +137,7 @@ class KvTx implements TXKV {
                         logger.trace("get:${strAddr}:${key}");
                         cb([result: resGet.result().toString(), error: null])
                     } else {
+                        logger.error("an error occured in a get() transaction on key: ${key} straddr: ${strAddr} session: ${this.session} ")
                         cb([result: null, error: resGet.cause()])
                     }
                 })
@@ -152,10 +162,14 @@ class KvTx implements TXKV {
                         cb([result: resDel.result().toString(), error: null])
 
                     } else {
+                        logger.error("an error occured in a del() transaction on key: ${key} straddr: ${strAddr} session: ${this.session} ")
+
                         cb([result: null, error: resDel.cause()])
                     }
                 })
             } else {
+                logger.error("an error occured in a del() transaction on key: ${key} straddr: ${strAddr} session: ${this.session} ")
+
                 cb([result: null, error: res.cause()])
             }
         })

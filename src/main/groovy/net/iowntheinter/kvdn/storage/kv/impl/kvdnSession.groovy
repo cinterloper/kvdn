@@ -17,7 +17,6 @@ class kvdnSession {
         sessionid = UUID.randomUUID().toString()
         logger = new LoggerFactory().getLogger("Kvdnsession:${sessionid.toString()}")
         eb = vertx.eventBus();
-
         if (vertx.isClustered()) {  //vertx cluster mode
           String configured_provider = config.getString('key_provider') ?:
                   'net.iowntheinter.kvdn.storage.kv.key.impl.CRDTKeyProvider'
@@ -32,6 +31,8 @@ class kvdnSession {
         } else {                    // vertx local mode
             this.keyprov = new LocalKeyProvider(vertx)
         }
+        logger.trace("starting new kvdn session with clustered = ${vertx.isClustered()} keyprovider = ${this.keyprov}")
+
     }
 
     KvTx newTx(String strAddr) {
