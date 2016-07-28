@@ -98,7 +98,7 @@ import salt.utils.minions
 import kvdn_client
 
 # Set up logging
-LOG = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 # Default config values
 CONF = {
@@ -112,6 +112,7 @@ CONF = {
 }
 
 def __virtual__():
+    log.debug("initalized KVDN pillar")
     return True
 
 
@@ -133,6 +134,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
     """ Main handler. Compile pillar data for the specified minion ID
     """
     kvdn_pillar = {}
+    log.debug("called KVDN pillar")
 
     # Load configuration values
     for key in CONF:
@@ -152,11 +154,11 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
     if raw_yml:
         config_map = yaml.safe_load(raw_yml.getvalue()) or {}
     else:
-        LOG.error("Unable to read configuration file '%s'", CONF["config"])
+        log.error("Unable to read configuration file '%s'", CONF["config"])
         return kvdn_pillar
 
     if not CONF["url"]:
-        LOG.error("'url' must be specified for KVDN configuration")
+        log.error("'url' must be specified for KVDN configuration")
         return kvdn_pillar
 
     #  KVDN
