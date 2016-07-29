@@ -13,13 +13,23 @@ args = parser.parse_args()
 if(args.set):
     s = sys.stdin.read()
 _baseurl=''
+_token=''
 try:
-   _baseurl=os.environ["KVDN_BASE_URL"]
+    _baseurl=os.environ["KVDN_BASE_URL"]
 except KeyError:
-   _baseurl='http://localhost:6500'
-   print "using default url of" + baseurl
+    _baseurl='http://localhost:6500'
+    print "using default url of" + _baseurl
 
-k = kvdn_client.kvdn_client(baseurl=_baseurl)
+try:
+    _token=os.environ["JWT_TOKEN"]
+    k = kvdn_client.kvdn_client(baseurl=_baseurl, token=_token)
+except KeyError:
+    print 'JWT_TOKEN not set'
+    k = kvdn_client.kvdn_client(baseurl=_baseurl)
+
+
+
+
 if(args.set):
     print k.set(args.straddr,args.key,s)
 else:
