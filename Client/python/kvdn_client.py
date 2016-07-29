@@ -13,7 +13,7 @@ class kvdn_client:
         for key,value in kwargs.iteritems():
             CONF[key]=value
         if CONF['token'] is not None:
-            CONF['headers']+={'Authorization': 'Bearer %s' % CONF['token']}
+            CONF['headers'].update({'Authorization': 'Bearer %s' % CONF['token']})
     def set(self, straddr, key, data, **kwargs):
         if CONF['set'] == 'raw':
             return self.setRaw(straddr,key,data,**kwargs)
