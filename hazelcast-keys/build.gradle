@@ -23,7 +23,7 @@ dependencies {
   compile "io.vertx:vertx-core:$version"
   compile 'com.hazelcast:hazelcast-client:3.6.3'
   compile 'io.vertx:vertx-hazelcast:3.3.2'
-  compile "net.iowntheinter:kvdn:$libversion-20"
+  compile "net.iowntheinter:kvdn:$libversion-1.0.3"
 
 }
 

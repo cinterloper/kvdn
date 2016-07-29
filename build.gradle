@@ -1,15 +1,36 @@
+
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.co.riiid:gradle-github-plugin:0.4.2"
+    }
+}
+
+
 plugins {
     id 'groovy'
     id 'java'
     id 'application'
     id 'com.github.johnrengelman.shadow' version '1.2.2'
     id 'maven-publish'
+
 }
+
+
+apply plugin: "co.riiid.gradle"
+apply plugin: 'distribution'
+
+
+
 def libversion = '3.3.2'
 if(System.getenv("VERTX_VERSION") != null)
     libversion = System.getenv("VERTX_VERSION")
 
-version =  "$libversion-1.0.2"
+version =  "$libversion-1.0.3"
 def GITHUB_TOKEN = System.getenv("GITHUB_TOKEN")
 def AWS_MVN_BUCKET = System.getenv("AWS_MVN_BUCKET")
 def AWS_DEFAULT_REGION = System.getenv("AWS_DEFAULT_REGION")
@@ -18,6 +39,35 @@ def AWS_SECRET_ACCESS_KEY = System.getenv("AWS_SECRET_ACCESS_KEY")
 def USER = System.getenv("USER")
 
 
+distributions {
+    clients {
+        baseName = 'clients'
+        contents {
+            from { 'Client/' }
+        }
+    }
+}
+
+if(System.getenv("GITHUB_TOKEN") != null) {
+    github {
+        owner = 'cinterloper'
+        repo = 'kvdn'
+        token = GITHUB_TOKEN
+        tagName = version
+        targetCommitish = 'master'
+        name = "v$version"
+        body = """# KVDN
+release $version
+${System.getenv('RELEASE_NOTES')?:""}
+"""
+
+        assets = [
+                "build/libs/kvdn-$version-fat.jar",
+                "build/distributions/clients-${version}.zip",
+                "build/distributions/clients-${version}.tar"
+        ]
+    }
+}
 repositories {
     mavenCentral()
     mavenLocal()
