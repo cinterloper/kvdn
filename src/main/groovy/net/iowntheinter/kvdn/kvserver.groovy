@@ -1,6 +1,7 @@
 package net.iowntheinter.kvdn
 
 import io.vertx.core.http.HttpServerResponse
+import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
@@ -82,7 +83,7 @@ class kvserver {
             KvTx tx = session.newTx("${sName}:${mName}")
             tx.getKeys({ resGetK ->
                 if (resGetK.error == null) {
-                    response.end(resGetK.result.toString())
+                    response.end(new JsonArray(resGetK.result as List).toString())
                 } else {
                     response.setStatusCode(501).end(resGetK.error.toString())
                 }
