@@ -18,13 +18,13 @@ try:
     _baseurl=os.environ["KVDN_BASE_URL"]
 except KeyError:
     _baseurl='http://localhost:6500'
-    print "using default url of" + _baseurl
+    sys.stderr.write( "using default url of" + _baseurl)
 
 try:
     _token=os.environ["JWT_TOKEN"]
     k = kvdn_client.kvdn_client(baseurl=_baseurl, token=_token)
 except KeyError:
-    print 'JWT_TOKEN not set'
+    sys.stderr.write( 'JWT_TOKEN not set')
     k = kvdn_client.kvdn_client(baseurl=_baseurl)
 
 

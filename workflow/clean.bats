@@ -1,8 +1,8 @@
 #!/usr/bin/env bats
 source workflow/mulibuild.sh 
-@test "build kvdn base" {
+@test "cleanup" {
   export DISABLE_BUILD_EXTENSIONS=TRUE
-  build
+  ./gradlew clean
   result=$?
   [ "$result" -eq 0 ]
 }

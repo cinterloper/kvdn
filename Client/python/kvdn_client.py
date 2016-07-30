@@ -36,7 +36,7 @@ class kvdn_client:
 
     def getKeys(self, straddr, **kwargs):
         h = httplib2.Http()
-        resp, content = h.request(CONF['baseurl'] +CONF['prefix'] +'/KEYS/'+ straddr +'/' )
+        resp, content = h.request(CONF['baseurl'] +CONF['prefix'] +'/KEYS/'+ straddr +'/' ,  headers=CONF['headers'])
         return content
 
     def delete(self, straddr, key, **kwargs):
