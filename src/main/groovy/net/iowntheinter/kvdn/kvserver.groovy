@@ -13,7 +13,6 @@ import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
 import net.iowntheinter.kvdn.storage.kv.impl.kvdnSession
-import io.vertx.ext.web.handler.sockjs.BridgeOptions
 
 class kvserver {
     def Logger logger
