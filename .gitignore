@@ -1,7 +1,6 @@
 
 kvdn.iml
 .idea
-.gradle
 *.jar
 *.xml
 *.class
