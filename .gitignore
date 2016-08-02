@@ -1,7 +1,7 @@
 
 kvdn.iml
 .idea
-*.jar
+build/
 *.xml
 *.class
 *.zip
