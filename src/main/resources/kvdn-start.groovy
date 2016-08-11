@@ -30,7 +30,7 @@ s.init(router as Router,v as Vertx, {
                 .setAddressRegex(".*"));
         sjsh.bridge(options)
         router.route("/eb/*").handler(sjsh)
-        server.requestHandler(router.&accept).listen(9099)
+        server.requestHandler(router.&accept).listen(6500)
     } catch (e) {
         logger.error "could not setup http server:" + e.getMessage()
     }
