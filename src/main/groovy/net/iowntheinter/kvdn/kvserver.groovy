@@ -128,15 +128,10 @@ class kvserver {
         if (mName == null || kName == null) {
             response.setStatusCode(400).end()
         } else {
-            def content;
+            String content;
             try {
-                def JsonObject entry = routingContext.getBodyAsJson()
-                try {
-                    content = entry.getJsonObject("content").toString()
-                } catch (ClassCastException e) {
-                    content = entry.getString("content").toString()
-                }
-                if (entry == null) {
+                content = routingContext.getBodyAsString()
+                if (content == null) {
                     response.setStatusCode(400).end()
                 } else {
                     KvTx tx = session.newTx("${sName}:${mName}")
@@ -190,15 +185,11 @@ class kvserver {
         if (mName == null) {
             response.setStatusCode(400).end()
         } else {
-            def content;
+            String content;
             try {
-                def JsonObject entry = new JsonObject(routingContext.getBodyAsString())
-                try {
-                    content = entry.getJsonObject("content").toString()
-                } catch (ClassCastException e) {
-                    content = entry.getString("content").toString()
-                }
-                if (entry == null) {
+                content = routingContext.getBodyAsString()
+
+                if (content == null) {
                     response.setStatusCode(400).end()
                 } else {
                     KvTx tx = session.newTx("${sName}:${mName}")
