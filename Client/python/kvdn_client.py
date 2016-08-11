@@ -46,10 +46,10 @@ class kvdn_client:
 
     def submit_cas(self, straddr, data, **kwargs):
         h = httplib2.Http()
-        resp, content = h.request(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' , 'POST', body=data, headers=CONF['headers'])
+        resp, content = h.request(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr , 'POST', body=data, headers=CONF['headers'])
         return content #the returned content should be the hash of data as a key
 
     def submit_uuid(self, straddr, data, **kwargs):
         h = httplib2.Http()
-        resp, content = h.request(CONF['baseurl'] +CONF['prefix'] +'/U/'+ straddr +'/' , 'POST', body=data, headers=CONF['headers'])
+        resp, content = h.request(CONF['baseurl'] +CONF['prefix'] +'/U/'+ straddr , 'POST', body=data, headers=CONF['headers'])
         return content # the returned content should be a uuid key

@@ -1,1 +1,5 @@
-deprecated, use the Client/go binary client
+deprecated, use 
+Client/go 
+or 
+Client/python/kvdn-cli.py
+
