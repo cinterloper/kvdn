@@ -19,9 +19,7 @@ following options:
           url: https://KVDN:8200
           config: Local path or salt:// URL to secret configuration file
           token: Explicit token for token authentication
-          app_id: Application ID for app-id authentication
-          user_id: Explicit User ID for app-id authentication
-          user_file: File to read for user-id value
+
           unset_if_missing: Leave pillar key unset if KVDN secret not found
 
 The ``url`` parameter is the full URL to the KVDN API endpoint.
@@ -31,13 +29,7 @@ The ``config`` parameter is the path or salt:// URL to the secret map YML file.
 The ``token`` parameter is an explicit token to use for authentication, and it
 overrides all other authentication methods.
 
-The ``app_id`` parameter is an Application ID to use for app-id authentication.
 
-The ``user_id`` parameter is an explicit User ID to pair with ``app_id`` for
-app-id authentication.
-
-The ``user_file`` parameter is the path to a file on the master to read for a
-``user-id`` value if ``user_id`` is not specified.
 
 The ``unset_if_missing`` parameter determins behavior when the KVDN secret is
 missing or otherwise inaccessible. If set to ``True``, the pillar key is left
@@ -105,9 +97,6 @@ CONF = {
     'url': 'https://KVDN:8200',
     'config': '/srv/salt/kvdn.yml',
     'token': None,
-    'app_id': None,
-    'user_id': None,
-    'user_file': None,
     'unset_if_missing': False
 }
 
