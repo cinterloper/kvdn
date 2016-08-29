@@ -99,24 +99,16 @@ CONF = {
     'token': None,
     'unset_if_missing': False
 }
+if os.environ.get('KVDN_TOKEN'):
+    CONF["token"] = os.environ.get('KVDN_TOKEN')
 
+__virtualname__ = 'kvdn'
 def __virtual__():
     log.debug("initalized KVDN pillar")
-    return True
+    return __virtualname__
 
 
 
-
-def _authenticate(conn):
-    """ Determine the appropriate authentication method and authenticate
-        for a token, if necesssary.
-    """
-    # Check for explicit token, first
-    if CONF["token"]:
-        conn["token"] = CONF["token"]
-    # Check for token in ENV
-    elif os.environ.get('KVDN_TOKEN'):
-        conn["token"] = os.environ.get('KVDN_TOKEN')
 
 
 def ext_pillar(minion_id, pillar, *args, **kwargs):
@@ -128,7 +120,8 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
     # Load configuration values
     for key in CONF:
         if kwargs.get(key, None):
-            CONF[key] = kwargs.get(key)
+            CONF[key] = kwargs.get(key,None)
+            log.debug("set config key " + key + " to value " + kwargs.get(key,None))
 
     # Resolve salt:// fileserver path, if necessary
     if CONF["config"].startswith("salt://"):
@@ -151,10 +144,8 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
         return kvdn_pillar
 
     #  KVDN
-    kvdn = kvdn_client.kvdn_client(baseurl=CONF.url)
-    
-    _authenticate(kvdn)
-    
+    kvdnc = kvdn_client.kvdn_client(baseurl=CONF["url"],token=CONF["token"])
+
     # Apply the compound filters to determine which mappings to expose for this minion
     ckminions = salt.utils.minions.CkMinions(__opts__)
 
@@ -170,13 +161,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
 
                 # Return only the key value, if requested, otherwise return
                 # the entire kvdn_value json structure
-                kvdn_value = kvdn.read(path)
-                if key:
-                    kvdn_value = kvdn_value["data"].get(key, None)
-                    # Decode base64 data, if detected
-                    prefix = "base64:"
-                    if kvdn_value.startswith(prefix):
-                        kvdn_value = base64.b64decode(kvdn_value[len(prefix):]).rstrip()
+                kvdn_value = kvdnc.get(path,key)
 
                 if kvdn_value or not CONF["unset_if_missing"]:
                     kvdn_pillar[variable] = kvdn_value
