@@ -31,7 +31,7 @@ if(System.getenv("VERTX_VERSION") != null)
     libversion = System.getenv("VERTX_VERSION")
 
 version =  "$libversion-1.0.8"
-def GITHUB_TOKEN = System.getenv("GITHUB_TOKEN")
+def GH_TOKEN = System.getenv("GH_TOKEN")
 def AWS_MVN_BUCKET = System.getenv("AWS_MVN_BUCKET")
 def AWS_DEFAULT_REGION = System.getenv("AWS_DEFAULT_REGION")
 def AWS_ACCESS_KEY_ID = System.getenv("AWS_ACCESS_KEY_ID")
@@ -48,11 +48,11 @@ distributions {
     }
 }
 
-if(System.getenv("GITHUB_TOKEN") != null) {
+if(System.getenv("GH_TOKEN") != null) {
     github {
         owner = 'cinterloper'
         repo = 'kvdn'
-        token = GITHUB_TOKEN
+        token = GH_TOKEN
         tagName = version
         targetCommitish = 'master'
         name = "v$version"
