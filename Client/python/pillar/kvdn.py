@@ -81,7 +81,7 @@ import base64
 import logging
 import os
 import yaml
-
+import json
 # Import salt modules
 import salt.loader
 import salt.minion
@@ -162,6 +162,11 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                 # Return only the key value, if requested, otherwise return
                 # the entire kvdn_value json structure
                 kvdn_value = kvdnc.get(path,key)
+		try:
+                  kvdn_value=json.loads(kvdn_value)
+                except:
+		  log.debug("kvdn value not json " + kvdn_value)
+
 
                 if kvdn_value or not CONF["unset_if_missing"]:
                     kvdn_pillar[variable] = kvdn_value
