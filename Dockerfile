@@ -5,6 +5,6 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y openjdk-8-jdk axe
 ENV TERM xterm
 RUN mkdir -p /opt/kvdn/{bin,lib}
 ADD build/libs/kvdn-$PROJVER-fat.jar /opt/kvdn.jar
-ADD project/Client /opt/kvdn/lib/Client
+ADD Client /opt/kvdn/lib/Client
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk
 CMD java -jar /opt/kvdn.jar
