@@ -97,10 +97,13 @@ CONF = {
     'url': 'https://KVDN:8200',
     'config': '/srv/salt/kvdn.yml',
     'token': None,
+    'token_path': None,
     'unset_if_missing': False
 }
 if os.environ.get('KVDN_TOKEN'):
     CONF["token"] = os.environ.get('KVDN_TOKEN')
+if CONF["token_path"]:
+    CONF["token"] = open(CONF["token_path"]).read()
 
 __virtualname__ = 'kvdn'
 def __virtual__():
