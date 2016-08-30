@@ -46,7 +46,7 @@ class hzKeyProvider implements keyProvider {
     void addKey(String name, String key, cb) {
         try{ //since we are just refering to the same map, which has native keySet(), the key should already be there
             IMap map = client.getMap(name);
-            assert map.keySet().contains(name)
+            assert map.keySet().contains(key)
             cb([result:true,error:null])
         }catch(Exception e){
             cb([result:false, error:e])
