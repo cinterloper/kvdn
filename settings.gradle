@@ -1,6 +1,4 @@
 rootProject.name = 'kvdn'
 
-if(System.getenv("BUILD_EXTENSIONS")) {
     include 'hazelcast-keys'
     include 'crdt-keys'
-}
