@@ -24,6 +24,7 @@ class kvserver {
     def JsonObject config
     def Context ctx
     def session
+    def _token='_'
     //used in a vertx program, or standalone
     def kvserver() {
 
@@ -56,7 +57,8 @@ class kvserver {
         def prefix = ""
         if(config.containsKey('kvdn_prefix'))
             prefix="/${config.getString('kvdn_prefix')}"
-
+        if(config.containsKey('kvdn_seperator_token'))
+            _token="${config.getString('kvdn_seperator_token')}"
 
         r.delete("${prefix}/X/:str/:map/:key").handler(this.&handleMapDel)
         r.post("${prefix}/X/:str/:map").handler(this.&handleMapSubmit)
@@ -80,7 +82,7 @@ class kvserver {
         if (mName == null || sName == null) {
             response.setStatusCode(400).end()
         } else {
-            KvTx tx = session.newTx("${sName}:${mName}")
+            KvTx tx = session.newTx("${sName}${_token}${mName}")
             tx.getKeys({ resGetK ->
                 if (resGetK.error == null) {
                     response.end(new JsonArray(resGetK.result as List).toString())
@@ -101,7 +103,7 @@ class kvserver {
         if (mName == null || kName == null) {
             response.setStatusCode(400).end()
         } else {
-            KvTx tx = session.newTx("${sName}:${mName}")
+            KvTx tx = session.newTx("${sName}${_token}${mName}")
             tx.get(kName, { resGet ->
                 if (resGet.error == null) {
                     response.end(resGet.result.toString())
@@ -134,7 +136,7 @@ class kvserver {
                 if (content == null) {
                     response.setStatusCode(400).end()
                 } else {
-                    KvTx tx = session.newTx("${sName}:${mName}")
+                    KvTx tx = session.newTx("${sName}${_token}${mName}")
                     tx.set(kName as String, content, { resPut ->
                         if (resPut.error == null) {
                             response.end(mName + ":" + kName)
@@ -165,7 +167,7 @@ class kvserver {
             if (content == null) {
                 response.setStatusCode(400).end(response.toString())
             } else {
-                KvTx tx = session.newTx("${sName}:${mName}")
+                KvTx tx = session.newTx("${sName}${_token}${mName}")
                 tx.set(kName as String, content, { resPut ->
                     if (resPut.error == null) {
                         response.end(mName + ":" + kName)
@@ -192,7 +194,7 @@ class kvserver {
                 if (content == null) {
                     response.setStatusCode(400).end()
                 } else {
-                    KvTx tx = session.newTx("${sName}:${mName}")
+                    KvTx tx = session.newTx("${sName}${_token}${mName}")
                     tx.submit(content, { resPut ->
                         if (resPut.error == null) {
                             response.end(mName + ":" + resPut.key)
@@ -217,7 +219,7 @@ class kvserver {
         if (mName == null || kName == null) {
             response.setStatusCode(400).end()
         } else {
-            KvTx tx = session.newTx("${sName}:${mName}")
+            KvTx tx = session.newTx("${sName}${_token}${mName}")
 
             tx.del(kName, { resDel ->
                 if (resDel.error == null) {
