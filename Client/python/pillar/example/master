@@ -1,8 +1,0 @@
-ext_pillar:
-  - kvdn:
-      url: http://172.17.0.1:6500
-      config: /srv/salt/kvdn.yml
-      token: None
-      unset_if_missing: False
-extension_modules: /etc/salt/modules
-
