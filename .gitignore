@@ -8,3 +8,4 @@ build/
 *.tgz
 *.iml
 note*.txt
+node_modules
