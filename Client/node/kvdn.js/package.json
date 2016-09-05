@@ -1,0 +1,20 @@
+
+{
+  "name": "kvdn.js",
+  "version": "0.0.1",
+  "description": "kvdn client library",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Grant Haywood",
+  "license": "ISC",
+
+  "dependencies" :
+  {
+    "vertx3-eventbus-client":"*",
+    "axios":"*"
+  }
+
+
+}

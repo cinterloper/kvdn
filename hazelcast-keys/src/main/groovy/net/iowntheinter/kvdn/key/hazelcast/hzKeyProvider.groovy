@@ -33,8 +33,8 @@ class hzKeyProvider implements keyProvider {
     @Override
     void deleteKey(String name, String key, cb) {
         try{ //since we are just refering to the same map, which has native keySet(), the key should already be gone
-            IMap map = client.getMap(name);
-            assert !map.keySet().contains(name)
+            //IMap map = client.getMap(name);
+            //assert !map.keySet().contains(name) //eeeennnnhhhhh this could be very timing-dependent
             cb([result:true,error:null])
         }catch(Exception e){
             cb([result:false, error:e])
@@ -45,8 +45,8 @@ class hzKeyProvider implements keyProvider {
     @Override
     void addKey(String name, String key, cb) {
         try{ //since we are just refering to the same map, which has native keySet(), the key should already be there
-            IMap map = client.getMap(name);
-            assert map.keySet().contains(key)
+            //IMap map = client.getMap(name);
+            //assert map.keySet().contains(key)
             cb([result:true,error:null])
         }catch(Exception e){
             cb([result:false, error:e])
