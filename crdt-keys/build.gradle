@@ -21,7 +21,7 @@ sourceCompatibility = '1.8'
 
 dependencies {
   compile "io.vertx:vertx-core:$version"
-  compile "net.iowntheinter:kvdn:$libversion-1.0.0"
+  compile "net.iowntheinter:kvdn:$libversion-1.0.9"
   compile 'com.esotericsoftware:kryo:3.0.3'
 
 

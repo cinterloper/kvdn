@@ -1,8 +1,10 @@
 plugins {
   id 'java'
   id 'application'
+
 }
 apply plugin: 'groovy'
+apply plugin: 'maven-publish'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 repositories {
@@ -12,22 +14,41 @@ repositories {
 }
 
 
-def libversion = '3.3.2'
-if(System.getenv("VERTX_VERSION") != null)
+def libversion  = '3.3.2'
+def projversion = '1.0.9'
+if(System.getenv("VERTX_VERSION"))
   libversion = System.getenv("VERTX_VERSION")
+if(System.getenv("PROJVER"))
+  projversion = System.getenv("PROJVER")
 
-version =  "$libversion"
+version =  "$libversion-$projversion"
 sourceCompatibility = '1.8'
 
 dependencies {
   compile "io.vertx:vertx-core:$version"
   compile 'com.hazelcast:hazelcast-client:3.6.3'
   compile 'io.vertx:vertx-hazelcast:3.3.2'
-  compile "net.iowntheinter:kvdn:$libversion-1.0.3"
+  compile "net.iowntheinter:kvdn:$libversion-$projversion"
 
 }
 
+publishing {
+    repositories {
+        mavenLocal()
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'net.iowntheinter'
+            artifactId 'kvdn-hazelcast-keys'
+            from components.java
+        }
+    }
+}
+
 mainClassName = 'io.vertx.example.HelloWorldEmbedded'
+
+
 
 shadowJar {
   classifier = 'fat'
