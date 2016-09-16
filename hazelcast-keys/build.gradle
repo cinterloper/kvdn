@@ -22,6 +22,7 @@ if(System.getenv("PROJVER"))
   projversion = System.getenv("PROJVER")
 
 version =  "$libversion-$projversion"
+
 sourceCompatibility = '1.8'
 
 dependencies {
@@ -31,6 +32,7 @@ dependencies {
   compile "net.iowntheinter:kvdn:$libversion-$projversion"
 
 }
+
 
 publishing {
     repositories {

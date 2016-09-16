@@ -17,7 +17,6 @@ class hzKeyProvider implements keyProvider {
         ClientNetworkConfig cnc = new ClientNetworkConfig().addAddress("127.0.0.1:5701");
         ClientConfig clientConfig = new ClientConfig().setNetworkConfig(cnc)
         client = HazelcastClient.newHazelcastClient(clientConfig);
-
     }
 
     @Override
