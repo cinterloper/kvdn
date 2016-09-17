@@ -26,7 +26,8 @@ class igKeyProvider implements keyProvider {
     private Ignite ignite;
 
     igKeyProvider() {
-        ignite = cfg == null ? Ignition.start(loadConfiguration()) : Ignition.start(cfg);
+        cfg = new IgniteConfiguration().setClientMode(true).setLocalHost("localhost")
+        ignite = Ignition.start(cfg);
     }
 
     @Override
@@ -43,8 +44,9 @@ class igKeyProvider implements keyProvider {
                         }
                     };
 
-            List keys = cache.query(new ScanQuery<String, String>(), transformer).getAll()
-            cb([result: keys, error: null])
+            //List keys = cache.query(new ScanQuery<String, String>(), transformer).getAll()
+            //this dosent work untill ignite >1.7
+            cb([result: "Unimplemented untill Ignite 1.7 in vertx", error: null])
         } catch (e) {
             cb([result: null, error: e])
         }
@@ -60,15 +62,5 @@ class igKeyProvider implements keyProvider {
         cb([result: true, error: null])
     }
 
-    private IgniteConfiguration loadConfiguration(URL config) {
-        try {
-            IgniteConfiguration cfg = F.first(IgnitionEx.loadConfigurations(config).get1());
-            setNodeID(cfg);
-            return cfg;
-        } catch (IgniteCheckedException e) {
-            log.error("Configuration loading error:", e);
-            throw new RuntimeException(e);
-        }
-    }
 
 }
