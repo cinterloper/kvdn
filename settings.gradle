@@ -4,3 +4,4 @@ if(System.getenv("BUILD_EXTENSIONS")) {
     include 'crdt-keys'
 }
 include 'service-proxy'
+include 'ignite-keys'

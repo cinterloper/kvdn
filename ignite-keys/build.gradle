@@ -27,8 +27,7 @@ sourceCompatibility = '1.8'
 
 dependencies {
   compile "io.vertx:vertx-core:$libversion"
-  compile 'com.hazelcast:hazelcast-client:3.6.3'
-  compile 'io.vertx:vertx-hazelcast:3.3.2'
+  compile "io.vertx:vertx-ignite:$libversion"
   compile "net.iowntheinter:kvdn:$libversion-$projversion"
 
 }
