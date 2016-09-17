@@ -31,6 +31,7 @@ class igKeyProvider implements keyProvider {
     private Ignite ignite;
     def _version
     Logger log = LoggerFactory.getLogger(this.class.getName())
+
     igKeyProvider() {
         cfg = new IgniteConfiguration().setClientMode(true).setLocalHost("localhost")
         ignite = Ignition.start(cfg);
@@ -41,14 +42,15 @@ class igKeyProvider implements keyProvider {
     @Override
     void getKeys(String name, cb) {
         log.warn("IGNITE MINOR VER ${_version}")
-        IgniteCacheProxy cache = ignite.cache(name);
+        IgniteCache cache = ignite.cache(name);
 
         ArrayList keys = new ArrayList();
         //assume major version is 1
-        if(_version >= 8)
-        {    keys = cache.query(new ScanQuery<String, String>(), transformer).getAll()  }
-        else
-        {   // performance--; scalability--
+        if (_version >= 8) {
+            cache.query(new ScanQuery<String, String>(), transformer).getAll().each { CacheEntryImpl ent ->
+                keys.add(ent.getKey())
+            }
+        } else {   // performance--; scalability--
             log.warn("IGNITE 1.7 AND BELOW HAS TERRIBLE getKeys() PERFORMANCE, SEE IGNITE-2546")
             cache.query(new ScanQuery<>()).getAll().each { CacheEntryImpl ent ->
                 keys.add(ent.getKey())
