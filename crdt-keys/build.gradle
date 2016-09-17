@@ -12,7 +12,7 @@ repositories {
 }
 
 
-def libversion = '3.3.2'
+def libversion = '3.3.3'
 if(System.getenv("VERTX_VERSION") != null)
   libversion = System.getenv("VERTX_VERSION")
 
@@ -21,7 +21,7 @@ sourceCompatibility = '1.8'
 
 dependencies {
   compile "io.vertx:vertx-core:$version"
-  compile "net.iowntheinter:kvdn:$libversion-1.0.9"
+  compile "net.iowntheinter:kvdn:$libversion-1.1.0"
   compile 'com.esotericsoftware:kryo:3.0.3'
 
 
