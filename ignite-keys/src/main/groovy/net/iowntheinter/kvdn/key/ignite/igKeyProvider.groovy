@@ -1,6 +1,7 @@
 package net.iowntheinter.kvdn.key.hazelcast
 
-
+import io.vertx.core.logging.Logger
+import io.vertx.core.logging.LoggerFactory
 import net.iowntheinter.kvdn.storage.kv.key.keyProvider
 import org.apache.ignite.Ignite
 import org.apache.ignite.IgniteCache
@@ -16,6 +17,7 @@ import org.apache.ignite.internal.processors.cache.IgniteCacheProxy
 import org.apache.ignite.internal.util.typedef.F
 import org.apache.ignite.lang.IgniteBiPredicate
 import org.apache.ignite.lang.IgniteClosure
+import org.apache.ignite.lang.IgniteProductVersion
 
 import javax.cache.Cache
 import javax.cache.Cache.Entry;
@@ -27,32 +29,32 @@ class igKeyProvider implements keyProvider {
 
     private IgniteConfiguration cfg;
     private Ignite ignite;
-
+    def _version
+    Logger log = LoggerFactory.getLogger(this.class.getName())
     igKeyProvider() {
         cfg = new IgniteConfiguration().setClientMode(true).setLocalHost("localhost")
         ignite = Ignition.start(cfg);
+        _version = ignite.cluster().localNode().version().minor()
+
     }
 
     @Override
     void getKeys(String name, cb) {
-            IgniteCacheProxy cache = ignite.cache(name);
-           //this dosent work until https://issues.apache.org/jira/browse/IGNITE-2546 make it into a release
-           /* IgniteClosure<Entry<String, String>, String> transformer =
-                    new IgniteClosure<Entry<String, String>, String>() {
-                        @Override
-                        public String apply(Entry<String, String> e) {
-                            return e.getKey();
-                        }
-                    };
+        log.warn("IGNITE MINOR VER ${_version}")
+        IgniteCacheProxy cache = ignite.cache(name);
 
-            //List keys = cache.query(new ScanQuery<String, String>(), transformer).getAll()
-            */
-
-            ArrayList keys = new ArrayList();
+        ArrayList keys = new ArrayList();
+        //assume major version is 1
+        if(_version >= 8)
+        {    keys = cache.query(new ScanQuery<String, String>(), transformer).getAll()  }
+        else
+        {   // performance--; scalability--
+            log.warn("IGNITE 1.7 AND BELOW HAS TERRIBLE getKeys() PERFORMANCE, SEE IGNITE-2546")
             cache.query(new ScanQuery<>()).getAll().each { CacheEntryImpl ent ->
-                  keys.add(ent.getKey())
-            }// performance--; scaleability--
-            cb([result: keys, error: null])
+                keys.add(ent.getKey())
+            } //full scan of all data ):
+        }
+        cb([result: keys, error: null])
 
     }
 
@@ -65,6 +67,14 @@ class igKeyProvider implements keyProvider {
     void addKey(String name, String key, cb) {
         cb([result: true, error: null])
     }
+    //this dosent work until https://issues.apache.org/jira/browse/IGNITE-2546 make it into a release
+    IgniteClosure<Entry<String, String>, String> transformer =
+            new IgniteClosure<Entry<String, String>, String>() {
+                @Override
+                public String apply(Entry<String, String> e) {
+                    return e.getKey();
+                }
+            };
 
 
 }
