@@ -18,7 +18,7 @@ class LocalKeyProvider implements keyProvider {
 
     @Override
     void getKeys(String name,  cb) {
-        cb([result:sd.getLocalMap(name).keySet(),error:null])
+        cb([result:new ArrayList(sd.getLocalMap(name).keySet()),error:null])
     }
 
     @Override

@@ -19,6 +19,8 @@ apply plugin: 'net.ltgt.apt'
 apply plugin: 'groovy'
 apply plugin: 'maven-publish'
 apply plugin: 'idea'
+apply plugin: 'com.github.johnrengelman.shadow'
+
 
 
 repositories {
@@ -73,7 +75,7 @@ publishing {
     }
 }
 
-mainClassName = 'io.vertx.example.HelloWorldEmbedded'
+mainClassName = 'io.vertx.core.Launcher'
 compileGroovy {
     groovyOptions.javaAnnotationProcessing = true
 }
@@ -93,7 +95,15 @@ task generateServiceProxy(type: JavaCompile, description: 'Generates EBServicePr
 }
 
 
-
+shadowJar {
+    classifier = 'fat'
+    manifest {
+        attributes 'Main-Verticle': 'groovy:kvdn-service.groovy'
+    }
+    mergeServiceFiles {
+        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+    }
+}
 task wrapper(type: Wrapper) {
     gradleVersion = '2.8'
 }
