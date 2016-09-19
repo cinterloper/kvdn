@@ -35,7 +35,7 @@ class igKeyProvider implements keyProvider {
     igKeyProvider() {
         cfg = new IgniteConfiguration().setClientMode(true).setLocalHost("localhost")
         ignite = Ignition.start(cfg);
-        _version = ignite.cluster().localNode().version().minor()
+            _version = ignite.cluster().localNode().version().minor()
 
     }
 
@@ -47,9 +47,8 @@ class igKeyProvider implements keyProvider {
         ArrayList keys = new ArrayList();
         //assume major version is 1
         if (_version >= 8) {
-            cache.query(new ScanQuery<String, String>(), transformer).getAll().each { CacheEntryImpl ent ->
-                keys.add(ent.getKey())
-            }
+            keys = cache.query(new ScanQuery<String, String>(), transformer).getAll()
+
         } else {   // performance--; scalability--
             log.warn("IGNITE 1.7 AND BELOW HAS TERRIBLE getKeys() PERFORMANCE, SEE IGNITE-2546")
             cache.query(new ScanQuery<>()).getAll().each { CacheEntryImpl ent ->

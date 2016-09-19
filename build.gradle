@@ -125,7 +125,10 @@ dependencies {
     compile "io.vertx:vertx-lang-groovy:$libversion"
     compile "io.vertx:vertx-auth-common:$libversion"
     compile "io.vertx:vertx-auth-jwt:$libversion"
+    compile "io.vertx:vertx-auth-shiro:$libversion"
     compile "io.vertx:vertx-service-proxy:$libversion"
+    compile 'ch.qos.logback:logback-classic:1.1.7'
+    compile 'ch.qos.logback:logback-core:1.1.7'
 
 
 }

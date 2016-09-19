@@ -38,16 +38,33 @@ class kvdnSession {
     KvTx newTx(String strAddr) {
         return (new KvTx(strAddr, this,  vertx))
     }
-
-    void onWrite(String strAddr, Closure cb) {
+//fluent?
+    def onWrite(String strAddr, Closure cb) {
         eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this keyset
             cb(message.body())
         })
+        return this
     }
 
-    void onDelete(String strAddr, Closure cb) {
-        eb.consumer("_KVDN_-${strAddr}", { message -> //listen for updates on this keyset
+    def onWrite(String strAddr, String key, Closure cb) {
+        eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this key
+            if(message.body() == key)
+                cb(message.body())
+        })
+        return this
+    }
+    def onDelete(String strAddr, Closure cb) {
+        eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this keyset
             cb(message.body())
         })
+        return this
+    }
+
+    def onDelete(String strAddr, String key, Closure cb) {
+        eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this key
+            if(message.body() == key)
+                cb(message.body())
+        })
+        return this
     }
 }
