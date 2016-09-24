@@ -27,26 +27,28 @@ class igKeyProvider implements keyProvider {
     igKeyProvider() {
         cfg = new IgniteConfiguration().setClientMode(true).setLocalHost("localhost")
         ignite = Ignition.start(cfg);
+        assert ignite.cluster().localNode().version().major(), 1
         _version = ignite.cluster().localNode().version().minor()
-
+        log.debug("init key provider with IGNITE 1.${_version}")
     }
 
     @Override
     void getKeys(String name, cb) {
-        log.warn("IGNITE MINOR VER ${_version}")
         IgniteCache cache = ignite.cache(name);
+        try {
+            ArrayList keys = new ArrayList();
+            //assume major version is 1
+            if (_version >= 8) {
+                keys = cache.query(new ScanQuery<String, String>(), transformer).getAll()
 
-        ArrayList keys = new ArrayList();
-        //assume major version is 1
-        if (_version >= 8) {
-            keys = cache.query(new ScanQuery<String, String>(), transformer).getAll()
-
-        } else {
-            keySet = ignite.set(name, null)
-            keys = keySet.toArray()
+            } else {
+                keySet = ignite.set(name, null)
+                keys = keySet.toArray()
+            }
+            cb([result: keys, error: null])
+        } catch (e) {
+            cb([result: null, error: e])
         }
-        cb([result: keys, error: null])
-
     }
 
     @Override
@@ -85,7 +87,6 @@ class igKeyProvider implements keyProvider {
                 public String apply(Entry<String, String> e) {
                     return e.getKey();
                 }
-            };
-
+            }
 
 }

@@ -1,7 +1,7 @@
 EventBus=require("vertx3-eventbus-client")
 kvdn=require("./kvsvc-proxy")
 
-var eb = new EventBus("http://172.17.0.2:6500/eb/")
+var eb = new EventBus("http://iowntheinter.net:6500/eb/")
 
     eb.onopen = function () {
         console.log("opened");
