@@ -11,4 +11,5 @@ interface TXKV {
     void get(String key,cb)
     void del(String key,cb)
     void getKeys(cb)
+    void size(cb)
 }
