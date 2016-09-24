@@ -5,22 +5,13 @@ import io.vertx.core.logging.LoggerFactory
 import net.iowntheinter.kvdn.storage.kv.key.keyProvider
 import org.apache.ignite.Ignite
 import org.apache.ignite.IgniteCache
-import org.apache.ignite.IgniteCheckedException
+import org.apache.ignite.IgniteSet
 import org.apache.ignite.Ignition
-import org.apache.ignite.cache.CacheEntry
 import org.apache.ignite.cache.query.ScanQuery
-import org.apache.ignite.cache.query.Query
 import org.apache.ignite.configuration.IgniteConfiguration
-import org.apache.ignite.internal.IgnitionEx
-import org.apache.ignite.internal.processors.cache.CacheEntryImpl
-import org.apache.ignite.internal.processors.cache.IgniteCacheProxy
-import org.apache.ignite.internal.util.typedef.F
-import org.apache.ignite.lang.IgniteBiPredicate
 import org.apache.ignite.lang.IgniteClosure
-import org.apache.ignite.lang.IgniteProductVersion
 
-import javax.cache.Cache
-import javax.cache.Cache.Entry;
+import javax.cache.Cache.Entry
 
 /**
  * Created by g on 7/17/16.
@@ -29,13 +20,14 @@ class igKeyProvider implements keyProvider {
 
     private IgniteConfiguration cfg;
     private Ignite ignite;
+    private IgniteSet keySet = null;
     def _version
     Logger log = LoggerFactory.getLogger(this.class.getName())
 
     igKeyProvider() {
         cfg = new IgniteConfiguration().setClientMode(true).setLocalHost("localhost")
         ignite = Ignition.start(cfg);
-            _version = ignite.cluster().localNode().version().minor()
+        _version = ignite.cluster().localNode().version().minor()
 
     }
 
@@ -49,11 +41,9 @@ class igKeyProvider implements keyProvider {
         if (_version >= 8) {
             keys = cache.query(new ScanQuery<String, String>(), transformer).getAll()
 
-        } else {   // performance--; scalability--
-            log.warn("IGNITE 1.7 AND BELOW HAS TERRIBLE getKeys() PERFORMANCE, SEE IGNITE-2546")
-            cache.query(new ScanQuery<>()).getAll().each { CacheEntryImpl ent ->
-                keys.add(ent.getKey())
-            } //full scan of all data ):
+        } else {
+            keySet = ignite.set(name, null)
+            keys = keySet.toArray()
         }
         cb([result: keys, error: null])
 
@@ -61,12 +51,32 @@ class igKeyProvider implements keyProvider {
 
     @Override
     void deleteKey(String name, String key, cb) {
-        cb([result: true, error: null])
+        try {
+            if (_version >= 8) {
+                cb([result: true, error: null])
+            } else {
+                keySet = ignite.set(name, null)
+                keySet.remove(key)
+                cb([result: true, error: null])
+            }
+        } catch (e) {
+            cb([result: false, error: e])
+        }
     }
 
     @Override
     void addKey(String name, String key, cb) {
-        cb([result: true, error: null])
+        try {
+            if (_version >= 8) {
+                cb([result: true, error: null])
+            } else {
+                keySet = ignite.set(name, null)
+                keySet.add(key)
+                cb([result: true, error: null])
+            }
+        } catch (e) {
+            cb([result: false, error: e])
+        }
     }
     //this dosent work until https://issues.apache.org/jira/browse/IGNITE-2546 make it into a release
     IgniteClosure<Entry<String, String>, String> transformer =
