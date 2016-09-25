@@ -83,7 +83,7 @@ class kvdnSession {
             case txType.LCK:
                 return (new LTx(strAddr, txid, this, vertx))
             default:
-                return(null)
+                return (null)
         }
     }
 
@@ -92,64 +92,35 @@ class kvdnSession {
         txEndHandler(tx)
     }
 
-    class fluent {
 
-//fluent?
-        def onWrite(String strAddr, Closure cb) {
-
-            eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this keyset
+    def onWrite_f(String strAddr, String key = null, Closure cb) {
+        eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this key
+            if ((key == null) || (message.body() == key))
                 cb(message.body())
-            })
-            return super
-        }
-
-        def onWrite(String strAddr, String key, Closure cb) {
-            eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this key
-                if (message.body() == key)
-                    cb(message.body())
-            })
-            return super
-        }
-
-        def onDelete(String strAddr, Closure cb) {
-            eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this keyset
-                cb(message.body())
-            })
-            return super
-        }
-
-        def onDelete(String strAddr, String key, Closure cb) {
-            eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this key
-                if (message.body() == key)
-                    cb(message.body())
-            })
-            return super
-        }
-    }
-
-//fluent?
-    MessageConsumer onWrite(String strAddr, Closure cb) {
-        return eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this keyset
-            cb(message.body())
         })
+        return this
     }
 
-    MessageConsumer onWrite(String strAddr, String key, Closure cb) {
+    def onDelete_f(String strAddr, String key = null, Closure cb) {
+        eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this keyset
+            if ((key == null) || (message.body() == key))
+                cb(message.body())
+        })
+        return this
+    }
+
+
+    MessageConsumer onWrite(String strAddr, String key = null, Closure cb) {
         return eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this key
-            if (message.body() == key)
+            if ((key == null) || (message.body() == key))
                 cb(message.body())
         })
     }
 
-    MessageConsumer onDelete(String strAddr, Closure cb) {
-        return eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this keyset
-            cb(message.body())
-        })
-    }
 
-    MessageConsumer onDelete(String strAddr, String key, Closure cb) {
+    MessageConsumer onDelete(String strAddr, String key = null, Closure cb) {
         return eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this key
-            if (message.body() == key)
+            if ((key == null) || (message.body() == key))
                 cb(message.body())
         })
     }
