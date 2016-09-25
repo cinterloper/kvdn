@@ -1,6 +1,8 @@
 //this will start the server standalone, if you execute the jar, on port 9090
 //you can also just include the jar in your project, in which case this file will not run, but you can do it yourself
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.AuthProvider
 import io.vertx.ext.auth.shiro.ShiroAuth
@@ -24,7 +26,8 @@ import io.vertx.ext.web.sstore.LocalSessionStore
 import net.iowntheinter.kvdn.kvserver
 import io.vertx.core.Vertx
 import io.vertx.groovy.core.Vertx as GVertx
-
+(org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) as Logger).
+        setLevel(Level.TRACE)
 v = (vertx as GVertx).getDelegate() as Vertx //get the instance of the java class
 
 s = new kvserver(v);
@@ -38,21 +41,7 @@ def opts = new ShiroAuthOptions().setConfig(config).setType(ShiroAuthRealmType.P
 AuthProvider provider = ShiroAuth.create(v, opts);
 
 
-router.route().handler(CookieHandler.create());
-router.route().handler(BodyHandler.create());
-router.route().handler(SessionHandler.create(LocalSessionStore.create(v)));
-router.route().handler(UserSessionHandler.create(provider))
-// Any requests to URI starting '/private/' require login
-router.route("/KVDN/*").handler(BasicAuthHandler.create(provider))
-//router.route("/KVDN/*").handler(RedirectAuthHandler.create(provider, "/loginpage.html"));
-router.route("/eb/*").handler(BasicAuthHandler.create(provider))
-router.route("/loginhandler").handler(FormLoginHandler.create(provider));
-router.route("/logout").handler({context ->
-    context.clearUser();
-    // Redirect back to the index page
-    context.response().putHeader("location", "/").setStatusCode(302).end();
-});
-router.route().handler(StaticHandler.create());
+
 def sjsh = SockJSHandler.create(v)
 def options = new BridgeOptions()
         .addOutboundPermitted(new PermittedOptions()
@@ -64,9 +53,24 @@ sjsh.bridge(options)
 
 
 router.route("/eb/*").handler(sjsh)
+//router.route("/KVDN/*").handler(BasicAuthHandler.create(provider))
+router.route("/loginhandler").handler(FormLoginHandler.create(provider));
 
 s.init(router as Router, {
+    router.route().handler(StaticHandler.create());
 
+    router.route().handler(CookieHandler.create());
+    router.route().handler(BodyHandler.create());
+    router.route().handler(SessionHandler.create(LocalSessionStore.create(v)));
+    router.route().handler(UserSessionHandler.create(provider))
+// Any requests to URI starting '/private/' require login
+//router.route("/KVDN/*").handler(RedirectAuthHandler.create(provider, "/loginpage.html"));
+    router.route("/eb/*").handler(BasicAuthHandler.create(provider))
+    router.route("/logout").handler({context ->
+        context.clearUser();
+        // Redirect back to the index page
+        context.response().putHeader("location", "/").setStatusCode(302).end();
+    });
     try {
 
         def server = v.createHttpServer()
