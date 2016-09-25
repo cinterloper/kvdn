@@ -12,33 +12,23 @@ import net.iowntheinter.kvdn.storage.kv.key.keyProvider
  */
 class LocalKeyProvider implements keyProvider {
     SharedData sd;
-    LocalKeyProvider(Vertx vertx){
+
+    LocalKeyProvider(Vertx vertx) {
         sd = vertx.sharedData()
     }
 
     @Override
-    void getKeys(String name,  cb) {
-        cb([result:new ArrayList(sd.getLocalMap(name).keySet()),error:null])
+    void getKeys(String name, cb) {
+        cb([result: new ArrayList(sd.getLocalMap(name).keySet()), error: null])
     }
 
     @Override
-    void deleteKey(String map, String name,  cb) {
-        try{ //since we are just refering to the same map, which has native keySet(), the key should already be gone
-            assert !sd.getLocalMap(map).keySet().contains(name)
-            cb([result:true,error:null])
-        }catch(Exception e){
-            cb([result:false, error:e])
-        }
-
+    void deleteKey(String map, String name, cb) {
+        cb([result: true, error: null])
     }
 
     @Override
-    void addKey(String map, String name,  cb) {
-        try{ //since we are just refering to the same map, which has native keySet(), the key should already be there
-            assert sd.getLocalMap(map).keySet().contains(name)
-            cb([result:true,error:null])
-        }catch(Exception e){
-            cb([result:false, error:e])
-        }
+    void addKey(String map, String name, cb) {
+        cb([result: true, error: null])
     }
 }
