@@ -4,6 +4,8 @@ import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
+import io.vertx.core.logging.Logger
+import io.vertx.core.logging.LoggerFactory
 import net.iowntheinter.kvdn.storage.kv.impl.kvdnSession
 
 /**
@@ -16,11 +18,13 @@ class distributedWaitGroup {
     private boolean ran
     private Map events
     EventBus eb
+    Logger logger
 
     distributedWaitGroup(Set tokens, timeout=0,abortcb={}, Vertx v) {
         ran = false
         this.vertx = v
         eb = vertx.eventBus()
+        this.logger = LoggerFactory.getLogger(this.class.getName())
         this.abortcb=abortcb
         this.timeout = timeout
         events = [:]
@@ -33,6 +37,7 @@ class distributedWaitGroup {
     void onAck(String channel, cb) {
         MessageConsumer c = eb.consumer(channel, { message ->
             def body = message.body() as JsonObject
+            logger.trace("onAck ${channel} ${body}")
             events[body.getString('key')] = true
             check(cb)
         })
@@ -42,6 +47,7 @@ class distributedWaitGroup {
     void onAck(String channel, evaluator, cb) {
         MessageConsumer c = eb.consumer(channel, { message ->
             def body = message.body() as JsonObject
+            logger.trace("onAck ${channel} ${body}")
             events[body.getString('key')] = evaluator(body)
             check(cb)
         })
@@ -52,6 +58,7 @@ class distributedWaitGroup {
 
         def s = new kvdnSession(vertx)
         def c = s.onWrite(straddr, { JsonObject body ->
+            logger.trace("onKeys ${straddr} ${body}")
             events[body.getString('key')] = true
             check(cb)
         })
@@ -74,6 +81,7 @@ class distributedWaitGroup {
     void abortTimer(MessageConsumer c,abortcb){
         if(this.timeout !=0){
             vertx.setTimer(this.timeout,{
+                logger.debug("abort timed listener on time exceeded ${c.address()}")
                 c.unregister({abortcb()})
             })
         }
