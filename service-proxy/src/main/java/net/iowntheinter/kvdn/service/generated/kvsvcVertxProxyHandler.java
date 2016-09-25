@@ -14,7 +14,7 @@
 * under the License.
 */
 
-package net.iowntheinter.kvdn.service;
+package net.iowntheinter.kvdn.service.generated;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -26,6 +26,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ProxyHandler;
 import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.ServiceExceptionMessageCodec;
+import net.iowntheinter.kvdn.service.kvsvc;
 
 import java.util.*;
 
@@ -118,6 +119,10 @@ public class kvsvcVertxProxyHandler extends ProxyHandler {
         }
         case "get": {
           service.get((JsonObject)json.getValue("document"), createHandler(msg));
+          break;
+        }
+        case "getSize": {
+          service.getSize((JsonObject)json.getValue("document"), createHandler(msg));
           break;
         }
         case "getKeys": {

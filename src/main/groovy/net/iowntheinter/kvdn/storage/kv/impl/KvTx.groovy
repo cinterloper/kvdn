@@ -12,6 +12,7 @@ import io.vertx.core.logging.LoggerFactory
 import net.iowntheinter.kvdn.kvdnTX
 import net.iowntheinter.kvdn.storage.kv.TXKV
 import net.iowntheinter.kvdn.storage.kv.local.shimAsyncMap
+import net.iowntheinter.kvdn.storage.kvdnSession
 
 import java.security.MessageDigest
 

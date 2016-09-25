@@ -6,7 +6,7 @@ import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
-import net.iowntheinter.kvdn.storage.kv.impl.kvdnSession
+import net.iowntheinter.kvdn.storage.kvdnSession
 
 /**
  * Created by g on 9/24/16.
@@ -33,13 +33,15 @@ class distributedWaitGroup {
         }
     }
 
-
+    void ack(String token,cb){
+        events[token]=true
+        check(cb)
+    }
     void onAck(String channel, cb) {
         MessageConsumer c = eb.consumer(channel, { message ->
             def body = message.body() as JsonObject
             logger.trace("onAck ${channel} ${body}")
-            events[body.getString('key')] = true
-            check(cb)
+            ack(channel,cb)
         })
         abortTimer(c,abortcb)
     }
@@ -55,14 +57,15 @@ class distributedWaitGroup {
     }
 
     void onKeys(String straddr, cb) {
-
         def s = new kvdnSession(vertx)
-        def c = s.onWrite(straddr, { JsonObject body ->
-            logger.trace("onKeys ${straddr} ${body}")
-            events[body.getString('key')] = true
-            check(cb)
-        })
-        abortTimer(c,abortcb)
+        s.init({
+            def c = s.onWrite(straddr, { JsonObject body ->
+                logger.trace("onKeys ${straddr} ${body}")
+                events[body.getString('key')] = true
+                check(cb)
+            })
+            abortTimer(c,abortcb)
+        },{})
 
     }
 

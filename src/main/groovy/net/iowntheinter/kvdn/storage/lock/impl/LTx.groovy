@@ -8,7 +8,7 @@ import io.vertx.core.shareddata.Counter
 import io.vertx.core.shareddata.Lock
 import io.vertx.core.shareddata.SharedData
 import net.iowntheinter.kvdn.kvdnTX
-import net.iowntheinter.kvdn.storage.kv.impl.kvdnSession
+import net.iowntheinter.kvdn.storage.kvdnSession
 import net.iowntheinter.kvdn.storage.lock.TXLCK
 
 class LTx extends kvdnTX implements TXLCK {

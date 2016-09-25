@@ -38,21 +38,21 @@ public class kvdnService implements kvsvc {
     @Override
     public void set(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
         mapjsonintercepter mji = new mapjsonintercepter().setCb(resultHandler);
-        KvTx tx = new KvTx(document.getString("straddr"),this.session,this.vertx);
+        KvTx tx = (KvTx)this.session.newTx(document.getString("straddr"));
         tx.set(document.getString("key"),document.getString("value"),mji);
     }
 
     @Override
     public void submit(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
         mapjsonintercepter mji = new mapjsonintercepter().setCb(resultHandler);
-        KvTx tx = new KvTx(document.getString("straddr"),this.session,this.vertx);
+        KvTx tx = (KvTx)this.session.newTx(document.getString("straddr"));
         tx.submit(document.getString("value"),mji);
     }
 
     @Override
     public void get(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
         mapjsonintercepter mji = new mapjsonintercepter().setCb(resultHandler);
-        KvTx tx = new KvTx(document.getString("straddr"),this.session,this.vertx);
+        KvTx tx = (KvTx)this.session.newTx(document.getString("straddr"));
         tx.get(document.getString("key"),mji);
     }
 
@@ -60,14 +60,20 @@ public class kvdnService implements kvsvc {
     public void getKeys(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
         logger.trace("getting keys request " + document.toString());
         mapjsonintercepter mji = new mapjsonintercepter().setCb(resultHandler);
-        KvTx tx = new KvTx(document.getString("straddr"),this.session,this.vertx);
+        KvTx tx = (KvTx)this.session.newTx(document.getString("straddr"));
         tx.getKeys(mji);
     }
-
+    @Override
+    public void getSize(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
+        logger.trace("getting keys request " + document.toString());
+        mapjsonintercepter mji = new mapjsonintercepter().setCb(resultHandler);
+        KvTx tx = (KvTx)this.session.newTx(document.getString("straddr"));
+        tx.size(mji);
+    }
     @Override
     public void delete(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
         mapjsonintercepter mji = new mapjsonintercepter().setCb(resultHandler);
-        KvTx tx = new KvTx(document.getString("straddr"),this.session,this.vertx);
+        KvTx tx = (KvTx)this.session.newTx(document.getString("straddr"));
         tx.del(document.getString("key"),mji);
     }
 

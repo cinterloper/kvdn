@@ -1,19 +1,15 @@
 package net.iowntheinter.kvdn.storage.counter.impl
 
 import io.vertx.core.Vertx
-import io.vertx.core.Future
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
-import io.vertx.core.shareddata.AsyncMap
 import io.vertx.core.shareddata.Counter
 import io.vertx.core.shareddata.SharedData
 import io.vertx.core.logging.LoggerFactory
 import net.iowntheinter.kvdn.kvdnTX
 import net.iowntheinter.kvdn.storage.counter.TXCTR
-import net.iowntheinter.kvdn.storage.kv.impl.kvdnSession
-import net.iowntheinter.kvdn.storage.kv.local.shimAsyncMap
-
+import net.iowntheinter.kvdn.storage.kvdnSession
 
 /**
  * Created by grant on 11/19/15.

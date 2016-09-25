@@ -1,4 +1,4 @@
-package net.iowntheinter.kvdn.storage.kv.impl
+package net.iowntheinter.kvdn.storage
 
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
@@ -10,6 +10,7 @@ import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.Counter
 import net.iowntheinter.kvdn.kvdnTX
 import net.iowntheinter.kvdn.storage.counter.impl.CtrTx
+import net.iowntheinter.kvdn.storage.kv.impl.KvTx
 import net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider
 import net.iowntheinter.kvdn.storage.kv.key.keyProvider
 import net.iowntheinter.kvdn.storage.lock.impl.LTx
@@ -73,6 +74,9 @@ class kvdnSession {
     }
 
     def newTx(String strAddr, txtype = txType.KV) {
+        if(!initalized){
+          throw new Exception("kvdn session needs to be init({ before you use it")
+        }else{
         def txid = UUID.randomUUID()
         outstandingTX.add(txid)
         switch (txtype) {
@@ -84,7 +88,7 @@ class kvdnSession {
                 return (new LTx(strAddr, txid, this, vertx))
             default:
                 return (null)
-        }
+        }}
     }
 
     void finishTx(kvdnTX tx) {

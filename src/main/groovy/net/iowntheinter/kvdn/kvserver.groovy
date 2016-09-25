@@ -9,11 +9,9 @@ import io.vertx.core.Context
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
 import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.core.logging.LoggerFactory
-import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
-import net.iowntheinter.kvdn.storage.kv.impl.kvdnSession
+import net.iowntheinter.kvdn.storage.kvdnSession
 
 class kvserver {
     Logger logger

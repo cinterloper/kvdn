@@ -34,6 +34,8 @@ public interface kvsvc {
 
     void get(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler);
 
+    void getSize(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler);
+
     void getKeys(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler);
 
     void delete(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler);
