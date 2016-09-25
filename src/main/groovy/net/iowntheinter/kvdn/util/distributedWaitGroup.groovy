@@ -1,64 +1,61 @@
-package net.iowntheinter.kvdn.admin
+package net.iowntheinter.kvdn.util
 
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
+import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import net.iowntheinter.kvdn.storage.kv.impl.kvdnSession
-
-import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Created by g on 9/24/16.
  */
 class distributedWaitGroup {
     Vertx vertx
-    List<String> peerList
     int timeout
-    String channel
-    def wgcb
+    def abortcb
     private boolean ran
     private Map events
     EventBus eb
 
-    distributedWaitGroup(Set tokens, Vertx v) {
+    distributedWaitGroup(Set tokens, timeout=0,abortcb={}, Vertx v) {
         ran = false
         this.vertx = v
         eb = vertx.eventBus()
-        peerList = config.peerList
-        channel = config.channel
-        timeout = config.timeout ?: 0
+        this.abortcb=abortcb
+        this.timeout = timeout
         events = [:]
         tokens.each { token ->
             events[token] = false
         }
-        wgcb = cb
     }
 
 
     void onAck(String channel, cb) {
-        eb.consumer(channel, { message ->
+        MessageConsumer c = eb.consumer(channel, { message ->
             def body = message.body() as JsonObject
             events[body.getString('key')] = true
             check(cb)
         })
+        abortTimer(c,abortcb)
     }
 
     void onAck(String channel, evaluator, cb) {
-        eb.consumer(channel, { message ->
+        MessageConsumer c = eb.consumer(channel, { message ->
             def body = message.body() as JsonObject
             events[body.getString('key')] = evaluator(body)
             check(cb)
         })
-
+        abortTimer(c,abortcb)
     }
 
     void onKeys(String straddr, cb) {
 
         def s = new kvdnSession(vertx)
-        s.onWrite(straddr, { JsonObject body ->
+        def c = s.onWrite(straddr, { JsonObject body ->
             events[body.getString('key')] = true
             check(cb)
         })
+        abortTimer(c,abortcb)
 
     }
 
@@ -73,6 +70,13 @@ class distributedWaitGroup {
             cb()
         }
 
+    }
+    void abortTimer(MessageConsumer c,abortcb){
+        if(this.timeout !=0){
+            vertx.setTimer(this.timeout,{
+                c.unregister({abortcb()})
+            })
+        }
     }
 
 }

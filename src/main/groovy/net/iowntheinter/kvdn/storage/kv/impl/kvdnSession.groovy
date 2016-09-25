@@ -3,6 +3,7 @@ package net.iowntheinter.kvdn.storage.kv.impl
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
+import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
@@ -78,9 +79,11 @@ class kvdnSession {
             case txType.KV:
                 return (new KvTx(strAddr, txid, this, vertx))
             case txType.CTR:
-                return (new CtrTx(strAddr, txid, this, vertx) )
+                return (new CtrTx(strAddr, txid, this, vertx))
             case txType.LCK:
-                return (new LTx(strAddr, txid, this, vertx) )
+                return (new LTx(strAddr, txid, this, vertx))
+            default:
+                return(null)
         }
     }
 
@@ -89,36 +92,66 @@ class kvdnSession {
         txEndHandler(tx)
     }
 
+    class fluent {
+
 //fluent?
-    def onWrite(String strAddr, Closure cb) {
+        def onWrite(String strAddr, Closure cb) {
 
-        eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this keyset
-            cb(message.body())
-        })
-        return this
+            eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this keyset
+                cb(message.body())
+            })
+            return super
+        }
+
+        def onWrite(String strAddr, String key, Closure cb) {
+            eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this key
+                if (message.body() == key)
+                    cb(message.body())
+            })
+            return super
+        }
+
+        def onDelete(String strAddr, Closure cb) {
+            eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this keyset
+                cb(message.body())
+            })
+            return super
+        }
+
+        def onDelete(String strAddr, String key, Closure cb) {
+            eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this key
+                if (message.body() == key)
+                    cb(message.body())
+            })
+            return super
+        }
     }
 
-    def onWrite(String strAddr, String key, Closure cb) {
-        eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this key
+//fluent?
+    MessageConsumer onWrite(String strAddr, Closure cb) {
+        return eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this keyset
+            cb(message.body())
+        })
+    }
+
+    MessageConsumer onWrite(String strAddr, String key, Closure cb) {
+        return eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this key
             if (message.body() == key)
                 cb(message.body())
         })
-        return this
     }
 
-    def onDelete(String strAddr, Closure cb) {
-        eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this keyset
+    MessageConsumer onDelete(String strAddr, Closure cb) {
+        return eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this keyset
             cb(message.body())
         })
-        return this
     }
 
-    def onDelete(String strAddr, String key, Closure cb) {
-        eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this key
+    MessageConsumer onDelete(String strAddr, String key, Closure cb) {
+        return eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this key
             if (message.body() == key)
                 cb(message.body())
         })
-        return this
     }
 
     void adminCommandListener() {
@@ -148,7 +181,7 @@ class kvdnSession {
                     error_cb(gre)
                 }
                 try {
-                    assert r.result(), 0
+                    assert r.result() == 0
                     goodstate = true
                 } catch (ase) {
                     error_cb(ase)

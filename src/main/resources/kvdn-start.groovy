@@ -65,7 +65,7 @@ sjsh.bridge(options)
 
 router.route("/eb/*").handler(sjsh)
 
-s.init(router as Router,v as Vertx, {
+s.init(router as Router, {
 
     try {
 
