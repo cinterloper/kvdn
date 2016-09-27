@@ -1,3 +1,4 @@
+import traceback
 import httplib2
 import logging
 import sys 
@@ -58,5 +59,5 @@ def kreq(url, method='GET', **kwargs):
     try:
         return h.request(url, method, kwargs)
     except :
-        CONF['logger'].error("could not make kvdn request " +  sys.exc_info()[0] )
+        CONF['logger'].error("could not make kvdn request " +  traceback.format_exc() )
         return "", ""
