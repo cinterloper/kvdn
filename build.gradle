@@ -18,6 +18,7 @@ plugins {
     id 'java'
     id 'application'
     id 'com.github.johnrengelman.shadow' version '1.2.3'
+    id "com.linkedin.python-sdist" version "0.3.9"
     id 'maven-publish'
     id "net.ltgt.apt" version "0.6"
 }
@@ -78,6 +79,7 @@ repositories {
     mavenCentral()
     mavenLocal()
     jcenter()
+    pyGradlePyPi()
     maven { url 'http://dl.bintray.com/gesellix/docker-utils' }
     flatDir { dirs '/usr/share/java' }
     flatDir { dirs 'lib/' }

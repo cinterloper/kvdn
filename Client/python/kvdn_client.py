@@ -57,7 +57,8 @@ class kvdn_client:
 def kreq(url, method='GET', **kwargs):
     h = httplib2.Http()
     try:
-        return h.request(url, method, kwargs)
+        resp, content = h.request(url, method, **kwargs)
+        return resp, content
     except :
         CONF['logger'].error("could not make kvdn request " +  traceback.format_exc() )
         return "", ""
