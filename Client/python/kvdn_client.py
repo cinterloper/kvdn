@@ -54,7 +54,9 @@ class kvdn_client:
         return content # the returned content should be a uuid key
 
 
-def kreq(url, method='GET', **kwargs):
+def kreq(url, method=None, **kwargs):
+    if method is None:
+        method = 'GET'
     h = httplib2.Http()
     try:
         resp, content = h.request(url, method, **kwargs)
