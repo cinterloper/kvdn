@@ -12,6 +12,7 @@ CONF = {
 }
 
 class kvdn_client:
+    kvdn_py_version = 1.4
     def __init__(self, **kwargs):
         for key,value in kwargs.iteritems():
             CONF[key]=value
@@ -52,7 +53,7 @@ class kvdn_client:
         return content # the returned content should be a uuid key
 
 
-def kreq(url, method, **kwargs):
+def kreq(url, method='GET', **kwargs):
     h = httplib2.Http()
     try:
         return h.request(url, method, kwargs)
