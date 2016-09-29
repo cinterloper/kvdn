@@ -9,7 +9,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import net.iowntheinter.kvdn.service.kvsvc;
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx;
-import net.iowntheinter.kvdn.storage.kv.impl.kvdnSession;
+import net.iowntheinter.kvdn.storage.kvdnSession;
 
 import java.util.Map;
 import java.util.concurrent.Callable;

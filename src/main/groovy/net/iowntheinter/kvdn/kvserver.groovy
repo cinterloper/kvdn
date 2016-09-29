@@ -58,10 +58,13 @@ class kvserver {
         }, { Exception e -> logger.fatal(e) })
 
     }
+    String filterAddr(String s){
+        return s.replace('.','') //make this pluggable?
+    }
 
     def handleMapKeys(RoutingContext routingContext) {
-        def mName = routingContext.request().getParam("map")
-        def sName = routingContext.request().getParam("str")
+        def mName = filterAddr(routingContext.request().getParam("map"))
+        def sName = filterAddr(routingContext.request().getParam("str"))
 
         def response = routingContext.response()
         if (mName == null || sName == null) {
@@ -79,8 +82,8 @@ class kvserver {
         }
     }
     def handleMapSize(RoutingContext routingContext) {
-        def mName = routingContext.request().getParam("map")
-        def sName = routingContext.request().getParam("str")
+        def mName = filterAddr(routingContext.request().getParam("map"))
+        def sName = filterAddr(routingContext.request().getParam("str"))
 
         def response = routingContext.response()
         if (mName == null || sName == null) {
@@ -99,9 +102,9 @@ class kvserver {
     }
 
     def handleMapGet(RoutingContext routingContext) {
-        def mName = routingContext.request().getParam("map")
+        def mName = filterAddr(routingContext.request().getParam("map"))
         def kName = routingContext.request().getParam("key")
-        def sName = routingContext.request().getParam("str")
+        def sName = filterAddr(routingContext.request().getParam("str"))
 
         def response = routingContext.response()
         if (mName == null || kName == null) {
@@ -126,8 +129,8 @@ class kvserver {
 
     def handleMapSet(RoutingContext routingContext) {
 
-        def mName = routingContext.request().getParam("map")
-        def sName = routingContext.request().getParam("str")
+        def mName = filterAddr(routingContext.request().getParam("map"))
+        def sName = filterAddr(routingContext.request().getParam("str"))
         def kName = routingContext.get('keyOverride') ?: routingContext.request().getParam("key")
 
         def response = routingContext.response()
@@ -159,8 +162,8 @@ class kvserver {
 
     def handleMapSetRaw(RoutingContext routingContext) {
 
-        def mName = routingContext.request().getParam("map")
-        def sName = routingContext.request().getParam("str")
+        def mName = filterAddr(routingContext.request().getParam("map"))
+        def sName = filterAddr(routingContext.request().getParam("str"))
         def kName = routingContext.get('keyOverride') ?: routingContext.request().getParam("key")
 
         HttpServerResponse response = routingContext.response()
@@ -185,8 +188,8 @@ class kvserver {
     }
 
     def handleMapSubmit(RoutingContext routingContext) {
-        def mName = routingContext.request().getParam("map")
-        def sName = routingContext.request().getParam("str")
+        def mName = filterAddr(routingContext.request().getParam("map"))
+        def sName = filterAddr(routingContext.request().getParam("str"))
         def response = routingContext.response()
         if (mName == null) {
             response.setStatusCode(400).end()
@@ -215,9 +218,9 @@ class kvserver {
     }
 
     def handleMapDel(RoutingContext routingContext) {
-        def mName = routingContext.request().getParam("map")
+        def mName = filterAddr(routingContext.request().getParam("map"))
         def kName = routingContext.request().getParam("key")
-        def sName = routingContext.request().getParam("str")
+        def sName = filterAddr(routingContext.request().getParam("str"))
         logger.info("full uri on delete: " + routingContext.request().absoluteURI())
         def response = routingContext.response()
         if (mName == null || kName == null) {
