@@ -26,7 +26,7 @@ class KvTx extends kvdnTX implements TXKV {
     EventBus eb
     String strAddr
     UUID txid
-    def  keyprov
+    def keyprov
     def Vertx vertx
     def D = new _data_impl()
     def session
@@ -34,6 +34,7 @@ class KvTx extends kvdnTX implements TXKV {
         MODE_WRITE,
         MODE_READ
     }
+
     private class _data_impl {
         SharedData sd;
         Vertx vertx
@@ -66,17 +67,21 @@ class KvTx extends kvdnTX implements TXKV {
     }
 
     @Override
-    Object bailTx(Object context) {
+    void bailTx(context, cb) {
         logger.error("KVTX error: ${this.session} " + context as Map)
-        (this.session as kvdnSession).finishTx(this)
-        return null
+        (this.session as kvdnSession).finishTx(this, {
+            cb([result: null, error: context.error ?: getFlags()])
+        })
     }
-    Set getFlags(){
+
+    Set getFlags() {
         return session.txflags
     }
-    boolean checkFlags(txtype){
+
+    boolean checkFlags(txtype) {
         return (!session.txflags.contains(txtype))
     }
+
     @Override
     void snapshot() {}
 
@@ -92,19 +97,19 @@ class KvTx extends kvdnTX implements TXKV {
 
                         keyprov.addKey(strAddr, key, {
                             logger.trace("set:${strAddr}:${key}");
-                            eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key',key))
-                            (this.session as kvdnSession).finishTx(this)
-                            cb([result: resPut.result().toString(), key: key, error: null])
+                            eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
+                            (this.session as kvdnSession).finishTx(this, {
+                                cb([result: resPut.result().toString(), key: key, error: null])
+
+                            })
                         })
 
                     } else {
-                        bailTx([txid:this.txid,straddr:strAddr,session:this.session,flags:session.txflags])
-                        cb([result: null, error: resPut.cause()])
+                        bailTx([error: res.cause(), tx: this], cb)
                     }
                 })
             } else {
-                bailTx([txid:this.txid,straddr:strAddr,session:this.session,flags:session.txflags])
-                cb([result: null, error: (res.cause() ?: getFlags())])
+                bailTx([error: res.cause(), tx: this], cb)
             }
         })
     }
@@ -118,22 +123,22 @@ class KvTx extends kvdnTX implements TXKV {
                     if (resPut.succeeded()) {
                         keyprov.addKey(strAddr, key, {
                             logger.trace("set:${strAddr}:${key}");
-                            eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key',key))
-                            (this.session as kvdnSession).finishTx(this)
-                            cb([result: resPut.result().toString(), key: key, error: null])
+                            eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
+                            (this.session as kvdnSession).finishTx(this, {
+                                cb([result: resPut.result().toString(), key: key, error: null])
+
+                            })
                         })
                     } else {
-                        bailTx([txid:this.txid,straddr:strAddr,session:this.session,flags:session.txflags])
-                        cb([result: null, error: resPut.cause()])
+                        bailTx([error: res.cause(), tx: this], cb)
                     }
                 })
             } else {
-                bailTx([txid:this.txid,straddr:strAddr,session:this.session,flags:session.txflags])
-                cb([result: null, error: res.cause()])
+                bailTx([error: res.cause(), tx: this], cb)
+
             }
         })
     }
-
 
 
     @Override
@@ -144,19 +149,19 @@ class KvTx extends kvdnTX implements TXKV {
                 map.get(key, { resGet ->
                     if (resGet.succeeded()) {
                         logger.trace("get:${strAddr}:${key}")
-                        (this.session as kvdnSession).finishTx(this)
-                        cb([result: resGet.result().toString(), error: null])
+                        (this.session as kvdnSession).finishTx(this, {
+                            cb([result: resGet.result().toString(), error: null])
+                        })
                     } else {
-                        bailTx([txid:this.txid,straddr:strAddr,session:this.session,flags:session.txflags])
-                        cb([result: null, error: resGet.cause()])
+                        bailTx([error: res.cause(), tx: this], cb)
                     }
                 })
             } else {
-                bailTx([txid:this.txid,straddr:strAddr,session:this.session,flags:session.txflags])
-                cb([result: null, error: res.cause()])
+                bailTx([error: res.cause(), tx: this], cb)
             }
         })
     }
+
     @Override
     void del(String key, cb) {
         D.getMap(this, { res ->
@@ -167,45 +172,47 @@ class KvTx extends kvdnTX implements TXKV {
                         keyprov.deleteKey(strAddr, key, {
                             logger.trace("set:${strAddr}:${key}");
                             eb.publish("_KVDN_-${strAddr}", new JsonObject().put('key'))
-                            (this.session as kvdnSession).finishTx(this)
-                            cb([result: resDel.result().toString(), key: key, error: null])
+                            (this.session as kvdnSession).finishTx(this, {
+                                cb([result: resDel.result().toString(), key: key, error: null])
+                            })
                         })
                     } else {
-                        bailTx([txid:this.txid,straddr:strAddr,session:this.session,flags:session.txflags])
-                        cb([result: null, error: resDel.cause()])
+                        bailTx([error: res.cause(), tx: this], cb)
                     }
                 })
             } else {
-                bailTx([txid:this.txid,straddr:strAddr,session:this.session,flags:session.txflags])
-                cb([result: null, error: res.cause()])
+                bailTx([error: res.cause(), tx: this], cb)
             }
         })
     }
+
     @Override
     void getKeys(cb) {
         keyprov.getKeys(strAddr, { Map asyncResult ->
-            (this.session as kvdnSession).finishTx(this)
-            cb(asyncResult)
+            (this.session as kvdnSession).finishTx(this, {
+                cb(asyncResult)
+            })
+
         })
     }
+
     @Override
     void size(cb) {
         D.getMap(this, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_READ)) {
                 def AsyncMap map = res.result();
-                map.size( { resGet ->
+                map.size({ resGet ->
                     if (resGet.succeeded()) {
                         logger.trace("size:${strAddr}")
-                        (this.session as kvdnSession).finishTx(this)
-                        cb([result: resGet.result().toString(), error: null])
+                        (this.session as kvdnSession).finishTx(this, {
+                            cb([result: resGet.result().toString(), error: null])
+                        })
                     } else {
-                        bailTx([txid:this.txid,straddr:strAddr,session:this.session,flags:session.txflags])
-                        cb([result: null, error: resGet.cause()])
+                        bailTx([error: res.cause(), tx: this], cb)
                     }
                 })
             } else {
-                bailTx([txid:this.txid,straddr:strAddr,session:this.session,flags:session.txflags])
-                cb([result: null, error: res.cause()])
+                bailTx([error: res.cause(), tx: this], cb)
             }
         })
     }

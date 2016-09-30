@@ -91,9 +91,10 @@ class kvdnSession {
         }}
     }
 
-    void finishTx(kvdnTX tx) {
+    void finishTx(kvdnTX tx, cb) {
         outstandingTX.remove(tx.txid)
         txEndHandler(tx)
+        cb() //send the data back to the api client here
     }
 
 
