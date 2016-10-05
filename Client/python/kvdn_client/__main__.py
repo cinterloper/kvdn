@@ -7,10 +7,11 @@ import sys,os
 
 def main(args=None):
     parser = argparse.ArgumentParser(description='KVDN PYCLIENT')
+    parser.add_argument('--debug', action='store_true', help='debug')
     parser.add_argument('--set', action='store_true',  help='set a value', )
     parser.add_argument('--submit', action='store_true',  help='submit a value', )
     parser.add_argument('--delete', action='store_true',  help='delete a value', )
-    parser.add_argument('straddr', type=str,  help='the kvdn map address to work with')
+    parser.add_argument('straddr', type=str, help='the kvdn map address to work with')
     parser.add_argument('--key', type=str, default='', help='the kvdn key to work with')
     s=''
     args = parser.parse_args()
@@ -32,6 +33,9 @@ def main(args=None):
         k = kvdn_client(baseurl=_baseurl)
 
 
+
+    if(args.debug):
+      sys.stderr.write("KVDN VERSION: " + k.version() + "\n")
 
 
     if(args.set):
