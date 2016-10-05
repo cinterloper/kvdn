@@ -12,18 +12,8 @@ import net.iowntheinter.kvdn.storage.kvdnSession
 import net.iowntheinter.kvdn.storage.lock.TXLCK
 
 class LTx extends kvdnTX implements TXLCK {
-    SharedData sd
-    Logger logger
-    EventBus eb
-    String strAddr
-    UUID txid
-    def Vertx vertx
+
     def D = new _data_impl()
-    def session
-    enum txtype {
-        MODE_WRITE,
-        MODE_READ
-    }
 
     private class _data_impl {
         SharedData sd;
@@ -51,32 +41,20 @@ class LTx extends kvdnTX implements TXLCK {
         eb = vertx.eventBus() as EventBus
     }
 
-    @Override
-    Object bailTx(Object context) {
-        logger.error("KVTX error: ${this.session} " + context as Map)
-        (this.session as kvdnSession).finishTx(this)
-        return null
-    }
-
 
     @Override
     void release(Lock l,  cb) {
         try{
             assert checkFlags(txtype.MODE_WRITE)
-            l.release()
-            cb([result:true,error:null])
+            (this.session as kvdnSession).finishTx(this,{
+                l.release()
+                cb([result:true,error:null])
+            })
         }catch(e){
-            cb([result:false,error:e])
+            bailTx([error: e.getCause(), tx: this], cb)
         }
     }
 
-    Set getFlags() {
-        return session.txflags
-    }
-
-    boolean checkFlags(txtype) {
-        return (!session.txflags.contains(txtype))
-    }
 
 
     @Override
@@ -87,16 +65,15 @@ class LTx extends kvdnTX implements TXLCK {
                 ctr.get({ resGet ->
                     if (resGet.succeeded()) {
                         logger.trace("get:${strAddr}")
-                        (this.session as kvdnSession).finishTx(this)
-                        cb([result: resGet.result().toString(), error: null])
+                        (this.session as kvdnSession).finishTx(this,{
+                            cb([result: resGet.result() as Lock, error: null])
+                        })
                     } else {
-                        bailTx([txid: this.txid, straddr: strAddr, session: this.session, flags: session.txflags])
-                        cb([result: null, error: resGet.cause()])
+                        bailTx([error: res.cause(), tx: this], cb)
                     }
                 })
             } else {
-                bailTx([txid: this.txid, straddr: strAddr, session: this.session, flags: session.txflags])
-                cb([result: null, error: res.cause()])
+                bailTx([error: res.cause(), tx: this], cb)
             }
         })
     }

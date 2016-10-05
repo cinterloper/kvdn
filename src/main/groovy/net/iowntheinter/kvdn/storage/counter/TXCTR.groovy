@@ -6,7 +6,7 @@ import io.vertx.core.shareddata.impl.AsynchronousLock
  * Created by g on 7/17/16.
  */
 interface TXCTR {
-    Object bailTx(context)
+
     void snapshot()
     void get(cb)
     void addAndGet(long value,cb)

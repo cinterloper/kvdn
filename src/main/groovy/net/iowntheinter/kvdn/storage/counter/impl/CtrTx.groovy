@@ -16,18 +16,8 @@ import net.iowntheinter.kvdn.storage.kvdnSession
  */
 
 class CtrTx extends kvdnTX implements TXCTR {
-    SharedData sd
-    Logger logger
-    EventBus eb
-    String strAddr
-    UUID txid
-    def Vertx vertx
+
     def D = new _data_impl()
-    def session
-    enum txtype {
-        MODE_WRITE,
-        MODE_READ
-    }
 
     private class _data_impl {
         SharedData sd;
@@ -54,20 +44,7 @@ class CtrTx extends kvdnTX implements TXCTR {
         eb = vertx.eventBus() as EventBus
     }
 
-    @Override
-    Object bailTx(Object context) {
-        logger.error("KVTX error: ${this.session} " + context as Map)
-        (this.session as kvdnSession).finishTx(this)
-        return null
-    }
 
-    Set getFlags() {
-        return session.txflags
-    }
-
-    boolean checkFlags(txtype) {
-        return (!session.txflags.contains(txtype))
-    }
 
     @Override
     void snapshot() {}
@@ -81,16 +58,15 @@ class CtrTx extends kvdnTX implements TXCTR {
                 ctr.get({ resGet ->
                     if (resGet.succeeded()) {
                         logger.trace("get:${strAddr}")
-                        (this.session as kvdnSession).finishTx(this)
-                        cb([result: resGet.result().toString(), error: null])
+                        (this.session as kvdnSession).finishTx(this,{
+                            cb([result: resGet.result().toString(), error: null])
+                        })
                     } else {
-                        bailTx([txid: this.txid, straddr: strAddr, session: this.session, flags: session.txflags])
-                        cb([result: null, error: resGet.cause()])
+                        bailTx([error: res.cause(), tx: this], cb)
                     }
                 })
             } else {
-                bailTx([txid: this.txid, straddr: strAddr, session: this.session, flags: session.txflags])
-                cb([result: null, error: res.cause()])
+                bailTx([error: res.cause(), tx: this], cb)
             }
         })
     }
@@ -103,20 +79,19 @@ class CtrTx extends kvdnTX implements TXCTR {
                 ctr.addAndGet(value, { resGet ->
                     if (resGet.succeeded()) {
                         logger.trace("get:${strAddr}")
-                        (this.session as kvdnSession).finishTx(this)
-                        if (value > 0)
-                            eb.publish("_KVDN_c+${strAddr}", new JsonObject().put('ctr', strAddr))
-                        else
-                            eb.publish("_KVDN_c-${strAddr}", new JsonObject().put('ctr', strAddr))
-                        cb([result: resGet.result().toString(), error: null])
+                        (this.session as kvdnSession).finishTx(this,{
+                            if (value > 0)
+                                eb.publish("_KVDN_c+${strAddr}", new JsonObject().put('ctr', strAddr))
+                            else
+                                eb.publish("_KVDN_c-${strAddr}", new JsonObject().put('ctr', strAddr))
+                            cb([result: resGet.result().toString(), error: null])
+                        })
                     } else {
-                        bailTx([txid: this.txid, straddr: strAddr, session: this.session, flags: session.txflags])
-                        cb([result: null, error: resGet.cause()])
+                        bailTx([error: res.cause(), tx: this], cb)
                     }
                 })
             } else {
-                bailTx([txid: this.txid, straddr: strAddr, session: this.session, flags: session.txflags])
-                cb([result: null, error: res.cause()])
+                bailTx([error: res.cause(), tx: this], cb)
             }
         })
     }
@@ -129,20 +104,19 @@ class CtrTx extends kvdnTX implements TXCTR {
                 ctr.getAndAdd(value, { resGet ->
                     if (resGet.succeeded()) {
                         logger.trace("get:${strAddr}")
-                        (this.session as kvdnSession).finishTx(this)
-                        if (value > 0)
-                            eb.publish("_KVDN_c+${strAddr}", new JsonObject().put('ctr', strAddr))
-                        else
-                            eb.publish("_KVDN_c-${strAddr}", new JsonObject().put('ctr', strAddr))
-                        cb([result: resGet.result().toString(), error: null])
+                        (this.session as kvdnSession).finishTx(this,{
+                            if (value > 0)
+                                eb.publish("_KVDN_c+${strAddr}", new JsonObject().put('ctr', strAddr))
+                            else
+                                eb.publish("_KVDN_c-${strAddr}", new JsonObject().put('ctr', strAddr))
+                            cb([result: resGet.result().toString(), error: null])
+                        })
                     } else {
-                        bailTx([txid: this.txid, straddr: strAddr, session: this.session, flags: session.txflags])
-                        cb([result: null, error: resGet.cause()])
+                        bailTx([error: res.cause(), tx: this], cb)
                     }
                 })
             } else {
-                bailTx([txid: this.txid, straddr: strAddr, session: this.session, flags: session.txflags])
-                cb([result: null, error: res.cause()])
+                bailTx([error: res.cause(), tx: this], cb)
             }
         })
     }
@@ -154,18 +128,17 @@ class CtrTx extends kvdnTX implements TXCTR {
                 Counter ctr = res.result();
                 ctr.compareAndSet(oldv, newv, { resGet ->
                     if (resGet.succeeded()) {
-                        logger.trace("get:${strAddr}")
-                        (this.session as kvdnSession).finishTx(this)
-                        eb.publish("_KVDN_c=${strAddr}", new JsonObject().put('ctr', strAddr))
-                        cb([result: resGet.result().toString(), error: null])
+                        logger.trace("ctr cas:${strAddr}")
+                        (this.session as kvdnSession).finishTx(this,{
+                            eb.publish("_KVDN_c=${strAddr}", new JsonObject().put('ctr', strAddr))
+                            cb([result: resGet.result().toString(), error: null])
+                        })
                     } else {
-                        bailTx([txid: this.txid, straddr: strAddr, session: this.session, flags: session.txflags])
-                        cb([result: null, error: resGet.cause()])
+                        bailTx([error: res.cause(), tx: this], cb)
                     }
                 })
             } else {
-                bailTx([txid: this.txid, straddr: strAddr, session: this.session, flags: session.txflags])
-                cb([result: null, error: res.cause()])
+                bailTx([error: res.cause(), tx: this], cb)
             }
         })
     }

@@ -21,19 +21,8 @@ import java.security.MessageDigest
  */
 
 class KvTx extends kvdnTX implements TXKV {
-    SharedData sd
-    Logger logger
-    EventBus eb
-    String strAddr
-    UUID txid
-    def keyprov
-    def Vertx vertx
     def D = new _data_impl()
-    def session
-    enum txtype {
-        MODE_WRITE,
-        MODE_READ
-    }
+
 
     private class _data_impl {
         SharedData sd;
@@ -65,30 +54,7 @@ class KvTx extends kvdnTX implements TXKV {
         sd = vertx.sharedData() as SharedData
         eb = vertx.eventBus() as EventBus
     }
-    Map getDebug(){
-        return [
-                txid: this.txid,
-                seid: ((kvdnSession)this.session).sessionid,
-                straddr: this.strAddr,
-                flags: this.flags
-        ]
-    }
 
-    @Override
-    void bailTx(context, cb) {
-        logger.error("KVTX error: ${getDebug()}")
-        (this.session as kvdnSession).finishTx(this, {
-            cb([result: null, error: context.error ?: getFlags()])
-        })
-    }
-
-    Set getFlags() {
-        return session.txflags
-    }
-
-    boolean checkFlags(txtype) {
-        return (!session.txflags.contains(txtype))
-    }
 
     @Override
     void snapshot() {}
@@ -102,13 +68,11 @@ class KvTx extends kvdnTX implements TXKV {
 
                 map.put(key, content, { resPut ->
                     if (resPut.succeeded()) {
-
                         keyprov.addKey(strAddr, key, {
                             logger.trace("set:${strAddr}:${key}");
-                            eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
                             (this.session as kvdnSession).finishTx(this, {
+                                eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
                                 cb([result: resPut.result().toString(), key: key, error: null])
-
                             })
                         })
 
@@ -131,10 +95,9 @@ class KvTx extends kvdnTX implements TXKV {
                     if (resPut.succeeded()) {
                         keyprov.addKey(strAddr, key, {
                             logger.trace("set:${strAddr}:${key}");
-                            eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
                             (this.session as kvdnSession).finishTx(this, {
+                                eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
                                 cb([result: resPut.result().toString(), key: key, error: null])
-
                             })
                         })
                     } else {
@@ -179,8 +142,8 @@ class KvTx extends kvdnTX implements TXKV {
                     if (resDel.succeeded()) {
                         keyprov.deleteKey(strAddr, key, {
                             logger.trace("set:${strAddr}:${key}");
-                            eb.publish("_KVDN_-${strAddr}", new JsonObject().put('key'))
                             (this.session as kvdnSession).finishTx(this, {
+                                eb.publish("_KVDN_-${strAddr}", new JsonObject().put('key'))
                                 cb([result: resDel.result().toString(), key: key, error: null])
                             })
                         })
