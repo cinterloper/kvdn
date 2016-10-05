@@ -8,12 +8,12 @@ except IOError:
 
 setup(
     name="kvdnc",
-    version="1.5.4-2",
+    version="1.5.4-3",
     description="kvdn client library and tool",
     license="Apache",
     author="Grant Haywood",
     packages=["kvdn_client"],
-    install_requires=["httplib2"],
+    install_requires=["requests"],
     long_description=long_description,
       entry_points={
           'console_scripts': [
