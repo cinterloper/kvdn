@@ -38,7 +38,7 @@ router.route().handler(BodyHandler.create())
 JsonObject config = new JsonObject().put("properties_path", "classpath:test-auth.properties");
 
 def opts = new ShiroAuthOptions().setConfig(config).setType(ShiroAuthRealmType.PROPERTIES)
-AuthProvider provider = ShiroAuth.create(v, opts);
+//AuthProvider provider = ShiroAuth.create(v, opts);
 
 
 
@@ -54,7 +54,7 @@ sjsh.bridge(options)
 
 router.route("/eb/*").handler(sjsh)
 //router.route("/KVDN/*").handler(BasicAuthHandler.create(provider))
-router.route("/loginhandler").handler(FormLoginHandler.create(provider));
+//router.route("/loginhandler").handler(FormLoginHandler.create(provider));
 
 s.init(router as Router, {
     router.route().handler(StaticHandler.create());
@@ -62,10 +62,10 @@ s.init(router as Router, {
     router.route().handler(CookieHandler.create());
     router.route().handler(BodyHandler.create());
     router.route().handler(SessionHandler.create(LocalSessionStore.create(v)));
-    router.route().handler(UserSessionHandler.create(provider))
+  //  router.route().handler(UserSessionHandler.create(provider))
 // Any requests to URI starting '/private/' require login
 //router.route("/KVDN/*").handler(RedirectAuthHandler.create(provider, "/loginpage.html"));
-    router.route("/eb/*").handler(BasicAuthHandler.create(provider))
+    //router.route("/eb/*").handler(BasicAuthHandler.create(provider))
     router.route("/logout").handler({context ->
         context.clearUser();
         // Redirect back to the index page

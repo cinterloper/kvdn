@@ -31,7 +31,7 @@ repositories {
 
 
 def libversion = '3.3.3'
-def projversion = '1.5.2'
+def projversion = '1.5.3'
 if (System.getenv("VERTX_VERSION"))
     libversion = System.getenv("VERTX_VERSION")
 if (System.getenv("PROJVER"))

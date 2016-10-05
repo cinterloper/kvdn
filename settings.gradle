@@ -2,7 +2,7 @@ rootProject.name = 'kvdn'
 if(!System.getenv("DISABLE_BUILD_EXTENSIONS")) {
     include 'hazelcast-keys'
     include 'hazelcast-store'
-    include 'crdt-keys'
+//    include 'crdt-keys'
     include 'service-proxy'
     include 'ignite-keys'
 }
