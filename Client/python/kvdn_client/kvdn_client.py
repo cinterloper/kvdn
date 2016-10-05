@@ -49,7 +49,7 @@ class kvdn_client:
         return content
 
     def delete(self, straddr, key, **kwargs):
-        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'DELETE', data='', headers=CONF['headers'])
+        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'DELETE', body='', headers=CONF['headers'])
         return content
 
     def submit_cas(self, straddr, data, **kwargs):
