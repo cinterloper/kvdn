@@ -38,10 +38,10 @@ class kvdn_client:
         return content
 
     def setRaw(self, straddr, key, data, **kwargs):
-        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/R/'+ straddr +'/' +key, 'PUT', body=data, headers=CONF['headers'])
+        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/R/'+ straddr +'/' +key, 'PUT', data=data, headers=CONF['headers'])
         return content
     def setJson(self, straddr, key, data, **kwargs):
-        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'PUT', body=data, headers=CONF['headers'])
+        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'PUT', data=data, headers=CONF['headers'])
         return content
 
     def getKeys(self, straddr, **kwargs):
@@ -49,15 +49,15 @@ class kvdn_client:
         return content
 
     def delete(self, straddr, key, **kwargs):
-        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'DELETE', body='', headers=CONF['headers'])
+        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'DELETE', data='', headers=CONF['headers'])
         return content
 
     def submit_cas(self, straddr, data, **kwargs):
-        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr , 'POST', body=data, headers=CONF['headers'])
+        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr , 'POST', data=data, headers=CONF['headers'])
         return content #the returned content should be the hash of data as a key
 
     def submit_uuid(self, straddr, data, **kwargs):
-        resp, content=kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/U/'+ straddr , 'POST', body=data, headers=CONF['headers'])
+        resp, content=kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/U/'+ straddr , 'POST', data=data, headers=CONF['headers'])
         return content # the returned content should be a uuid key
 
 
