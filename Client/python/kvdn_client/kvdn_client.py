@@ -26,12 +26,17 @@ class kvdn_client:
             CONF[key]=value
         if CONF['token'] is not None:
             CONF['headers'].update({'Authorization': 'Bearer %s' % CONF['token']})
+        self.session=requests.Session()
+        self.SVER=self.session.get(CONF['baseurl'] +CONF['prefix'] + '/__VERSION')
 
     def set(self, straddr, key, data, **kwargs):
         if CONF['set'] == 'raw':
             return self.setRaw(straddr,key,data,**kwargs)
         elif CONF['set'] == 'json':
             return self.setJson(straddr,key,data,**kwargs)
+
+    def version(self):
+        return self.SVER
 
     def get(self, straddr, key, **kwargs):
         resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, headers=CONF['headers'])
