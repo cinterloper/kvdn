@@ -65,10 +65,18 @@ class KvTx extends kvdnTX implements TXKV {
         sd = vertx.sharedData() as SharedData
         eb = vertx.eventBus() as EventBus
     }
+    Map getDebug(){
+        return [
+                txid: this.txid,
+                seid: ((kvdnSession)this.session).sessionid,
+                straddr: this.strAddr,
+                flags: this.flags
+        ]
+    }
 
     @Override
     void bailTx(context, cb) {
-        logger.error("KVTX error: ${this.session} " + context as Map)
+        logger.error("KVTX error: ${getDebug()}")
         (this.session as kvdnSession).finishTx(this, {
             cb([result: null, error: context.error ?: getFlags()])
         })
