@@ -39,40 +39,40 @@ class kvdn_client:
         return self.SVER
 
     def get(self, straddr, key, **kwargs):
-        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, headers=CONF['headers'])
+        resp, content = kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, headers=CONF['headers'])
         return content
 
     def setRaw(self, straddr, key, data, **kwargs):
-        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/R/'+ straddr +'/' +key, 'PUT', data=data, headers=CONF['headers'])
+        resp, content = kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/R/'+ straddr +'/' +key, 'PUT', data=data, headers=CONF['headers'])
         return content
     def setJson(self, straddr, key, data, **kwargs):
-        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'PUT', data=data, headers=CONF['headers'])
+        resp, content = kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'PUT', data=data, headers=CONF['headers'])
         return content
 
     def getKeys(self, straddr, **kwargs):
-        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/KEYS/'+ straddr +'/' ,  headers=CONF['headers'])
+        resp, content = kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/KEYS/'+ straddr +'/' ,  headers=CONF['headers'])
         return content
 
     def delete(self, straddr, key, **kwargs):
-        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'DELETE', data='', headers=CONF['headers'])
+        resp, content = kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'DELETE', data='', headers=CONF['headers'])
         return content
 
     def submit_cas(self, straddr, data, **kwargs):
-        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr , 'POST', data=data, headers=CONF['headers'])
+        resp, content = kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr , 'POST', data=data, headers=CONF['headers'])
         return content #the returned content should be the hash of data as a key
 
     def submit_uuid(self, straddr, data, **kwargs):
-        resp, content=kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/U/'+ straddr , 'POST', data=data, headers=CONF['headers'])
+        resp, content=kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/U/'+ straddr , 'POST', data=data, headers=CONF['headers'])
         return content # the returned content should be a uuid key
 
 
-def kvdn_req(url, method=None, **kwargs):
+def kvdn_req(session, url, method=None, **kwargs):
     if method is None:
         method = 'GET'
     req = requests.Request(method,url,**kwargs)
     try:
         p = req.prepare()
-        s=requests.Session()
+        s=session
         resp=s.send(p,verify=CONF['verify'],timeout=CONF['timeout'])
         return resp, resp.text
     except :
