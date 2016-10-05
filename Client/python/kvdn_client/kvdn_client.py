@@ -1,6 +1,6 @@
 import traceback
-import httplib2
 import logging
+import requests
 import sys
 
 ch = logging.StreamHandler()
@@ -14,11 +14,13 @@ CONF = {
     'prefix': '',
     'set':'raw',
     'headers':{},
-    'logger': dl
+    'logger': dl,
+    'verify': False,
+    'timeout':15
 }
 
 class kvdn_client:
-    kvdn_py_version = 1.4
+    kvdn_py_version = 1.6
     def __init__(self, **kwargs):
         for key,value in kwargs.iteritems():
             CONF[key]=value
@@ -47,7 +49,7 @@ class kvdn_client:
         return content
 
     def delete(self, straddr, key, **kwargs):
-        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'DELETE', body='', headers=CONF['headers'])
+        resp, content = kvdn_req(CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'DELETE', data='', headers=CONF['headers'])
         return content
 
     def submit_cas(self, straddr, data, **kwargs):
@@ -62,10 +64,12 @@ class kvdn_client:
 def kvdn_req(url, method=None, **kwargs):
     if method is None:
         method = 'GET'
-    h = httplib2.Http()
+    req = requests.Request(method,url,**kwargs)
     try:
-        resp, content = h.request(url, method, **kwargs)
-        return resp, content
+        p = req.prepare()
+        s=requests.Session()
+        resp=s.send(p,verify=CONF['verify'],timeout=CONF['timeout'])
+        return resp, resp.text
     except :
         CONF['logger'].error("could not make kvdn request " +  traceback.format_exc() )
         return "", ""
