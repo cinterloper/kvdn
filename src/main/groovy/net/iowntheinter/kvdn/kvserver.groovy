@@ -14,13 +14,13 @@ import net.iowntheinter.kvdn.storage.kv.impl.KvTx
 import net.iowntheinter.kvdn.storage.kvdnSession
 
 class kvserver {
+    final String version
+    final JsonObject config
     Logger logger
     EventBus eb
     Vertx vertx
     Router router
-    JsonObject config
     Context ctx
-
     def session
     def _token = '_'
     //used in a vertx program, or standalone
@@ -30,6 +30,8 @@ class kvserver {
         ctx = vertx.getOrCreateContext()
         config = ctx.config() as JsonObject
         session = new kvdnSession(vertx)
+        def classloader = (URLClassLoader) (Thread.currentThread().getContextClassLoader())
+        this.version=(classloader.getResourceAsStream('__VERSION.txt').getText())
     }
 
     def init(Router r, cb) { //real initializaion function
@@ -52,6 +54,9 @@ class kvserver {
             r.put("${prefix}/X/:str/:map/:key").handler(this.&handleMapSet)
             r.put("${prefix}/R/:str/:map/:key").handler(this.&handleMapSetRaw)
             r.post("${prefix}/R/:str/:map/:key").handler(this.&handleMapSetRaw)
+            r.get("${prefix}/__VERSION").handler({ RoutingContext rc ->
+                rc.response().end(this.version)
+            })
 
             cb();
 
