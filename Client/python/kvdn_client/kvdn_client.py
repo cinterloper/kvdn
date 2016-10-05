@@ -1,7 +1,12 @@
 import traceback
 import httplib2
 import logging
-import sys 
+import sys
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.ERROR)
+dl = logging.getLogger(__name__)
+dl.addHandler(ch)
 
 CONF = {
     'baseurl': 'https://localhost:6500',
@@ -9,7 +14,7 @@ CONF = {
     'prefix': '',
     'set':'raw',
     'headers':{},
-    'logger': logging.getLogger(__name__)
+    'logger': dl
 }
 
 class kvdn_client:
