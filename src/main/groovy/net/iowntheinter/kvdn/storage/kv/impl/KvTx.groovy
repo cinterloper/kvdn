@@ -21,24 +21,26 @@ import java.security.MessageDigest
  */
 
 class KvTx extends kvdnTX implements TXKV {
-    def D = new _data_impl()
-
+    def D
 
     private class _data_impl {
         SharedData sd;
         Vertx vertx
-        String name
-
-        void getMap(KvTx txn, cb) {
-            vertx = txn.vertx
-            name = txn.strAddr
+        String sa
+        
+        _data_impl(Vertx v, String sa){
+            this.vertx = v
+            this.sa = sa
+            this.sd = vertx.sharedData()
+        }
+        
+        void getMap(cb) {
             if (vertx.isClustered()) {  //vertx cluster mode
-                this.sd = vertx.sharedData()
-                sd.getClusterWideMap("${name}", cb)
+                sd.getClusterWideMap("${sa}", cb)
                 logger.trace("starting clustered kvdn operation with vertx.isClustered() == ${vertx.isClustered()}")
             } else {                    // vertx local mode
                 logger.trace("starting local kvdn operation with vertx.isClustered() == ${vertx.isClustered()}")
-                cb(Future.succeededFuture(new shimAsyncMap(vertx, name)))
+                cb(Future.succeededFuture(new shimAsyncMap(vertx, sa)))
             }
         }
     }
@@ -49,19 +51,13 @@ class KvTx extends kvdnTX implements TXKV {
         this.keyprov = session.keyprov
         this.session = session as kvdnSession
         this.txid = txid
-        strAddr = sa
-        logger = new LoggerFactory().getLogger("KvTx:" + strAddr)
-        sd = vertx.sharedData() as SharedData
-        eb = vertx.eventBus() as EventBus
+        this.strAddr = sa
+        this.logger = new LoggerFactory().getLogger("KvTx:" + strAddr)
+        this.sd = vertx.sharedData() as SharedData
+        this.eb = vertx.eventBus() as EventBus
+        this.D = new _data_impl(vertx, this.strAddr)
     }
-
-
-    private void startTX(String type, Map params = [:]){
-        if(this.dirty)
-            throw new Exception("tx has already been invoked, you must create another tx")
-        logger.trace("${type}:${strAddr}:${params.toString()}");
-        this.dirty = true
-    }
+    
     @Override
     void snapshot() {
         throw new Exception("unimplemented")
@@ -70,7 +66,7 @@ class KvTx extends kvdnTX implements TXKV {
     @Override
     void submit(content, cb) {
         startTX("submit")
-        D.getMap(this, { res ->
+        D.getMap( { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
                 def AsyncMap map = res.result();
                 def String key = MessageDigest.getInstance("MD5").digest(Buffer.buffer(content.toString()).getBytes()).encodeHex().toString()
@@ -96,7 +92,7 @@ class KvTx extends kvdnTX implements TXKV {
     @Override
     void set(String key, content, cb) {
         startTX("set",[key:key])
-        D.getMap(this, { res ->
+        D.getMap( { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
                 def AsyncMap map = res.result();
                 map.put(key, content, { resPut ->
@@ -122,7 +118,7 @@ class KvTx extends kvdnTX implements TXKV {
     @Override
     void get(String key, cb) {
         startTX("get",[key:key])
-        D.getMap(this, { res ->
+        D.getMap( { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_READ)) {
                 def AsyncMap map = res.result();
                 map.get(key, { resGet ->
@@ -143,7 +139,7 @@ class KvTx extends kvdnTX implements TXKV {
     @Override
     void del(String key, cb) {
         startTX("del",[key:key])
-        D.getMap(this, { res ->
+        D.getMap( { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
                 def AsyncMap map = res.result();
                 map.remove(key, { resDel ->
@@ -177,7 +173,7 @@ class KvTx extends kvdnTX implements TXKV {
     @Override
     void size(cb) {
         startTX("size")
-        D.getMap(this, { res ->
+        D.getMap( { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_READ)) {
                 def AsyncMap map = res.result();
                 map.size({ resGet ->

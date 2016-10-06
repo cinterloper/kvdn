@@ -29,7 +29,12 @@ abstract class kvdnTX {
             cb([result: null, error: context.error ?: getFlags()])
         })
     }
-
+    private void startTX(String type, Map params = [:]){
+        if(this.dirty)
+            throw new Exception("tx has already been invoked, you must create another tx")
+        logger.trace("${type}:${strAddr}:${params.toString()}");
+        this.dirty = true
+    }
     Set getFlags() {
         return session.txflags
     }
