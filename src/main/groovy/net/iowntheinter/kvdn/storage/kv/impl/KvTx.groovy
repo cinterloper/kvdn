@@ -56,56 +56,63 @@ class KvTx extends kvdnTX implements TXKV {
     }
 
 
+    private void startTX(String type, Map params = [:]){
+        if(this.dirty)
+            throw new Exception("tx has already been invoked, you must create another tx")
+        logger.trace("${type}:${strAddr}:${params.toString()}");
+        this.dirty = true
+    }
     @Override
-    void snapshot() {}
+    void snapshot() {
+        throw new Exception("unimplemented")
+    }
 
     @Override
     void submit(content, cb) {
+        startTX("submit")
         D.getMap(this, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
                 def AsyncMap map = res.result();
                 def String key = MessageDigest.getInstance("MD5").digest(Buffer.buffer(content.toString()).getBytes()).encodeHex().toString()
-
                 map.put(key, content, { resPut ->
                     if (resPut.succeeded()) {
                         keyprov.setKey(strAddr, key, {
-                            logger.trace("set:${strAddr}:${key}");
                             (this.session as kvdnSession).finishTx(this, {
                                 eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
-                                cb([result: resPut.result().toString(), key: key, error: null])
+                                cb([result: true, key: key, error: null])
                             })
                         })
 
                     } else {
-                        bailTx([error: res.cause(), tx: this], cb)
+                        bailTx([result: false, error: res.cause(), tx: this], cb)
                     }
                 })
             } else {
-                bailTx([error: res.cause(), tx: this], cb)
+                bailTx([result: false, error: res.cause(), tx: this], cb)
             }
         })
     }
 
     @Override
     void set(String key, content, cb) {
+        startTX("set",[key:key])
         D.getMap(this, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
                 def AsyncMap map = res.result();
                 map.put(key, content, { resPut ->
                     if (resPut.succeeded()) {
                         keyprov.setKey(strAddr, key, {
-                            logger.trace("set:${strAddr}:${key}");
                             (this.session as kvdnSession).finishTx(this, {
                                 eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
-                                cb([result: resPut.result().toString(), key: key, error: null])
+                                cb([result: true, key: key, error: null])
                             })
                         })
                     } else {
-                        bailTx([error: res.cause(), tx: this], cb)
+                        bailTx([result: false, error: res.cause(), tx: this], cb)
                     }
                 })
             } else {
-                bailTx([error: res.cause(), tx: this], cb)
+                bailTx([result: false, error: res.cause(), tx: this], cb)
 
             }
         })
@@ -114,76 +121,76 @@ class KvTx extends kvdnTX implements TXKV {
 
     @Override
     void get(String key, cb) {
+        startTX("get",[key:key])
         D.getMap(this, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_READ)) {
                 def AsyncMap map = res.result();
                 map.get(key, { resGet ->
                     if (resGet.succeeded()) {
-                        logger.trace("get:${strAddr}:${key}")
                         (this.session as kvdnSession).finishTx(this, {
-                            cb([result: resGet.result().toString(), error: null])
+                            cb([result: resGet.result(), error: null])
                         })
                     } else {
-                        bailTx([error: res.cause(), tx: this], cb)
+                        bailTx([result: false, error: res.cause(), tx: this], cb)
                     }
                 })
             } else {
-                bailTx([error: res.cause(), tx: this], cb)
+                bailTx([result: false, error: res.cause(), tx: this], cb)
             }
         })
     }
 
     @Override
     void del(String key, cb) {
+        startTX("del",[key:key])
         D.getMap(this, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
                 def AsyncMap map = res.result();
                 map.remove(key, { resDel ->
                     if (resDel.succeeded()) {
                         keyprov.deleteKey(strAddr, key, {
-                            logger.trace("set:${strAddr}:${key}");
                             (this.session as kvdnSession).finishTx(this, {
                                 eb.publish("_KVDN_-${strAddr}", new JsonObject().put('key', key))
-                                cb([result: resDel.result().toString(), key: key, error: null])
+                                cb([result: true, key: key, error: null])
                             })
                         })
                     } else {
-                        bailTx([error: res.cause(), tx: this], cb)
+                        bailTx([result: false, error: res.cause(), tx: this], cb)
                     }
                 })
             } else {
-                bailTx([error: res.cause(), tx: this], cb)
+                bailTx([result: false, error: res.cause(), tx: this], cb)
             }
         })
     }
 
     @Override
     void getKeys(cb) {
-        keyprov.getKeys(strAddr, { Map asyncResult ->
+        startTX("getKeys")
+        keyprov.getKeys(this.strAddr, { Map asyncResult ->
             (this.session as kvdnSession).finishTx(this, {
                 cb(asyncResult)
             })
-
         })
     }
 
     @Override
     void size(cb) {
+        startTX("size")
         D.getMap(this, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_READ)) {
                 def AsyncMap map = res.result();
                 map.size({ resGet ->
                     if (resGet.succeeded()) {
-                        logger.trace("size:${strAddr}")
                         (this.session as kvdnSession).finishTx(this, {
                             cb([result: resGet.result(), error: null])
                         })
                     } else {
-                        bailTx([error: res.cause(), tx: this], cb)
+                        bailTx([result: false, error: res.cause(), tx: this], cb)
                     }
                 })
             } else {
-                bailTx([error: res.cause(), tx: this], cb)
+                bailTx([result: false, error: res.cause(), tx: this], cb)
             }
         })
     }

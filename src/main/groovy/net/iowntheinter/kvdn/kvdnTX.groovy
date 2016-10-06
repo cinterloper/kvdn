@@ -14,6 +14,7 @@ abstract class kvdnTX {
     Logger logger
     EventBus eb
     String strAddr
+    boolean dirty
     def keyprov
     def Vertx vertx
     def session
