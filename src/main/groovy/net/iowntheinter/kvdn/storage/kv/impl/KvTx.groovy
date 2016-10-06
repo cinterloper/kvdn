@@ -176,7 +176,7 @@ class KvTx extends kvdnTX implements TXKV {
                     if (resGet.succeeded()) {
                         logger.trace("size:${strAddr}")
                         (this.session as kvdnSession).finishTx(this, {
-                            cb([result: resGet.result().toString(), error: null])
+                            cb([result: resGet.result(), error: null])
                         })
                     } else {
                         bailTx([error: res.cause(), tx: this], cb)
