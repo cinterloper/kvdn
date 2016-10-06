@@ -14,23 +14,25 @@ repositories {
 }
 
 
-def libversion  = '3.3.2'
-def projversion = '1.0.9'
+def libversion  = '3.3.3'
+def projversion = new File("src/main/resources/__VERSION.txt").text
 if(System.getenv("VERTX_VERSION"))
   libversion = System.getenv("VERTX_VERSION")
 if(System.getenv("PROJVER"))
   projversion = System.getenv("PROJVER")
 
 version =  "$libversion-$projversion"
+
 sourceCompatibility = '1.8'
 
 dependencies {
-  compile "io.vertx:vertx-core:$version"
+  compile "io.vertx:vertx-core:$libversion"
   compile 'com.hazelcast:hazelcast-client:3.6.3'
-  compile 'io.vertx:vertx-hazelcast:3.3.2'
+  compile "io.vertx:vertx-hazelcast:$libversion"
   compile "net.iowntheinter:kvdn:$libversion-$projversion"
 
 }
+
 
 publishing {
     repositories {
@@ -46,16 +48,9 @@ publishing {
     }
 }
 
-mainClassName = 'io.vertx.example.HelloWorldEmbedded'
+mainClassName = 'io.vertx.core.Launcher'
 
 
-
-shadowJar {
-  classifier = 'fat'
-  mergeServiceFiles {
-    include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
-  }
-}
 
 task wrapper(type: Wrapper) {
   gradleVersion = '2.8'

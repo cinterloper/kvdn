@@ -7,6 +7,8 @@ buildscript {
     }
     dependencies {
         classpath "gradle.plugin.co.riiid:gradle-github-plugin:0.4.2"
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.6"
+
     }
 }
 
@@ -16,21 +18,25 @@ plugins {
     id 'java'
     id 'application'
     id 'com.github.johnrengelman.shadow' version '1.2.3'
+    id "com.linkedin.python-sdist" version "0.3.9"
     id 'maven-publish'
-
+    id "net.ltgt.apt" version "0.6"
 }
 
+compileGroovy {
+    groovyOptions.javaAnnotationProcessing = true
+}
 
 apply plugin: "co.riiid.gradle"
 apply plugin: 'distribution'
+apply plugin: 'idea'
 
 
-
-def libversion = '3.3.2'
+def libversion = '3.3.3'
 if(System.getenv("VERTX_VERSION") != null)
     libversion = System.getenv("VERTX_VERSION")
 
-version =  "$libversion-1.0.9"
+version =  "$libversion-${new File('src/main/resources/__VERSION.txt').text}"
 def GH_TOKEN = System.getenv("GH_TOKEN")
 def AWS_MVN_BUCKET = System.getenv("AWS_MVN_BUCKET")
 def AWS_DEFAULT_REGION = System.getenv("AWS_DEFAULT_REGION")
@@ -73,6 +79,7 @@ repositories {
     mavenCentral()
     mavenLocal()
     jcenter()
+    pyGradlePyPi()
     maven { url 'http://dl.bintray.com/gesellix/docker-utils' }
     flatDir { dirs '/usr/share/java' }
     flatDir { dirs 'lib/' }
@@ -120,6 +127,11 @@ dependencies {
     compile "io.vertx:vertx-lang-groovy:$libversion"
     compile "io.vertx:vertx-auth-common:$libversion"
     compile "io.vertx:vertx-auth-jwt:$libversion"
+    compile "io.vertx:vertx-auth-shiro:$libversion"
+    compile "io.vertx:vertx-service-proxy:$libversion"
+    compile 'ch.qos.logback:logback-classic:1.1.7'
+    compile 'ch.qos.logback:logback-core:1.1.7'
+
 
 }
 
