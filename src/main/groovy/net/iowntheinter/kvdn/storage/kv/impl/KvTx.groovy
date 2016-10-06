@@ -46,7 +46,6 @@ class KvTx extends kvdnTX implements TXKV {
     }
 
     def KvTx(String sa, UUID txid, kvdnSession session, Vertx vertx) {
-        // keys = new ORSet()
         this.vertx = vertx
         this.keyprov = session.keyprov
         this.session = session as kvdnSession

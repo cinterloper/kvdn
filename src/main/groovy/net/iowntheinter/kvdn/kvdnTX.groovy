@@ -10,19 +10,23 @@ import net.iowntheinter.kvdn.storage.kvdnSession
  * Created by g on 9/24/16.
  */
 abstract class kvdnTX {
+    enum txtype {
+        MODE_WRITE,
+        MODE_READ,
+        MODE_COMPLEX,
+        MODE_ADMIN
+    }
     SharedData sd
     Logger logger
     EventBus eb
     String strAddr
+    UUID txid
     boolean dirty
     def keyprov
     def Vertx vertx
     def session
-    enum txtype {
-        MODE_WRITE,
-        MODE_READ
-    }
-    UUID txid
+
+
     void bailTx(context, cb) {
         logger.error("KVTX error: ${getDebug()}")
         (this.session as kvdnSession).finishTx(this, {
@@ -35,6 +39,7 @@ abstract class kvdnTX {
         logger.trace("${type}:${strAddr}:${params.toString()}");
         this.dirty = true
     }
+
     Set getFlags() {
         return session.txflags
     }
