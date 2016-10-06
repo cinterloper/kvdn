@@ -68,7 +68,7 @@ class KvTx extends kvdnTX implements TXKV {
 
                 map.put(key, content, { resPut ->
                     if (resPut.succeeded()) {
-                        keyprov.addKey(strAddr, key, {
+                        keyprov.setKey(strAddr, key, {
                             logger.trace("set:${strAddr}:${key}");
                             (this.session as kvdnSession).finishTx(this, {
                                 eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
@@ -93,7 +93,7 @@ class KvTx extends kvdnTX implements TXKV {
                 def AsyncMap map = res.result();
                 map.put(key, content, { resPut ->
                     if (resPut.succeeded()) {
-                        keyprov.addKey(strAddr, key, {
+                        keyprov.setKey(strAddr, key, {
                             logger.trace("set:${strAddr}:${key}");
                             (this.session as kvdnSession).finishTx(this, {
                                 eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
@@ -143,7 +143,7 @@ class KvTx extends kvdnTX implements TXKV {
                         keyprov.deleteKey(strAddr, key, {
                             logger.trace("set:${strAddr}:${key}");
                             (this.session as kvdnSession).finishTx(this, {
-                                eb.publish("_KVDN_-${strAddr}", new JsonObject().put('key'))
+                                eb.publish("_KVDN_-${strAddr}", new JsonObject().put('key', key))
                                 cb([result: resDel.result().toString(), key: key, error: null])
                             })
                         })

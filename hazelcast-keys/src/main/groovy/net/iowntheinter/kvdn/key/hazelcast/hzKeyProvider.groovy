@@ -42,7 +42,7 @@ class hzKeyProvider implements keyProvider {
     }
 
     @Override
-    void addKey(String name, String key, cb) {
+    void setKey(String name, String key, cb) {
         try{ //since we are just refering to the same map, which has native keySet(), the key should already be there
             //IMap map = client.getMap(name);
             //assert map.keySet().contains(key)

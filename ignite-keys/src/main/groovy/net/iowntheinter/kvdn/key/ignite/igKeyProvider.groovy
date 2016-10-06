@@ -67,7 +67,7 @@ class igKeyProvider implements keyProvider {
     }
 
     @Override
-    void addKey(String name, String key, cb) {
+    void setKey(String name, String key, cb) {
         try {
             if (_version >= 8) {
                 cb([result: true, error: null])

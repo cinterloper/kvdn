@@ -28,7 +28,7 @@ class LocalKeyProvider implements keyProvider {
     }
 
     @Override
-    void addKey(String map, String name, cb) {
+    void setKey(String map, String name, cb) {
         cb([result: true, error: null])
     }
 }

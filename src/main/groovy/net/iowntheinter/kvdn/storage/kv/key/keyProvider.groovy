@@ -6,6 +6,6 @@ package net.iowntheinter.kvdn.storage.kv.key
 interface keyProvider {
     void getKeys(String name, cb)
     void deleteKey(String map, String name, cb)
-    void addKey(String map, String name, cb)
+    void setKey(String map, String name, cb)
 
 }
