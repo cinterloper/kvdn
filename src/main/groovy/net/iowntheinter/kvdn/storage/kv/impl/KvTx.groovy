@@ -1,17 +1,15 @@
 package net.iowntheinter.kvdn.storage.kv.impl
 
 import io.vertx.core.Vertx
-import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.json.JsonObject
-import io.vertx.core.logging.Logger
 import io.vertx.core.shareddata.AsyncMap
 import io.vertx.core.shareddata.SharedData
 import io.vertx.core.logging.LoggerFactory
 import net.iowntheinter.kvdn.kvdnTX
 import net.iowntheinter.kvdn.storage.kv.TXKV
-import net.iowntheinter.kvdn.storage.kv.local.shimAsyncMap
+import net.iowntheinter.kvdn.storage.kv.data
 import net.iowntheinter.kvdn.storage.kvdnSession
 
 import java.security.MessageDigest
@@ -23,27 +21,6 @@ import java.security.MessageDigest
 class KvTx extends kvdnTX implements TXKV {
     def D
 
-    private class _data_impl {
-        SharedData sd;
-        Vertx vertx
-        String sa
-        
-        _data_impl(Vertx v, String sa){
-            this.vertx = v
-            this.sa = sa
-            this.sd = vertx.sharedData()
-        }
-        
-        void getMap(cb) {
-            if (vertx.isClustered()) {  //vertx cluster mode
-                sd.getClusterWideMap("${sa}", cb)
-                logger.trace("starting clustered kvdn operation with vertx.isClustered() == ${vertx.isClustered()}")
-            } else {                    // vertx local mode
-                logger.trace("starting local kvdn operation with vertx.isClustered() == ${vertx.isClustered()}")
-                cb(Future.succeededFuture(new shimAsyncMap(vertx, sa)))
-            }
-        }
-    }
 
     def KvTx(String sa, UUID txid, kvdnSession session, Vertx vertx) {
         this.vertx = vertx
@@ -54,7 +31,7 @@ class KvTx extends kvdnTX implements TXKV {
         this.logger = new LoggerFactory().getLogger("KvTx:" + strAddr)
         this.sd = vertx.sharedData() as SharedData
         this.eb = vertx.eventBus() as EventBus
-        this.D = new _data_impl(vertx, this.strAddr)
+        this.D = session.D.newInstance(vertx,sa) as data
     }
     
     @Override

@@ -10,6 +10,7 @@ import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.Counter
 import net.iowntheinter.kvdn.kvdnTX
 import net.iowntheinter.kvdn.storage.counter.impl.CtrTx
+import net.iowntheinter.kvdn.storage.kv.data
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
 import net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider
 import net.iowntheinter.kvdn.storage.kv.key.keyProvider
@@ -38,6 +39,7 @@ class kvdnSession {
     EventBus eb
     Logger logger
     def sessionid, keyprov, config
+    final Class D
     Closure txEndHandler = {}
 
     kvdnSession(Vertx vx, stype = sessionType.NATIVE_SESSION) {
@@ -49,8 +51,8 @@ class kvdnSession {
         logger = new LoggerFactory().getLogger("Kvdnsession:${sessionid.toString()}")
         eb = vertx.eventBus();
         if (vertx.isClustered()) {  //vertx cluster mode
-            String configured_provider = config.getString('key_provider') ?:
-                    'net.iowntheinter.kvdn.storage.kv.key.impl.CRDTKeyProvider'
+            String configured_provider = config.getString('key_provider') ?: null
+                  //  'net.iowntheinter.kvdn.storage.kv.key.impl.CRDTKeyProvider' // not working right now
             try {
                 this.keyprov = this.class.classLoader.loadClass(configured_provider)?.newInstance() as keyProvider
             } catch (e) {
@@ -62,6 +64,18 @@ class kvdnSession {
         } else {                    // vertx local mode
             this.keyprov = new LocalKeyProvider(vertx)
         }
+
+
+        String configured_data = config.getString('data_implementation') ?: 'net.iowntheinter.kvdn.storage.kv.data'
+        try {
+            this.D = this.class.classLoader.loadClass(configured_data)
+        } catch (e) {
+            e.printStackTrace()
+            logger.fatal("could not load key provider $configured_data: ${e.getMessage()}")
+            throw e
+        }
+
+
         logger.trace("starting new kvdn session with clustered = ${vertx.isClustered()} keyprovider = ${this.keyprov}")
 
     }
