@@ -10,10 +10,10 @@ import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.Counter
 import net.iowntheinter.kvdn.kvdnTX
 import net.iowntheinter.kvdn.storage.counter.impl.CtrTx
-import net.iowntheinter.kvdn.storage.kv.data
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
 import net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider
 import net.iowntheinter.kvdn.storage.kv.key.keyProvider
+import net.iowntheinter.kvdn.storage.kv.kvdata
 import net.iowntheinter.kvdn.storage.lock.impl.LTx
 
 
@@ -39,7 +39,7 @@ class kvdnSession {
     EventBus eb
     Logger logger
     def sessionid, keyprov, config
-    final Class D
+    def D
     Closure txEndHandler = {}
 
     kvdnSession(Vertx vx, stype = sessionType.NATIVE_SESSION) {
@@ -66,9 +66,9 @@ class kvdnSession {
         }
 
 
-        String configured_data = config.getString('data_implementation') ?: 'net.iowntheinter.kvdn.storage.kv.data'
+        String configured_data = config.getString('data_implementation') ?: 'net.iowntheinter.kvdn.storage.kv.data.defaultDataImpl'
         try {
-            this.D = this.class.classLoader.loadClass(configured_data)
+            this.D = this.class.classLoader.loadClass(configured_data)?.newInstance(vertx as Vertx) as kvdata
         } catch (e) {
             e.printStackTrace()
             logger.fatal("could not load key provider $configured_data: ${e.getMessage()}")
@@ -108,7 +108,7 @@ class kvdnSession {
     void finishTx(kvdnTX tx, cb) {
         outstandingTX.remove(tx.txid)
         txEndHandler(tx)
-        cb() //send the data back to the api client here
+        cb() //send the kvdata back to the api client here
     }
 
 

@@ -41,7 +41,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId 'net.iowntheinter'
-            artifactId 'kvdn-hazelcast-keys'
+            artifactId 'kvdn-ignite-extensions'
             from components.java
         }
     }

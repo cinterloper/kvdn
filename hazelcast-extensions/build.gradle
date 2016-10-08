@@ -30,14 +30,13 @@ dependencies {
     compile 'com.hazelcast:hazelcast-client:3.6.3'
     compile "io.vertx:vertx-hazelcast:$libversion"
     compile "net.iowntheinter:kvdn:$libversion-$projversion"
-    compile 'ch.qos.logback:logback-classic:1.1.7'
-    compile 'ch.qos.logback:logback-core:1.1.7'
     compile 'com.google.code.gson:gson:2.6.2'
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'commons-codec:commons-codec:1.10'
+    compile 'ch.qos.logback:logback-classic:1.1.7'
+    compile 'ch.qos.logback:logback-core:1.1.7'
 
 }
-
 
 publishing {
     repositories {
@@ -47,7 +46,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId 'net.iowntheinter'
-            artifactId 'kvdn-hazelcast-store'
+            artifactId 'kvdn-hazelcast-extensions'
             from components.java
         }
     }

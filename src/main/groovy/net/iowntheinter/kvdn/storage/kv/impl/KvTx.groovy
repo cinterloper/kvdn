@@ -9,7 +9,7 @@ import io.vertx.core.shareddata.SharedData
 import io.vertx.core.logging.LoggerFactory
 import net.iowntheinter.kvdn.kvdnTX
 import net.iowntheinter.kvdn.storage.kv.TXKV
-import net.iowntheinter.kvdn.storage.kv.data
+import net.iowntheinter.kvdn.storage.kv.kvdata
 import net.iowntheinter.kvdn.storage.kvdnSession
 
 import java.security.MessageDigest
@@ -31,9 +31,10 @@ class KvTx extends kvdnTX implements TXKV {
         this.logger = new LoggerFactory().getLogger("KvTx:" + strAddr)
         this.sd = vertx.sharedData() as SharedData
         this.eb = vertx.eventBus() as EventBus
-        this.D = session.D.newInstance(vertx,sa) as data
+        this.D = session.D as kvdata
+
     }
-    
+
     @Override
     void snapshot() {
         throw new Exception("unimplemented")
@@ -42,7 +43,7 @@ class KvTx extends kvdnTX implements TXKV {
     @Override
     void submit(content, cb) {
         startTX("submit")
-        D.getMap( { res ->
+        D.getMap(this.strAddr, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
                 def AsyncMap map = res.result();
                 def String key = MessageDigest.getInstance("MD5").digest(Buffer.buffer(content.toString()).getBytes()).encodeHex().toString()
@@ -67,8 +68,8 @@ class KvTx extends kvdnTX implements TXKV {
 
     @Override
     void set(String key, content, cb) {
-        startTX("set",[key:key])
-        D.getMap( { res ->
+        startTX("set", [key: key])
+        D.getMap(this.strAddr, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
                 def AsyncMap map = res.result();
                 map.put(key, content, { resPut ->
@@ -93,8 +94,8 @@ class KvTx extends kvdnTX implements TXKV {
 
     @Override
     void get(String key, cb) {
-        startTX("get",[key:key])
-        D.getMap( { res ->
+        startTX("get", [key: key])
+        D.getMap(this.strAddr, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_READ)) {
                 def AsyncMap map = res.result();
                 map.get(key, { resGet ->
@@ -114,8 +115,8 @@ class KvTx extends kvdnTX implements TXKV {
 
     @Override
     void del(String key, cb) {
-        startTX("del",[key:key])
-        D.getMap( { res ->
+        startTX("del", [key: key])
+        D.getMap(this.strAddr, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
                 def AsyncMap map = res.result();
                 map.remove(key, { resDel ->
@@ -149,7 +150,7 @@ class KvTx extends kvdnTX implements TXKV {
     @Override
     void size(cb) {
         startTX("size")
-        D.getMap( { res ->
+        D.getMap(this.strAddr, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_READ)) {
                 def AsyncMap map = res.result();
                 map.size({ resGet ->

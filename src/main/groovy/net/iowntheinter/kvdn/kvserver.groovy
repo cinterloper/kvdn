@@ -80,6 +80,7 @@ class kvserver {
                 if (resGetK.error == null) {
                     response.end(new JsonArray(resGetK.result as List).toString())
                 } else {
+
                     response.setStatusCode(501).end(resGetK.error.toString())
                 }
             })

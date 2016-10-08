@@ -3,29 +3,30 @@ package net.iowntheinter.kvdn.storage.kv.data
 import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
+import io.vertx.core.impl.VertxImpl
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.SharedData
-import net.iowntheinter.kvdn.storage.kv.data
+import net.iowntheinter.kvdn.storage.kv.kvdata
 import net.iowntheinter.kvdn.storage.kv.local.shimAsyncMap
 
 /**
  * Created by g on 10/6/16.
  */
-class defaultDataImpl implements data {
+class defaultDataImpl implements kvdata {
     SharedData sd
     Vertx vertx
-    String sa
     Logger logger
 
-    defaultDataImpl(Vertx v, String sa) {
-        this.logger = new LoggerFactory().getLogger("KvTx:" + sa)
+    defaultDataImpl(Vertx v) {
         this.vertx = v
-        this.sa = sa
+
+        this.logger = new LoggerFactory().getLogger(this.class.getName())
         this.sd = vertx.sharedData()
     }
 
-    void getMap(Handler cb) {
+    @Override
+    void getMap(String sa,Handler cb) {
         if (vertx.isClustered()) {  //vertx cluster mode
             sd.getClusterWideMap("${sa}", cb)
             logger.trace("starting clustered kvdn operation with vertx.isClustered() == ${vertx.isClustered()}")
