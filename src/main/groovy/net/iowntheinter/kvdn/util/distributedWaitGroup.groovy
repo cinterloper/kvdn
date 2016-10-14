@@ -8,6 +8,8 @@ import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import net.iowntheinter.kvdn.storage.kvdnSession
 
+import java.util.concurrent.Callable
+
 /**
  * Created by g on 9/24/16.
  */
@@ -39,19 +41,18 @@ class distributedWaitGroup {
     }
     void onAck(String channel, cb) {
         MessageConsumer c = eb.consumer(channel, { message ->
-            def body = message.body() as JsonObject
+            def body = message.body() as String
             logger.trace("onAck ${channel} ${body}")
-            ack(channel,cb)
+            ack(body,cb)
         })
         abortTimer(c,abortcb)
     }
 
-    void onAck(String channel, evaluator, cb) {
+    void onAck(String channel, Closure<String> evaluator, cb) {
         MessageConsumer c = eb.consumer(channel, { message ->
-            def body = message.body() as JsonObject
+            String body = message.body() as String
             logger.trace("onAck ${channel} ${body}")
-            events[body.getString('key')] = evaluator(body)
-            check(cb)
+            ack(evaluator(body),cb)
         })
         abortTimer(c,abortcb)
     }
@@ -61,8 +62,7 @@ class distributedWaitGroup {
         s.init({
             def c = s.onWrite(straddr, { JsonObject body ->
                 logger.trace("onKeys ${straddr} ${body}")
-                events[body.getString('key')] = true
-                check(cb)
+               ack(body.getString('key'),cb)
             })
             abortTimer(c,abortcb)
         },{})

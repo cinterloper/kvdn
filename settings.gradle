@@ -1,7 +1,8 @@
 rootProject.name = 'kvdn'
 if (!System.getenv("DISABLE_BUILD_EXTENSIONS")) {
     include 'hazelcast-extensions'
-//    include 'crdt-keys'
+//    include 'crdt-keys' //deprecated ~on ice
     include 'service-proxy'
     include 'ignite-extensions'
+//    include 'graph-extensions' //not finished
 }
