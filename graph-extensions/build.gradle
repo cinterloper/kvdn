@@ -1,0 +1,109 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "io.vertx:vertx-service-proxy:3.3.3"
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.6"
+
+    }
+}
+plugins {
+    id 'groovy'
+    id 'java'
+    id 'application'
+}
+apply plugin: 'net.ltgt.apt'
+apply plugin: 'groovy'
+apply plugin: 'maven-publish'
+apply plugin: 'idea'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    jcenter()
+}
+
+
+def libversion = '3.3.3'
+def projversion = new File("src/main/resources/__VERSION.txt").text
+if (System.getenv("VERTX_VERSION"))
+    libversion = System.getenv("VERTX_VERSION")
+if (System.getenv("PROJVER"))
+    projversion = System.getenv("PROJVER")
+
+version = "$libversion-$projversion"
+
+sourceCompatibility = '1.8'
+
+dependencies {
+    compile "io.vertx:vertx-core:$libversion"
+    compile "net.iowntheinter:kvdn:$libversion-$projversion"
+    compile 'org.apache.tinkerpop:tinkerpop:3.2.2'
+    compile 'org.apache.tinkerpop:gremlin-core:3.2.2'
+    compile 'org.apache.tinkerpop:gremlin-groovy:3.2.2'
+
+
+}
+def generateSrcPath = "$buildDir/generated-src"
+def generatedSrcDir = file("$buildDir/generated-src")
+
+sourceSets {
+    main {
+        java.srcDirs += generatedSrcDir
+        output.dir(builtBy: 'generateServiceProxy', generateSrcPath)
+    }
+}
+
+
+publishing {
+    repositories {
+        mavenLocal()
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'net.iowntheinter'
+            artifactId 'kvdn-hazelcast-keys'
+            from components.java
+        }
+    }
+}
+
+mainClassName = 'io.vertx.core.Launcher'
+compileGroovy {
+    groovyOptions.javaAnnotationProcessing = true
+}
+
+task generateServiceProxy(type: JavaCompile, description: 'Generates EBServiceProxies') {
+    source = sourceSets.main.java
+    classpath = configurations.
+            compile
+    destinationDir = generatedSrcDir
+    options.compilerArgs = [
+
+            "-proc:only",
+            "-processor", "io.vertx.codegen.CodeGenProcessor",
+
+            "-AoutputDirectory=$generateSrcPath"
+    ]
+}
+
+
+shadowJar {
+    classifier = 'fat'
+    manifest {
+        attributes 'Main-Verticle': 'groovy:kvdn-service.groovy'
+    }
+    mergeServiceFiles {
+        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+    }
+}
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.8'
+}
