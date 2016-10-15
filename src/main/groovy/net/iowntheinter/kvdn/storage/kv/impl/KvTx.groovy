@@ -13,6 +13,7 @@ import net.iowntheinter.kvdn.storage.kv.kvdata
 import net.iowntheinter.kvdn.storage.kvdnSession
 
 import java.security.MessageDigest
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Created by grant on 11/19/15.
@@ -20,6 +21,7 @@ import java.security.MessageDigest
 
 class KvTx extends kvdnTX implements TXKV {
     def D
+    boolean finished
 
 
     def KvTx(String sa, UUID txid, kvdnSession session, Vertx vertx) {

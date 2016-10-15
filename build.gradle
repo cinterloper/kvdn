@@ -131,10 +131,15 @@ dependencies {
     compile "io.vertx:vertx-service-proxy:$libversion"
     compile 'ch.qos.logback:logback-classic:1.1.7'
     compile 'ch.qos.logback:logback-core:1.1.7'
-
-
+    testCompile "io.vertx:vertx-unit:$libversion"
+    testCompile group: 'junit', name: 'junit', version: '4.+'
 }
-
+test {
+    testLogging {
+        // Show that tests are run in the command-line output
+        events 'started', 'passed'
+    }
+}
 processResources {
     from 'src/main/groovy'
 }
