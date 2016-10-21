@@ -16,15 +16,16 @@ import java.util.concurrent.Callable
 class distributedWaitGroup {
     Vertx vertx
     int timeout
-    def abortcb
+    def abortcb, triggercb
     private boolean ran
     private Map events
     EventBus eb
     Logger logger
 
-    distributedWaitGroup(Set tokens, timeout=0,abortcb={}, Vertx v) {
+    distributedWaitGroup(Set tokens, timeout=0, triggercb, abortcb={}, Vertx v) {
         ran = false
         this.vertx = v
+        this.triggercb = triggercb
         eb = vertx.eventBus()
         this.logger = LoggerFactory.getLogger(this.class.getName())
         this.abortcb=abortcb
@@ -35,34 +36,34 @@ class distributedWaitGroup {
         }
     }
 
-    void ack(String token,cb){
+    void ack(String token){
         events[token]=true
-        check(cb)
+        check(triggercb)
     }
     void onAck(String channel, cb) {
         MessageConsumer c = eb.consumer(channel, { message ->
             def body = message.body() as String
             logger.trace("onAck ${channel} ${body}")
-            ack(body,cb)
+            ack(body)
         })
         abortTimer(c,abortcb)
     }
 
-    void onAck(String channel, Closure<String> evaluator, cb) {
+    void onAck(String channel, Closure<String> evaluator) {
         MessageConsumer c = eb.consumer(channel, { message ->
             String body = message.body() as String
             logger.trace("onAck ${channel} ${body}")
-            ack(evaluator(body),cb)
+            ack(evaluator(body))
         })
         abortTimer(c,abortcb)
     }
 
-    void onKeys(String straddr, cb) {
+    void onKeys(String straddr) {
         def s = new kvdnSession(vertx)
         s.init({
             def c = s.onWrite(straddr, { JsonObject body ->
                 logger.trace("onKeys ${straddr} ${body}")
-               ack(body.getString('key'),cb)
+               ack(body.getString('key'))
             })
             abortTimer(c,abortcb)
         },{})

@@ -89,7 +89,7 @@ class kvdnSession {
 
     def newTx(String strAddr, txtype = txType.KV) {
         if(!initalized){
-          throw new Exception("kvdn session needs to be init({ before you use it")
+          throw new Exception("kvdn session needs to be init(cb,ecb) before you use it")
         }else{
         def txid = UUID.randomUUID()
         outstandingTX.add(txid)
