@@ -22,13 +22,13 @@ class distributedWaitGroup {
     EventBus eb
     Logger logger
 
-    distributedWaitGroup(Set tokens, timeout=0, triggercb, abortcb={}, Vertx v) {
+    distributedWaitGroup(Set tokens, timeout = 0, triggercb, abortcb = {}, Vertx v) {
         ran = false
         this.vertx = v
         this.triggercb = triggercb
         eb = vertx.eventBus()
         this.logger = LoggerFactory.getLogger(this.class.getName())
-        this.abortcb=abortcb
+        this.abortcb = abortcb
         this.timeout = timeout
         events = [:]
         tokens.each { token ->
@@ -36,38 +36,35 @@ class distributedWaitGroup {
         }
     }
 
-    void ack(String token){
-        events[token]=true
+    void ack(String token) {
+        events[token] = true
         check(triggercb)
     }
-    void onAck(String channel, cb) {
+
+    void onChannel(String channel) {
         MessageConsumer c = eb.consumer(channel, { message ->
             def body = message.body() as String
             logger.trace("onAck ${channel} ${body}")
             ack(body)
         })
-        abortTimer(c,abortcb)
+        abortTimer(c, abortcb)
     }
 
-    void onAck(String channel, Closure<String> evaluator) {
+    void onChannel(String channel, Closure<String> evaluator) {
         MessageConsumer c = eb.consumer(channel, { message ->
             String body = message.body() as String
             logger.trace("onAck ${channel} ${body}")
             ack(evaluator(body))
         })
-        abortTimer(c,abortcb)
+        abortTimer(c, abortcb)
     }
 
-    void onKeys(String straddr) {
-        def s = new kvdnSession(vertx)
-        s.init({
-            def c = s.onWrite(straddr, { JsonObject body ->
-                logger.trace("onKeys ${straddr} ${body}")
-               ack(body.getString('key'))
-            })
-            abortTimer(c,abortcb)
-        },{})
-
+    void onKeys(String straddr, kvdnSession s) {
+        def c = s.onWrite(straddr, { JsonObject body ->
+            logger.trace("onKeys ${straddr} ${body}")
+            ack(body.getString('key'))
+        })
+        abortTimer(c, abortcb)
     }
 
     void check(cb) {
@@ -82,11 +79,12 @@ class distributedWaitGroup {
         }
 
     }
-    void abortTimer(MessageConsumer c,abortcb){
-        if(this.timeout !=0){
-            vertx.setTimer(this.timeout,{
+
+    void abortTimer(MessageConsumer c, abortcb) {
+        if (this.timeout != 0) {
+            vertx.setTimer(this.timeout, {
                 logger.debug("abort timed listener on time exceeded ${c.address()}")
-                c.unregister({abortcb()})
+                c.unregister({ abortcb() })
             })
         }
     }
