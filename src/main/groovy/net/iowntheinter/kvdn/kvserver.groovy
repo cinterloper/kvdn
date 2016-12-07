@@ -24,7 +24,7 @@ class kvserver {
     def session
     def _token = '_'
     //used in a vertx program, or standalone
-    def kvserver(Vertx vertx) {
+    kvserver(Vertx vertx) {
         logger = new LoggerFactory().getLogger("kvdn")
         this.vertx = vertx
         ctx = vertx.getOrCreateContext()
@@ -58,12 +58,13 @@ class kvserver {
                 rc.response().end(this.version)
             })
 
-            cb();
+            cb()
 
         }, { Exception e -> logger.fatal(e) })
 
     }
-    String filterAddr(String s){
+
+    static String filterAddr(String s){
         return s.replace('.','') //make this pluggable?
     }
 
@@ -143,7 +144,7 @@ class kvserver {
         if (mName == null || kName == null) {
             response.setStatusCode(400).end()
         } else {
-            String content;
+            String content
             try {
                 content = routingContext.getBodyAsString()
                 if (content == null) {
@@ -200,7 +201,7 @@ class kvserver {
         if (mName == null) {
             response.setStatusCode(400).end()
         } else {
-            String content;
+            String content
             try {
                 content = routingContext.getBodyAsString()
 

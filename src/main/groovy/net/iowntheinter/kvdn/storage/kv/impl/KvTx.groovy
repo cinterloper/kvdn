@@ -24,7 +24,7 @@ class KvTx extends kvdnTX implements TXKV {
     boolean finished
 
 
-    def KvTx(String sa, UUID txid, kvdnSession session, Vertx vertx) {
+    KvTx(String sa, UUID txid, kvdnSession session, Vertx vertx) {
         this.vertx = vertx
         this.keyprov = session.keyprov
         this.session = session as kvdnSession

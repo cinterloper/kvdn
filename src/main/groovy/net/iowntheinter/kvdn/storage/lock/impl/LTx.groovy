@@ -16,7 +16,7 @@ class LTx extends kvdnTX implements TXLCK {
     def D = new _data_impl()
 
     private class _data_impl {
-        SharedData sd;
+        SharedData sd
         Vertx vertx
         String name
 
@@ -61,7 +61,7 @@ class LTx extends kvdnTX implements TXLCK {
     void get(cb) {
         D.getLock(this, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_READ)) {
-                Counter ctr = res.result();
+                Counter ctr = res.result()
                 ctr.get({ resGet ->
                     if (resGet.succeeded()) {
                         logger.trace("get:${strAddr}")

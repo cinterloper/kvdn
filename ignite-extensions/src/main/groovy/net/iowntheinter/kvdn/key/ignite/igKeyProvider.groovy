@@ -18,15 +18,15 @@ import javax.cache.Cache.Entry
  */
 class igKeyProvider implements keyProvider {
 
-    private IgniteConfiguration cfg;
-    private Ignite ignite;
-    private IgniteSet keySet = null;
+    private IgniteConfiguration cfg
+    private Ignite ignite
+    private IgniteSet keySet = null
     def _version
     Logger log = LoggerFactory.getLogger(this.class.getName())
 
     igKeyProvider() {
         cfg = new IgniteConfiguration().setClientMode(true).setLocalHost("localhost")
-        ignite = Ignition.start(cfg);
+        ignite = Ignition.start(cfg)
         assert ignite.cluster().localNode().version().major(), 1
         _version = ignite.cluster().localNode().version().minor()
         log.debug("init key provider with IGNITE 1.${_version}")
@@ -34,9 +34,9 @@ class igKeyProvider implements keyProvider {
 
     @Override
     void getKeys(String name, cb) {
-        IgniteCache cache = ignite.cache(name);
+        IgniteCache cache = ignite.cache(name)
         try {
-            ArrayList keys = new ArrayList();
+            ArrayList keys = new ArrayList()
             //assume major version is 1
             if (_version >= 8) {
                 keys = cache.query(new ScanQuery<String, String>(), transformer).getAll()
@@ -84,8 +84,8 @@ class igKeyProvider implements keyProvider {
     IgniteClosure<Entry<String, String>, String> transformer =
             new IgniteClosure<Entry<String, String>, String>() {
                 @Override
-                public String apply(Entry<String, String> e) {
-                    return e.getKey();
+                String apply(Entry<String, String> e) {
+                    return e.getKey()
                 }
             }
 

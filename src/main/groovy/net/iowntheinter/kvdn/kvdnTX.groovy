@@ -16,14 +16,14 @@ abstract class kvdnTX {
         MODE_COMPLEX,
         MODE_ADMIN
     }
+    boolean dirty
     SharedData sd
     Logger logger
     EventBus eb
     String strAddr
     UUID txid
-    boolean dirty
+    Vertx vertx
     def keyprov
-    def Vertx vertx
     def session
 
 
@@ -36,7 +36,7 @@ abstract class kvdnTX {
     protected void startTX(String type, Map params=[:] ){
         if(this.dirty)
             throw new Exception("tx has already been invoked, you must create another tx")
-        logger.trace("${type}:${strAddr}:${params.toString()}");
+        logger.trace("${type}:${strAddr}:${params.toString()}")
         this.dirty = true
     }
 

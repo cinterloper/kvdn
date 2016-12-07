@@ -20,7 +20,7 @@ class CtrTx extends kvdnTX implements TXCTR {
     def D = new _data_impl()
 
     private class _data_impl {
-        SharedData sd;
+        SharedData sd
         Vertx vertx
         String name
 
@@ -33,7 +33,7 @@ class CtrTx extends kvdnTX implements TXCTR {
         }
     }
 
-    def CtrTx(String sa, UUID txid, kvdnSession session, Vertx vertx) {
+    CtrTx(String sa, UUID txid, kvdnSession session, Vertx vertx) {
         // keys = new ORSet()
         this.vertx = vertx
         this.session = session as kvdnSession
@@ -54,7 +54,7 @@ class CtrTx extends kvdnTX implements TXCTR {
     void get(cb) {
         D.getCtr(this, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_READ)) {
-                Counter ctr = res.result();
+                Counter ctr = res.result()
                 ctr.get({ resGet ->
                     if (resGet.succeeded()) {
                         logger.trace("get:${strAddr}")
@@ -75,7 +75,7 @@ class CtrTx extends kvdnTX implements TXCTR {
     void addAndGet(long value, cb) {
         D.getCtr(this, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
-                Counter ctr = res.result();
+                Counter ctr = res.result()
                 ctr.addAndGet(value, { resGet ->
                     if (resGet.succeeded()) {
                         logger.trace("get:${strAddr}")
@@ -100,7 +100,7 @@ class CtrTx extends kvdnTX implements TXCTR {
     void getAndAdd(long value, cb) {
         D.getCtr(this, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
-                Counter ctr = res.result();
+                Counter ctr = res.result()
                 ctr.getAndAdd(value, { resGet ->
                     if (resGet.succeeded()) {
                         logger.trace("get:${strAddr}")
