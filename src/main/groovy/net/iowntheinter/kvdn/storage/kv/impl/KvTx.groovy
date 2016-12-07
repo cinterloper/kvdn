@@ -47,8 +47,8 @@ class KvTx extends kvdnTX implements TXKV {
         startTX("submit")
         D.getMap(this.strAddr, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
-                def AsyncMap map = res.result();
-                def String key = MessageDigest.getInstance("MD5").digest(Buffer.buffer(content.toString()).getBytes()).encodeHex().toString()
+                AsyncMap map = res.result()
+                String key = MessageDigest.getInstance("MD5").digest(Buffer.buffer(content.toString()).getBytes()).encodeHex().toString()
                 map.put(key, content, { resPut ->
                     if (resPut.succeeded()) {
                         keyprov.setKey(strAddr, key, {
@@ -73,7 +73,7 @@ class KvTx extends kvdnTX implements TXKV {
         startTX("set", [key: key])
         D.getMap(this.strAddr, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
-                def AsyncMap map = res.result();
+                AsyncMap map = res.result()
                 map.put(key, content, { resPut ->
                     if (resPut.succeeded()) {
                         keyprov.setKey(strAddr, key, {
@@ -99,7 +99,7 @@ class KvTx extends kvdnTX implements TXKV {
         startTX("get", [key: key])
         D.getMap(this.strAddr, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_READ)) {
-                def AsyncMap map = res.result();
+                AsyncMap map = res.result()
                 map.get(key, { resGet ->
                     if (resGet.succeeded()) {
                         (this.session as kvdnSession).finishTx(this, {
@@ -120,7 +120,7 @@ class KvTx extends kvdnTX implements TXKV {
         startTX("del", [key: key])
         D.getMap(this.strAddr, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
-                def AsyncMap map = res.result();
+                AsyncMap map = res.result()
                 map.remove(key, { resDel ->
                     if (resDel.succeeded()) {
                         keyprov.deleteKey(strAddr, key, {
@@ -154,7 +154,7 @@ class KvTx extends kvdnTX implements TXKV {
         startTX("size")
         D.getMap(this.strAddr, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_READ)) {
-                def AsyncMap map = res.result();
+                AsyncMap map = res.result()
                 map.size({ resGet ->
                     if (resGet.succeeded()) {
                         (this.session as kvdnSession).finishTx(this, {

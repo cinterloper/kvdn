@@ -125,7 +125,7 @@ class CtrTx extends kvdnTX implements TXCTR {
     void compareAndSet(long oldv, long newv, cb) {
         D.getCtr(this, { res ->
             if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
-                Counter ctr = res.result();
+                Counter ctr = res.result()
                 ctr.compareAndSet(oldv, newv, { resGet ->
                     if (resGet.succeeded()) {
                         logger.trace("ctr cas:${strAddr}")

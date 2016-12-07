@@ -30,7 +30,7 @@ class LTx extends kvdnTX implements TXLCK {
         }
     }
 
-    def LTx(String sa, UUID txid, kvdnSession session, Vertx vertx) {
+    LTx(String sa, UUID txid, kvdnSession session, Vertx vertx) {
         // keys = new ORSet()
         this.vertx = vertx
         this.session = session as kvdnSession
