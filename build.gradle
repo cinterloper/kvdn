@@ -36,7 +36,7 @@ def libversion = '3.3.3'
 if(System.getenv("VERTX_VERSION") != null)
     libversion = System.getenv("VERTX_VERSION")
 
-version =  "$libversion-${new File('src/main/resources/__VERSION.txt').text}"
+version =  "$libversion-${new File('src/main/resources/__VERSION.txt').text.trim()}"
 def GH_TOKEN = System.getenv("GH_TOKEN")
 def AWS_MVN_BUCKET = System.getenv("AWS_MVN_BUCKET")
 def AWS_DEFAULT_REGION = System.getenv("AWS_DEFAULT_REGION")
