@@ -8,14 +8,14 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 repositories {
-    mavenCentral()
     mavenLocal()
+    mavenCentral()
     jcenter()
 }
 
 
 def libversion = '3.3.3'
-def projversion = new File("src/main/resources/__VERSION.txt").text
+def projversion = rootProject.getVersion()
 if (System.getenv("VERTX_VERSION"))
     libversion = System.getenv("VERTX_VERSION")
 if (System.getenv("PROJVER"))
@@ -29,7 +29,7 @@ dependencies {
     compile "io.vertx:vertx-core:$libversion"
     compile 'com.hazelcast:hazelcast-client:3.6.3'
     compile "io.vertx:vertx-hazelcast:$libversion"
-    compile "net.iowntheinter:kvdn:$libversion-$projversion"
+    compile "net.iowntheinter:kvdn:$projversion"
     compile 'com.google.code.gson:gson:2.6.2'
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'commons-codec:commons-codec:1.10'
