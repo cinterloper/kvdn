@@ -21,7 +21,7 @@ if (System.getenv("VERTX_VERSION"))
 if (System.getenv("PROJVER"))
     projversion = System.getenv("PROJVER")
 
-version = "$libversion-$projversion"
+version = projversion
 
 sourceCompatibility = '1.8'
 
