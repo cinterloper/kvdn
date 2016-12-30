@@ -43,17 +43,8 @@ class distributedWaitGroup {
         check(triggercb)
     }
 
-    void onChannel(String channel) {
-        logger.debug("wg waiting on $channel")
-        MessageConsumer c = eb.consumer(channel, { message ->
-            def body = message.body() as String
-            logger.trace("onAck ${channel} ${body}")
-            ack(body)
-        })
-        abortTimer(c, abortcb)
-    }
 
-    void onChannel(String channel, Closure<String> evaluator) {
+    void onChannel(String channel, Closure<String> evaluator = { body -> return body }) {
         MessageConsumer c = eb.consumer(channel, { message ->
             String body = message.body() as String
             logger.trace("onAck ${channel} ${body}")
