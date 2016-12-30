@@ -23,11 +23,12 @@ class distributedWaitGroup {
     Logger logger
 
     distributedWaitGroup(Set tokens, timeout = 0, triggercb, abortcb = {}, Vertx v) {
+        this.logger = LoggerFactory.getLogger(this.class.getName())
+        logger.debug("initalized new distributedWaitGroup with tokens: $tokens ")
         ran = false
         this.vertx = v
         this.triggercb = triggercb
         eb = vertx.eventBus()
-        this.logger = LoggerFactory.getLogger(this.class.getName())
         this.abortcb = abortcb
         this.timeout = timeout
         events = [:]
@@ -38,10 +39,12 @@ class distributedWaitGroup {
 
     void ack(String token) {
         events[token] = true
+        logger.debug("dwg ack for $token ${events}")
         check(triggercb)
     }
 
     void onChannel(String channel) {
+        logger.debug("wg waiting on $channel")
         MessageConsumer c = eb.consumer(channel, { message ->
             def body = message.body() as String
             logger.trace("onAck ${channel} ${body}")
