@@ -2,7 +2,7 @@ from kvdn_client import kvdn_client
 import fileinput
 import argparse
 import sys,os
-
+import json
 
 
 def main(args=None):
@@ -19,6 +19,7 @@ def main(args=None):
         s = sys.stdin.read()
     _baseurl=''
     _token=''
+    krgs={}
     try:
         _baseurl=os.environ["KVDN_BASE_URL"]
     except KeyError:
@@ -26,10 +27,26 @@ def main(args=None):
         sys.stderr.write( "using default url : " + _baseurl + '\n')
 
     try:
+        _token=os.environ["CACERT"]
+        krgs["verify"]=_token
+    except Exception:
+        pass
+    try:
+        _token=os.environ["CERT"]
+        try:
+            _token=json.load(_token)
+            krgs["verify"]=_token
+        except Exception:
+            krgs["cert"]=_token
+    except Exception:
+        pass
+
+
+    try:
         _token=os.environ["JWT_TOKEN"]
         k = kvdn_client(baseurl=_baseurl, token=_token)
     except KeyError:
-        sys.stderr.write( 'JWT_TOKEN not set \n')
+        sys.stderr.write('JWT_TOKEN not set \n')
         k = kvdn_client(baseurl=_baseurl)
 
 

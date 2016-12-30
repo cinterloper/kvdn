@@ -15,8 +15,9 @@ CONF = {
     'set':'raw',
     'headers':{},
     'logger': dl,
-    'verify': False,
-    'timeout':15
+    'verify': True, # this can be False or a cacert path
+    'timeout':15,
+    'cert':None # pem or ('/path/client.cert', '/path/client.key')
 }
 
 class kvdn_client:
@@ -73,8 +74,9 @@ def kvdn_req(session, url, method=None, **kwargs):
     try:
         p = req.prepare()
         s=session
-        resp=s.send(p,verify=CONF['verify'],timeout=CONF['timeout'])
+        resp=s.send(p,verify=CONF['verify'], cert=CONF['cert'] ,timeout=CONF['timeout'])
         return resp, resp.text
     except :
         CONF['logger'].error("could not make kvdn request " +  traceback.format_exc() )
         return "", ""
+
