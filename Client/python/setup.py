@@ -9,7 +9,7 @@ except IOError:
 setup(
     name="kvdnc",
 
-    version="1.5.9-b3",
+    version="1.6.8_1",
     description="kvdn client library and tool",
     license="Apache",
     author="Grant Haywood",
