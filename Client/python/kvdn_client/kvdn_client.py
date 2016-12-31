@@ -21,7 +21,7 @@ CONF = {
 }
 
 class kvdn_client:
-    kvdn_py_version = 1.6
+    kvdn_py_version = '1.6.8'
     def __init__(self, **kwargs):
         for key,value in kwargs.iteritems():
             CONF[key]=value
