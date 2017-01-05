@@ -3,7 +3,6 @@ package net.iowntheinter.kvdn.storage.counter.impl
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.json.JsonObject
-import io.vertx.core.logging.Logger
 import io.vertx.core.shareddata.Counter
 import io.vertx.core.shareddata.SharedData
 import io.vertx.core.logging.LoggerFactory
@@ -45,101 +44,109 @@ class CtrTx extends kvdnTX implements TXCTR {
     }
 
 
-
     @Override
     void snapshot() {}
 
 
     @Override
     void get(cb) {
-        D.getCtr(this, { res ->
-            if (res.succeeded() && checkFlags(txtype.MODE_READ)) {
-                Counter ctr = res.result()
-                ctr.get({ resGet ->
-                    if (resGet.succeeded()) {
-                        logger.trace("get:${strAddr}")
-                        (this.session as kvdnSession).finishTx(this,{
-                            cb([result: resGet.result().toString(), error: null])
-                        })
-                    } else {
-                        bailTx([error: res.cause(), tx: this], cb)
-                    }
-                })
-            } else {
-                bailTx([error: res.cause(), tx: this], cb)
-            }
+        startTX("CTR:get", {
+            D.getCtr(this, { res ->
+                if (res.succeeded() && checkFlags(txmode.MODE_READ)) {
+                    Counter ctr = res.result()
+                    ctr.get({ resGet ->
+                        if (resGet.succeeded()) {
+                            logger.trace("get:${strAddr}")
+                            (this.session as kvdnSession).finishTx(this, {
+                                cb([result: resGet.result().toString(), error: null])
+                            })
+                        } else {
+                            bailTx([error: res.cause(), tx: this], cb)
+                        }
+                    })
+                } else {
+                    bailTx([error: res.cause(), tx: this], cb)
+                }
+            })
         })
     }
 
     @Override
     void addAndGet(long value, cb) {
-        D.getCtr(this, { res ->
-            if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
-                Counter ctr = res.result()
-                ctr.addAndGet(value, { resGet ->
-                    if (resGet.succeeded()) {
-                        logger.trace("get:${strAddr}")
-                        (this.session as kvdnSession).finishTx(this,{
-                            if (value > 0)
-                                eb.publish("_KVDN_c+${strAddr}", new JsonObject().put('ctr', strAddr))
-                            else
-                                eb.publish("_KVDN_c-${strAddr}", new JsonObject().put('ctr', strAddr))
-                            cb([result: resGet.result().toString(), error: null])
-                        })
-                    } else {
-                        bailTx([error: res.cause(), tx: this], cb)
-                    }
-                })
-            } else {
-                bailTx([error: res.cause(), tx: this], cb)
-            }
+        startTX("CTR:addAndGet", {
+            D.getCtr(this, { res ->
+                if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
+                    Counter ctr = res.result()
+                    ctr.addAndGet(value, { resGet ->
+                        if (resGet.succeeded()) {
+                            logger.trace("get:${strAddr}")
+                            (this.session as kvdnSession).finishTx(this, {
+                                if (value > 0)
+                                    eb.publish("_KVDN_c+${strAddr}", new JsonObject().put('ctr', strAddr))
+                                else
+                                    eb.publish("_KVDN_c-${strAddr}", new JsonObject().put('ctr', strAddr))
+                                cb([result: resGet.result().toString(), error: null])
+                            })
+                        } else {
+                            bailTx([error: res.cause(), tx: this], cb)
+                        }
+                    })
+                } else {
+                    bailTx([error: res.cause(), tx: this], cb)
+                }
+            })
         })
     }
 
     @Override
     void getAndAdd(long value, cb) {
-        D.getCtr(this, { res ->
-            if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
-                Counter ctr = res.result()
-                ctr.getAndAdd(value, { resGet ->
-                    if (resGet.succeeded()) {
-                        logger.trace("get:${strAddr}")
-                        (this.session as kvdnSession).finishTx(this,{
-                            if (value > 0)
-                                eb.publish("_KVDN_c+${strAddr}", new JsonObject().put('ctr', strAddr))
-                            else
-                                eb.publish("_KVDN_c-${strAddr}", new JsonObject().put('ctr', strAddr))
-                            cb([result: resGet.result().toString(), error: null])
-                        })
-                    } else {
-                        bailTx([error: res.cause(), tx: this], cb)
-                    }
-                })
-            } else {
-                bailTx([error: res.cause(), tx: this], cb)
-            }
+        startTX("CTR:getAndAdd", {
+            D.getCtr(this, { res ->
+                if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
+                    Counter ctr = res.result()
+                    ctr.getAndAdd(value, { resGet ->
+                        if (resGet.succeeded()) {
+                            logger.trace("get:${strAddr}")
+                            (this.session as kvdnSession).finishTx(this, {
+                                if (value > 0)
+                                    eb.publish("_KVDN_c+${strAddr}", new JsonObject().put('ctr', strAddr))
+                                else
+                                    eb.publish("_KVDN_c-${strAddr}", new JsonObject().put('ctr', strAddr))
+                                cb([result: resGet.result().toString(), error: null])
+                            })
+                        } else {
+                            bailTx([error: res.cause(), tx: this], cb)
+                        }
+                    })
+                } else {
+                    bailTx([error: res.cause(), tx: this], cb)
+                }
+            })
         })
     }
 
     @Override
     void compareAndSet(long oldv, long newv, cb) {
-        D.getCtr(this, { res ->
-            if (res.succeeded() && checkFlags(txtype.MODE_WRITE)) {
-                Counter ctr = res.result()
-                ctr.compareAndSet(oldv, newv, { resGet ->
-                    if (resGet.succeeded()) {
-                        logger.trace("ctr cas:${strAddr}")
-                        (this.session as kvdnSession).finishTx(this,{
-                            eb.publish("_KVDN_c=${strAddr}", new JsonObject().put('ctr', strAddr))
-                            cb([result: resGet.result().toString(), error: null])
-                        })
-                    } else {
-                        bailTx([error: res.cause(), tx: this], cb)
-                    }
-                })
-            } else {
-                bailTx([error: res.cause(), tx: this], cb)
-            }
+        startTX("CTR:compareAndSet", {
+
+            D.getCtr(this, { res ->
+                if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
+                    Counter ctr = res.result()
+                    ctr.compareAndSet(oldv, newv, { resGet ->
+                        if (resGet.succeeded()) {
+                            logger.trace("ctr cas:${strAddr}")
+                            (this.session as kvdnSession).finishTx(this, {
+                                eb.publish("_KVDN_c=${strAddr}", new JsonObject().put('ctr', strAddr))
+                                cb([result: resGet.result().toString(), error: null])
+                            })
+                        } else {
+                            bailTx([error: res.cause(), tx: this], cb)
+                        }
+                    })
+                } else {
+                    bailTx([error: res.cause(), tx: this], cb)
+                }
+            })
         })
     }
 

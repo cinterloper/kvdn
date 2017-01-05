@@ -2,7 +2,6 @@ package net.iowntheinter.kvdn.storage.lock.impl
 
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
-import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.Counter
 import io.vertx.core.shareddata.Lock
@@ -43,38 +42,42 @@ class LTx extends kvdnTX implements TXLCK {
 
 
     @Override
-    void release(Lock l,  cb) {
-        try{
-            assert checkFlags(txtype.MODE_WRITE)
-            (this.session as kvdnSession).finishTx(this,{
-                l.release()
-                cb([result:true,error:null])
-            })
-        }catch(e){
-            bailTx([error: e.getCause(), tx: this], cb)
-        }
-    }
+    void release(Lock l, cb) {
+        startTX("LCK:release", {
 
+            try {
+                assert checkFlags(txmode.MODE_WRITE)
+                (this.session as kvdnSession).finishTx(this, {
+                    l.release()
+                    cb([result: true, error: null])
+                })
+            } catch (e) {
+                bailTx([error: e.getCause(), tx: this], cb)
+            }
+        })
+    }
 
 
     @Override
     void get(cb) {
-        D.getLock(this, { res ->
-            if (res.succeeded() && checkFlags(txtype.MODE_READ)) {
-                Counter ctr = res.result()
-                ctr.get({ resGet ->
-                    if (resGet.succeeded()) {
-                        logger.trace("get:${strAddr}")
-                        (this.session as kvdnSession).finishTx(this,{
-                            cb([result: resGet.result() as Lock, error: null])
-                        })
-                    } else {
-                        bailTx([error: res.cause(), tx: this], cb)
-                    }
-                })
-            } else {
-                bailTx([error: res.cause(), tx: this], cb)
-            }
+        startTX("LCK:get", {
+            D.getLock(this, { res ->
+                if (res.succeeded() && checkFlags(txmode.MODE_READ)) {
+                    Counter ctr = res.result()
+                    ctr.get({ resGet ->
+                        if (resGet.succeeded()) {
+                            logger.trace("get:${strAddr}")
+                            (this.session as kvdnSession).finishTx(this, {
+                                cb([result: resGet.result() as Lock, error: null])
+                            })
+                        } else {
+                            bailTx([error: res.cause(), tx: this], cb)
+                        }
+                    })
+                } else {
+                    bailTx([error: res.cause(), tx: this], cb)
+                }
+            })
         })
     }
 

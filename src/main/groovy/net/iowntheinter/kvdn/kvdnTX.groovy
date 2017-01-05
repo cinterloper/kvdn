@@ -10,12 +10,13 @@ import net.iowntheinter.kvdn.storage.kvdnSession
  * Created by g on 9/24/16.
  */
 abstract class kvdnTX {
-    enum txtype {
+    enum txmode {
         MODE_WRITE,
         MODE_READ,
         MODE_COMPLEX,
         MODE_ADMIN
     }
+
     boolean dirty
     SharedData sd
     Logger logger
@@ -25,6 +26,7 @@ abstract class kvdnTX {
     Vertx vertx
     def keyprov
     def session
+    def preTxHooks = { cb -> cb() }
 
 
     void bailTx(context, cb) {
@@ -33,11 +35,12 @@ abstract class kvdnTX {
             cb([result: null, error: context.error ?: getFlags()])
         })
     }
-    protected void startTX(String type, Map params=[:] ){
+    protected void startTX(String type, Map params=[:] , cb){
         if(this.dirty)
             throw new Exception("tx has already been invoked, you must create another tx")
         logger.trace("${type}:${strAddr}:${params.toString()}")
         this.dirty = true
+        preTxHooks(cb)
     }
 
     Set getFlags() {

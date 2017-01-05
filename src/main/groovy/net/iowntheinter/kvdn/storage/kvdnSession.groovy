@@ -26,7 +26,7 @@ class kvdnSession {
         READ_ONLY
     }
 
-    enum txType {
+    enum dataType {
         KV, CTR, LCK
     }
     boolean initalized = false
@@ -87,18 +87,18 @@ class kvdnSession {
         }, error_cb)
     }
 
-    def newTx(String strAddr, txtype = txType.KV) {
+    def newTx(String strAddr, datatype = dataType.KV) {
         if(!initalized){
           throw new Exception("kvdn session needs to be init(cb,ecb) before you use it")
         }else{
         def txid = UUID.randomUUID()
         outstandingTX.add(txid)
-        switch (txtype) {
-            case txType.KV:
+        switch (datatype) {
+            case dataType.KV:
                 return (new KvTx(strAddr, txid, this, vertx))
-            case txType.CTR:
+            case dataType.CTR:
                 return (new CtrTx(strAddr, txid, this, vertx))
-            case txType.LCK:
+            case dataType.LCK:
                 return (new LTx(strAddr, txid, this, vertx))
             default:
                 return (null)

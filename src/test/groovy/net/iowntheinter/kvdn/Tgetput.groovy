@@ -1,11 +1,5 @@
-import io.vertx.core.http.HttpClient
-import io.vertx.core.http.HttpServer
-import io.vertx.ext.unit.TestSuite
-import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
-import io.vertx.core.Context
 import io.vertx.core.Vertx
-import io.vertx.core.eventbus.EventBus
 import io.vertx.core.logging.LoggerFactory
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
 import net.iowntheinter.kvdn.storage.kvdnSession
@@ -52,7 +46,7 @@ public class Tgetput {
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
         (kvs as kvdnSession).init({
-            KvTx tx = kvs.newTx(addr, kvdnSession.txType.KV) as KvTx
+            KvTx tx = kvs.newTx(addr, kvdnSession.dataType.KV) as KvTx
             tx.set(key, data, { result ->
                 if (result.error) {
                     context.fail(result.error.toString())
@@ -83,7 +77,7 @@ public class Tgetput {
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
         (kvs as kvdnSession).init({
-            KvTx tx = kvs.newTx(addr, kvdnSession.txType.KV) as KvTx
+            KvTx tx = kvs.newTx(addr, kvdnSession.dataType.KV) as KvTx
             tx.set(key, data, { result ->
                 if (result.error) {
                     context.fail(result.error.toString())
