@@ -18,8 +18,9 @@ def merge(x, y):
 CONF = {
     'baseurl': 'https://localhost:6500',
     'token': None,
+    'debug': False,
     'prefix': '',
-    'set':'raw',
+    'set_mode':'raw',
     'headers':{},
     'logger': dl,
     'verify': True, # this can be False or a cacert path
@@ -36,11 +37,10 @@ class kvdn_client:
             CONF['headers'].update({'Authorization': 'Bearer %s' % CONF['token']})
         self.session=requests.Session()
         self.SVER=self.session.get(CONF['baseurl'] +CONF['prefix'] + '/__VERSION', verify=CONF['verify'],timeout=CONF['timeout'],cert=CONF['cert'],headers=CONF['headers']).text
-
     def set(self, straddr, key, data, **kwargs):
-        if CONF['set'] == 'raw':
+        if CONF['set_mode'] == 'raw':
             return self.setRaw(straddr,key,data,**kwargs)
-        elif CONF['set'] == 'json':
+        elif CONF['set_mode'] == 'json':
             return self.setJson(straddr,key,data,**kwargs)
 
     def version(self):
@@ -51,10 +51,10 @@ class kvdn_client:
         return content
 
     def setRaw(self, straddr, key, data, **kwargs):
-        resp, content = kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/R/'+ straddr +'/' +key, 'PUT', data=data, headers=CONF['headers'])
+        resp, content = kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/R/'+ straddr +'/' +key, method='PUT', data=data, headers=CONF['headers'])
         return content
     def setJson(self, straddr, key, data, **kwargs):
-        resp, content = kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'PUT', data=data, headers=CONF['headers'])
+        resp, content = kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, method='PUT', data=data, headers=CONF['headers'])
         return content
 
     def getKeys(self, straddr, **kwargs):
@@ -62,15 +62,15 @@ class kvdn_client:
         return content
 
     def delete(self, straddr, key, **kwargs):
-        resp, content = kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, 'DELETE', data='', headers=CONF['headers'])
+        resp, content = kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr +'/' +key, method='DELETE', data='', headers=CONF['headers'])
         return content
 
     def submit_cas(self, straddr, data, **kwargs):
-        resp, content = kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr , 'POST', data=data, headers=CONF['headers'])
+        resp, content = kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/X/'+ straddr , method='POST', data=data, headers=CONF['headers'])
         return content #the returned content should be the hash of data as a key
 
     def submit_uuid(self, straddr, data, **kwargs):
-        resp, content=kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/U/'+ straddr , 'POST', data=data, headers=CONF['headers'])
+        resp, content=kvdn_req(self.session,CONF['baseurl'] +CONF['prefix'] +'/U/'+ straddr , method='POST', data=data, headers=CONF['headers'])
         return content # the returned content should be a uuid key
 
 def kvdn_req(session, url, method=None, data=None, **kwargs):
