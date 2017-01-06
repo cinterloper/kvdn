@@ -35,7 +35,6 @@ KVDN also has a saltstack integration where it can be a `pillar` data provider
 
 
 #### Building for source
-For production release:
 ```sh
 $ ./gradlew clean shadowJar publish
 $ export BUILD_EXTENSIONS=true
