@@ -34,7 +34,7 @@ KVDN also has a saltstack integration where it can be a `pillar` data provider
 * [https://github.com/cinterloper/salt-pillar-kvdn] [PlDb]
 
 
-#### Building for source
+#### Building from source
 ```sh
 $ ./gradlew clean shadowJar publish
 $ export BUILD_EXTENSIONS=true
