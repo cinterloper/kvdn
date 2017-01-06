@@ -55,6 +55,6 @@ Apache
 
 Powered by
 ----
-[![N|Vertx](http://vertx.io/assets/logo-sm.png)](https://vertx.io)
+[![N|Vertx](http://vertx.io/assets/logo-sm.png)](http://vertx.io)
 
 
