@@ -25,6 +25,7 @@ KVDN has client drivers for
 
 * Golang
 * Python
+*  - CLI
 * Javascript
 * (vert.x languages supporting codegen)
 
