@@ -2,6 +2,7 @@
 
 
 KVDN is an extensible distributed data framework and key-value storage protocol server.
+
 It builds on the Vert.X SharedData interface with features such as:
 
   - keySet() on distribued maps
@@ -14,6 +15,7 @@ You can also:
   - embed kvdn in your vertx-enabled application
 
 Some of these fetures are achived through cluster-manager specific `provider` implementations. 
+
 right now KVDN supports Hazelcast and Apache Ignite
 
 
