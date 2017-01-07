@@ -6,7 +6,8 @@ import json
 
 def main(args=None):
     parser = argparse.ArgumentParser(description='KVDN PYCLIENT')
-    parser.add_argument('--verify', type=str, default='', help='True, False, or path to ca')
+    parser.add_argument('--verify', type=str, default=True, help='True, False, or path to ca')
+    parser.add_argument('--noverify', action='store_true', help='do not verify host certificate')
     parser.add_argument('--cert', type=str, default='', help='path to certificate')
     parser.add_argument('--debug', action='store_true', help='debug')
     parser.add_argument('--set', action='store_true',  help='set a value', )
@@ -54,7 +55,7 @@ def main(args=None):
         _token=os.environ["JWT_TOKEN"]
         k = kvdn_client(baseurl=_baseurl, token=_token, **varargs )
     except KeyError:
-        sys.stderr.write('JWT_TOKEN not set \n', **varargs )
+        sys.stderr.write('JWT_TOKEN not set \n')
         k = kvdn_client(baseurl=_baseurl)
 
 
