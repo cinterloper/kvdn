@@ -5,7 +5,7 @@ KVDN is an extensible distributed data framework and key-value storage protocol 
 
 It builds on the Vert.X SharedData interface with features such as:
 
-  - keySet() on distribued maps
+  - getKeys() on distribued maps
   - pre and post action hooks
   - utilities such as distributedWaitGroup and cluster wide exclusiveTask 
 
