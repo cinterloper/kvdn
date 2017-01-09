@@ -1,6 +1,7 @@
 package net.iowntheinter.kvdn.storage.kv.key.impl
 
 import io.vertx.core.Vertx
+import io.vertx.core.json.JsonObject
 import io.vertx.core.shareddata.SharedData
 import net.iowntheinter.kvdn.storage.kv.key.keyProvider
 
@@ -11,7 +12,7 @@ import net.iowntheinter.kvdn.storage.kv.key.keyProvider
  * this is not a possibility with the native vertx clustered asyncMap impl
  */
 class LocalKeyProvider implements keyProvider {
-    SharedData sd;
+    SharedData sd
 
     LocalKeyProvider(Vertx vertx) {
         sd = vertx.sharedData()
@@ -30,5 +31,15 @@ class LocalKeyProvider implements keyProvider {
     @Override
     void setKey(String map, String name, cb) {
         cb([result: true, error: null])
+    }
+
+    @Override
+    void load(Vertx vertx, cb) {
+        cb()
+    }
+
+    @Override
+    JsonObject register(Vertx vertx) {
+        return null
     }
 }

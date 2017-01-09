@@ -1,14 +1,11 @@
-package net.iowntheinter.kvdn.key.hazelcast
+package net.iowntheinter.kvdn.ignite.key
 
-import io.vertx.core.logging.Logger
-import io.vertx.core.logging.LoggerFactory
+import io.vertx.core.Vertx
+import io.vertx.core.json.JsonObject
+import net.iowntheinter.kvdn.ignite.igniteExtension
 import net.iowntheinter.kvdn.storage.kv.key.keyProvider
-import org.apache.ignite.Ignite
 import org.apache.ignite.IgniteCache
-import org.apache.ignite.IgniteSet
-import org.apache.ignite.Ignition
 import org.apache.ignite.cache.query.ScanQuery
-import org.apache.ignite.configuration.IgniteConfiguration
 import org.apache.ignite.lang.IgniteClosure
 
 import javax.cache.Cache.Entry
@@ -16,21 +13,7 @@ import javax.cache.Cache.Entry
 /**
  * Created by g on 7/17/16.
  */
-class igKeyProvider implements keyProvider {
-
-    private IgniteConfiguration cfg
-    private Ignite ignite
-    private IgniteSet keySet = null
-    def _version
-    Logger log = LoggerFactory.getLogger(this.class.getName())
-
-    igKeyProvider() {
-        cfg = new IgniteConfiguration().setClientMode(true).setLocalHost("localhost")
-        ignite = Ignition.start(cfg)
-        assert ignite.cluster().localNode().version().major(), 1
-        _version = ignite.cluster().localNode().version().minor()
-        log.debug("init key provider with IGNITE 1.${_version}")
-    }
+class igKeyProvider extends igniteExtension implements keyProvider {
 
     @Override
     void getKeys(String name, cb) {
@@ -89,4 +72,13 @@ class igKeyProvider implements keyProvider {
                 }
             }
 
+    @Override
+    void load(Vertx vertx, Object o) {
+
+    }
+
+    @Override
+    JsonObject register(Vertx vertx) {
+        return null
+    }
 }

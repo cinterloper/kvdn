@@ -1,4 +1,4 @@
-FROM cinterloper/lash
+FROM cinterloper/bash-json
 ARG PROJVER
 ENV PROJVER ${PROJVER}
 RUN apt-get update && apt-get upgrade -y && apt-get install -y openjdk-8-jdk axel maven jq nodejs gradle groovy2 && apt clean

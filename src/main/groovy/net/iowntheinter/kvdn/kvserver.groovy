@@ -31,7 +31,7 @@ class kvserver {
         config = ctx.config() as JsonObject
         session = new kvdnSession(vertx)
         def classloader = (URLClassLoader) (Thread.currentThread().getContextClassLoader())
-        this.version=(classloader.getResourceAsStream('__VERSION.txt').getText())
+        this.version=(classloader.getResourceAsStream('_KVDN_VERSION.txt').getText())
     }
 
     def init(Router r, cb) { //real initializaion function

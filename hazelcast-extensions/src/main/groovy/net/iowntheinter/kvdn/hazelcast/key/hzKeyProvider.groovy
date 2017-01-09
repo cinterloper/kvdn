@@ -1,23 +1,15 @@
-package net.iowntheinter.kvdn.key.hazelcast
+package net.iowntheinter.kvdn.hazelcast.key
 
-import com.hazelcast.client.HazelcastClient
-import com.hazelcast.client.config.ClientConfig
-import com.hazelcast.client.config.ClientNetworkConfig
-import com.hazelcast.core.HazelcastInstance
 import com.hazelcast.core.IMap
+import io.vertx.core.Vertx
+import io.vertx.core.json.JsonObject
+import net.iowntheinter.kvdn.hazelcast.hzExtension
 import net.iowntheinter.kvdn.storage.kv.key.keyProvider
 
 /**
  * Created by g on 7/17/16.
  */
-class hzKeyProvider implements keyProvider {
-    private HazelcastInstance client
-
-    hzKeyProvider() {
-        ClientNetworkConfig cnc = new ClientNetworkConfig().addAddress("127.0.0.1:5701");
-        ClientConfig clientConfig = new ClientConfig().setNetworkConfig(cnc)
-        client = HazelcastClient.newHazelcastClient(clientConfig);
-    }
+class hzKeyProvider extends hzExtension implements keyProvider  {
 
     @Override
     void getKeys(String name, cb) {
@@ -50,5 +42,15 @@ class hzKeyProvider implements keyProvider {
         }catch(Exception e){
             cb([result:false, error:e])
         }
+    }
+
+    @Override
+    void load(Vertx vertx, Object o) {
+
+    }
+
+    @Override
+    JsonObject register(Vertx vertx) {
+        return null
     }
 }

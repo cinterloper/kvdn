@@ -1,15 +1,30 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "io.vertx:vertx-service-proxy:3.3.3"
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.6"
+
+    }
+}
 plugins {
+    id 'groovy'
     id 'java'
     id 'application'
-
 }
+apply plugin: 'net.ltgt.apt'
 apply plugin: 'groovy'
 apply plugin: 'maven-publish'
-apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'idea'
+
+
 
 repositories {
-    mavenLocal()
     mavenCentral()
+    mavenLocal()
     jcenter()
 }
 
@@ -27,19 +42,9 @@ sourceCompatibility = '1.8'
 
 dependencies {
     compile "io.vertx:vertx-core:$libversion"
-    compile "io.vertx:vertx-sql-common:$libversion"
-    compile "io.vertx:vertx-jdbc-client:$libversion"
-    compile 'com.hazelcast:hazelcast-client:3.6.3'
-    compile "io.vertx:vertx-hazelcast:$libversion"
-    compile 'com.google.code.gson:gson:2.6.2'
-    compile 'org.apache.commons:commons-lang3:3.4'
-    compile 'commons-codec:commons-codec:1.10'
-    compile 'ch.qos.logback:logback-classic:1.1.7'
-    compile 'ch.qos.logback:logback-core:1.1.7'
-    compile "net.iowntheinter:kvdn:$projversion"
-
-
+    compile "io.vertx:vertx-lang-groovy:$libversion"
 }
+
 
 publishing {
     repositories {
@@ -49,13 +54,11 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId 'net.iowntheinter'
-            artifactId 'kvdn-hazelcast-extensions'
+            artifactId 'kvdn-util'
             from components.java
         }
     }
 }
-
-mainClassName = 'io.vertx.core.Launcher'
 
 
 

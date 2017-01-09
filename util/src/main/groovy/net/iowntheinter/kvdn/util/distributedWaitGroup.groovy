@@ -6,9 +6,6 @@ import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
-import net.iowntheinter.kvdn.storage.kvdnSession
-
-import java.util.concurrent.Callable
 
 /**
  * Created by g on 9/24/16.
@@ -37,14 +34,14 @@ class distributedWaitGroup {
         }
     }
 
-    void ack(String token) {
+    void ack(token) {
         events[token] = true
         logger.debug("dwg ack for $token ${events}")
         check(triggercb)
     }
 
 
-    void onChannel(String channel, Closure<String> evaluator = { body -> return body }) {
+    void onChannel(String channel, evaluator = { body -> return body }) {
         MessageConsumer c = eb.consumer(channel, { message ->
             String body = message.body() as String
             logger.trace("onAck ${channel} ${body}")
@@ -53,8 +50,9 @@ class distributedWaitGroup {
         abortTimer(c, abortcb)
     }
 
-    void onKeys(String straddr, kvdnSession s) {
-        def c = s.onWrite(straddr, { JsonObject body ->
+    void onKeys(String straddr, kvdnSession) {
+        //s loose typeing hack, should be a kvdnSession
+        def c = kvdnSession.onWrite(straddr, { JsonObject body ->
             logger.trace("onKeys ${straddr} ${body}")
             ack(body.getString('key'))
         })
@@ -74,11 +72,11 @@ class distributedWaitGroup {
 
     }
 
-    void abortTimer(MessageConsumer c, abortcb) {
+    void abortTimer(c, abortcb) {
         if (this.timeout != 0) {
             vertx.setTimer(this.timeout, {
                 logger.debug("abort timed listener on time exceeded ${c.address()}")
-                c.unregister({ abortcb() })
+                (c as MessageConsumer).unregister({ abortcb() })
             })
         }
     }
