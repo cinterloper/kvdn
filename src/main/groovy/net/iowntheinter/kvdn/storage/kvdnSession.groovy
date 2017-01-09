@@ -8,6 +8,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.Counter
+import io.vertx.core.shareddata.LocalMap
 import net.iowntheinter.kvdn.kvdnTX
 import net.iowntheinter.kvdn.storage.counter.impl.CtrTx
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
@@ -18,6 +19,7 @@ import net.iowntheinter.kvdn.storage.lock.impl.LTx
 
 
 class kvdnSession {
+    static final ACCESS_CACHE_LOC= '__KVDN_ACCESS_CACHE'
     enum sessionType {
         NATIVE_SESSION, PROTOCOL_SERVER, PROXY_SERVER
     }
@@ -30,6 +32,7 @@ class kvdnSession {
         KV, CTR, LCK
     }
     boolean initalized = false
+    boolean tracking = false
     Vertx vertx
     Set outstandingTX
     //roMode should not issue new sessions, new tx's on existing sessions will get the ROFLAG
@@ -41,6 +44,7 @@ class kvdnSession {
     def sessionid, keyprov, config
     def D
     Closure txEndHandler = {}
+    private LocalMap accessCache
 
     kvdnSession(Vertx vx, stype = sessionType.NATIVE_SESSION) {
         vertx = vx
@@ -49,10 +53,11 @@ class kvdnSession {
         config = vertx.getOrCreateContext().config().getJsonObject('kvdn') ?: new JsonObject()
         sessionid = UUID.randomUUID().toString()
         logger = new LoggerFactory().getLogger("Kvdnsession:${sessionid.toString()}")
-        eb = vertx.eventBus();
+        eb = vertx.eventBus()
+        accessCache = vertx.sharedData().getLocalMap(ACCESS_CACHE_LOC)
         if (vertx.isClustered()) {  //vertx cluster mode
             String configured_provider = config.getString('key_provider') ?: null
-                  //  'net.iowntheinter.kvdn.storage.kv.key.impl.CRDTKeyProvider' // not working right now
+            //  'net.iowntheinter.kvdn.storage.kv.key.impl.CRDTKeyProvider' // not working right now
             try {
                 this.keyprov = this.class.classLoader.loadClass(configured_provider)?.newInstance() as keyProvider
             } catch (e) {
@@ -88,27 +93,33 @@ class kvdnSession {
     }
 
     def newTx(String strAddr, datatype = dataType.KV) {
-        if(!initalized){
-          throw new Exception("kvdn session needs to be init(cb,ecb) before you use it")
-        }else{
-        def txid = UUID.randomUUID()
-        outstandingTX.add(txid)
-        switch (datatype) {
-            case dataType.KV:
-                return (new KvTx(strAddr, txid, this, vertx))
-            case dataType.CTR:
-                return (new CtrTx(strAddr, txid, this, vertx))
-            case dataType.LCK:
-                return (new LTx(strAddr, txid, this, vertx))
-            default:
-                return (null)
-        }}
+        if (!initalized) {
+            throw new Exception("kvdn session needs to be init(cb,ecb) before you use it")
+        } else {
+            def txid = UUID.randomUUID()
+            outstandingTX.add(txid)
+            switch (datatype) {
+                case dataType.KV:
+                    return (new KvTx(strAddr, txid, this, vertx))
+                case dataType.CTR:
+                    return (new CtrTx(strAddr, txid, this, vertx))
+                case dataType.LCK:
+                    return (new LTx(strAddr, txid, this, vertx))
+                default:
+                    return (null)
+            }
+        }
     }
 
     void finishTx(kvdnTX tx, cb) {
         outstandingTX.remove(tx.txid)
-        txEndHandler(tx)
-        cb() //send the kvdata back to the api client here
+        txEndHandler(tx, {
+            if (tracking)
+                accessCache.put(tx.strAddr, tx.txid)
+            else
+                accessCache.putIfAbsent(tx.strAddr, null)
+            cb()
+        })
     }
 
 
