@@ -29,7 +29,7 @@ CONF = {
 }
 
 class kvdn_client:
-    kvdn_py_version = '1.6.8'
+    kvdn_py_version = '1.6.10'
     def __init__(self, **kwargs):
         for key,value in kwargs.iteritems():
             CONF[key]=value
@@ -74,7 +74,7 @@ class kvdn_client:
         return content # the returned content should be a uuid key
 
 def kvdn_req(session, url, method=None, data=None, **kwargs):
-    if CONF['debug'] is not None or False:
+    if CONF['debug'] is True:
         import pprint
         pprint.PrettyPrinter(indent=4).pprint(kwargs)
         pprint.PrettyPrinter(indent=4).pprint(CONF)
