@@ -26,7 +26,10 @@ abstract class kvdnTX {
     Vertx vertx
     def keyprov
     def session
-    def preTxHooks = { cb -> cb() }
+    def preTxHooks = { kvdnTX tx, cb ->
+        ((kvdnSession) session).sessionPreTxHooks(tx,cb)
+    }
+
 
 
     void bailTx(context, cb) {
@@ -35,8 +38,9 @@ abstract class kvdnTX {
             cb([result: null, error: context.error ?: getFlags()])
         })
     }
-    protected void startTX(String type, Map params=[:] , cb){
-        if(this.dirty)
+
+    protected void startTX(String type, Map params = [:], cb) {
+        if (this.dirty)
             throw new Exception("tx has already been invoked, you must create another tx")
         logger.trace("${type}:${strAddr}:${params.toString()}")
         this.dirty = true
@@ -51,12 +55,12 @@ abstract class kvdnTX {
         return (!session.txflags.contains(txtype))
     }
 
-    Map getDebug(){
+    Map getDebug() {
         return [
-                txid: this.txid,
-                seid: ((kvdnSession)this.session).sessionid,
+                txid   : this.txid,
+                seid   : ((kvdnSession) this.session).sessionid,
                 straddr: this.strAddr,
-                flags: this.flags
+                flags  : this.flags
         ]
     }
 }

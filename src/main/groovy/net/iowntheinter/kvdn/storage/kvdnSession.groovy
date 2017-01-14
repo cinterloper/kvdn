@@ -19,7 +19,7 @@ import net.iowntheinter.kvdn.storage.lock.impl.LTx
 
 
 class kvdnSession {
-    static final ACCESS_CACHE_LOC= '__KVDN_ACCESS_CACHE'
+    static final ACCESS_CACHE_LOC = '__KVDN_ACCESS_CACHE'
     enum sessionType {
         NATIVE_SESSION, PROTOCOL_SERVER, PROXY_SERVER
     }
@@ -43,8 +43,25 @@ class kvdnSession {
     Logger logger
     def sessionid, keyprov, config
     def D
-    Closure txEndHandler = {}
+
+    ArrayList<txnHook> preHooks = []
+    ArrayList<txnHook> postHooks = []
     LocalMap accessCache
+
+    def sessionPreTxHooks = { tx, cb -> cb() }
+    def sessionPostTxHooks = { tx, cb -> cb() }
+    Closure txEndHandler = { KvTx tx, cb ->
+        sessionPostTxHooks(tx, cb)
+    }
+
+    void _hookCaller(kvdnTX tx, ArrayList<txnHook> hooks, int ptr, cb) {
+        if (ptr != hooks.size()) {
+            ptr++
+            def nxt = hooks[ptr]
+            nxt.call(tx, this, this.&_hookCaller(tx, hooks, ptr,cb))
+        }else
+            cb()
+    }
 
     kvdnSession(Vertx vx, stype = sessionType.NATIVE_SESSION) {
         vertx = vx
@@ -68,6 +85,7 @@ class kvdnSession {
             //load cluster key provider
         } else {                    // vertx local mode
             this.keyprov = new LocalKeyProvider(vertx)
+
         }
 
 
@@ -101,10 +119,13 @@ class kvdnSession {
             switch (datatype) {
                 case dataType.KV:
                     return (new KvTx(strAddr, txid, this, vertx))
+                    break
                 case dataType.CTR:
                     return (new CtrTx(strAddr, txid, this, vertx))
+                    break
                 case dataType.LCK:
                     return (new LTx(strAddr, txid, this, vertx))
+                    break
                 default:
                     return (null)
             }
