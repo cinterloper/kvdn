@@ -40,4 +40,6 @@ public interface kvsvc {
 
     void delete(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler);
 
+    void query(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler);
+
 }

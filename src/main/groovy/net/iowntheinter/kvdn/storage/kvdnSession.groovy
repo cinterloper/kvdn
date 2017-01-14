@@ -44,7 +44,7 @@ class kvdnSession {
     def sessionid, keyprov, config
     def D
     Closure txEndHandler = {}
-    private LocalMap accessCache
+    LocalMap accessCache
 
     kvdnSession(Vertx vx, stype = sessionType.NATIVE_SESSION) {
         vertx = vx

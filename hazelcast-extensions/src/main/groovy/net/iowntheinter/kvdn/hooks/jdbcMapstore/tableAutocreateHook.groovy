@@ -34,7 +34,7 @@ class tableAutocreateHook extends hzExtension implements txnHook {
     }
 
     @Override
-    void load(Vertx vertx,  cb) {
+    void load(Vertx vertx, cb) {
         cb()
     }
 
@@ -51,20 +51,30 @@ class tableAutocreateHook extends hzExtension implements txnHook {
 
         def r = new resourceLoader()
 
-        String query = e.createTemplate(r.getResource("pgsql.template"))
-                .make(binding)
-        client.getConnection({ ar ->
-            if(ar.failed()){
-                logger.fatal(ar.cause())
-            }else{
-                def conn = ar.result()
 
-                conn.query(query,{queryResult ->
-                  cb(queryResult)
-                })
-            }
 
-        })
 
+
+        if (!kvdnSession.accessCache.keySet().contains(strAddr)) {
+            String query = e.createTemplate(r.getResource("pgsql.template"))
+                    .make(binding)
+            client.getConnection({ ar ->
+                if (ar.failed()) {
+                    logger.fatal(ar.cause())
+                } else {
+
+                    def conn = ar.result()
+
+                    conn.
+
+
+                    conn.query(query, { queryResult ->
+                        cb(queryResult)
+                    })
+                }
+
+            })
+
+        }
     }
 }
