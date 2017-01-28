@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+    id 'application'
+    id "com.moowork.node" version "1.1.1"
+}
+
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+}
+// Package name of your project.
+// Example: github.com/my_user/my_project
+group = '' // String - REQUIRED (if golang.packageName is not set)
+
+
+def projversion = rootProject.getVersion()
+
+version = projversion
+
+sourceCompatibility = '1.8'
+
+dependencies {
+
+}
+
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.8'
+}

@@ -6,5 +6,6 @@ if (!System.getenv("DISABLE_EXTENSIONS")) {
     include 'ignite-extensions'
     include 'util'
     include 'mapdb-extensions'
+    include 'Client/golang'
 //    include 'graph-extensions' //not finished
 }
