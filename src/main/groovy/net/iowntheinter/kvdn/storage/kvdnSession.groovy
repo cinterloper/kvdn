@@ -38,6 +38,7 @@ class kvdnSession {
     //roMode should not issue new sessions, new tx's on existing sessions will get the ROFLAG
     boolean roMode = false
     boolean transition = false
+    def customDataImpl = null
     Set txflags
     EventBus eb
     Logger logger
@@ -83,9 +84,11 @@ class kvdnSession {
                 throw e //erm this is pretty fatal
             }
             //load cluster key provider
-        } else {                    // vertx local mode
-            this.keyprov = new LocalKeyProvider(vertx)
+        } else if(this.customDataImpl) {
 
+        }
+        else { // in memory mode
+            this.keyprov = new LocalKeyProvider(vertx)
         }
 
 

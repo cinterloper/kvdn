@@ -1,0 +1,44 @@
+package net.iowntheinter.kvdn.mapdb.impl
+
+import io.vertx.core.AsyncResult
+import io.vertx.core.Handler
+import io.vertx.core.Vertx
+import io.vertx.core.json.JsonObject
+import io.vertx.core.logging.Logger
+import io.vertx.core.logging.LoggerFactory
+import io.vertx.core.shareddata.AsyncMap
+import net.iowntheinter.kvdn.mapdb.mapdbExtension
+import net.iowntheinter.kvdn.storage.kv.kvdata
+import org.mapdb.DB
+import org.mapdb.DBMaker
+
+class mapdbDataImpl extends mapdbExtension implements kvdata {
+    JsonObject config
+    Vertx vertx
+    DB db
+    String dbpath = null
+    Logger logger = LoggerFactory.getLogger(this.class.getName())
+
+    mapdbDataImpl(Vertx vertx) {
+        this.vertx = vertx
+        this.config = vertx.getOrCreateContext().config().getJsonObject('kvdn') ?: new JsonObject()
+        dbpath = config.getJsonObject("mapdb")?.getString("dbPath")
+        if (dbpath) {
+            db = DBMaker.fileDB(dbpath).make()
+        } else {
+            db = DBMaker.memoryDB().make()
+            logger.warn("initalized MapDB as in-memory database")
+            logger.warn("THIS IS NOT PERSISTENT")
+        }
+
+    }
+
+    @Override
+    void getMap(String s, Handler<AsyncResult<AsyncMap>> handler) {
+        vertx.executeBlocking({ future ->
+            future.complete(db.hashMap(s))
+        }, { asyncResult ->
+            handler.handle(asyncResult)
+        })
+    }
+}
