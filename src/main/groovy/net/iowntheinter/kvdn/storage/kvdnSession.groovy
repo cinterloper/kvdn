@@ -59,8 +59,8 @@ class kvdnSession {
         if (ptr != hooks.size()) {
             ptr++
             def nxt = hooks[ptr]
-            nxt.call(tx, this, this.&_hookCaller(tx, hooks, ptr,cb))
-        }else
+            nxt.call(tx, this, this.&_hookCaller(tx, hooks, ptr, cb))
+        } else
             cb()
     }
 
@@ -73,7 +73,17 @@ class kvdnSession {
         logger = new LoggerFactory().getLogger("Kvdnsession:${sessionid.toString()}")
         eb = vertx.eventBus()
         accessCache = vertx.sharedData().getLocalMap(ACCESS_CACHE_LOC)
-        if (vertx.isClustered()) {  //vertx cluster mode
+
+        String configured_data = config.getString('data_implementation') ?: 'net.iowntheinter.kvdn.storage.kv.data.defaultDataImpl'
+        try {
+            this.D = this.class.classLoader.loadClass(configured_data)?.newInstance(vertx as Vertx) as kvdata
+        } catch (e) {
+            e.printStackTrace()
+            logger.fatal("could not load data impl $configured_data: ${e.getMessage()}")
+            throw e
+        }
+
+        try {  //vertx cluster mode
             String configured_provider = config.getString('key_provider') ?: null
             //  'net.iowntheinter.kvdn.storage.kv.key.impl.CRDTKeyProvider' // not working right now
             try {
@@ -84,23 +94,9 @@ class kvdnSession {
                 throw e //erm this is pretty fatal
             }
             //load cluster key provider
-        } else if(this.customDataImpl) {
-
-        }
-        else { // in memory mode
+        } catch (e) { // in memory mode
             this.keyprov = new LocalKeyProvider(vertx)
         }
-
-
-        String configured_data = config.getString('data_implementation') ?: 'net.iowntheinter.kvdn.storage.kv.data.defaultDataImpl'
-        try {
-            this.D = this.class.classLoader.loadClass(configured_data)?.newInstance(vertx as Vertx) as kvdata
-        } catch (e) {
-            e.printStackTrace()
-            logger.fatal("could not load key provider $configured_data: ${e.getMessage()}")
-            throw e
-        }
-
 
         logger.trace("starting new kvdn session with clustered = ${vertx.isClustered()} keyprovider = ${this.keyprov}")
 
