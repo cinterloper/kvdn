@@ -10,6 +10,7 @@ import io.vertx.core.shareddata.AsyncMap
 import net.iowntheinter.kvdn.mapdb.mapdbData
 import net.iowntheinter.kvdn.mapdb.mapdbExtension
 import net.iowntheinter.kvdn.storage.kv.kvdata
+import net.iowntheinter.kvdn.storage.txnHook
 import org.mapdb.DB
 import org.mapdb.DBMaker
 
@@ -19,6 +20,10 @@ class mapdbDataImpl extends mapdbExtension implements kvdata {
     DB db
     String dbpath = null
     Logger logger = LoggerFactory.getLogger(this.class.getName())
+    LinkedHashSet<txnHook> postHooks = new LinkedHashSet<txnHook>()
+    LinkedHashSet<txnHook> preHooks = new LinkedHashSet<txnHook>()
+
+
 
     mapdbDataImpl(Vertx vertx) {
         this.vertx = vertx
@@ -31,6 +36,7 @@ class mapdbDataImpl extends mapdbExtension implements kvdata {
             logger.warn("initalized MapDB as in-memory database")
             logger.warn("THIS IS NOT PERSISTENT")
         }
+        postHooks.add(new mapdbPostTXHook())
 
     }
 
@@ -42,6 +48,14 @@ class mapdbDataImpl extends mapdbExtension implements kvdata {
             handler.handle(asyncResult)
         })
     }
+    @Override
+    LinkedHashSet<txnHook> getPreHooks() {
+        return this.preHooks
+    }
 
+    @Override
+    LinkedHashSet<txnHook> getPostHooks() {
+        return this.postHooks
+    }
 
 }

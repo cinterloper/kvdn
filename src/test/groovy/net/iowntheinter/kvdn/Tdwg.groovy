@@ -21,30 +21,30 @@ import org.junit.runner.RunWith
  */
 
 @RunWith(VertxUnitRunner.class)
-public class Tdwg {
+class Tdwg {
 
-    Vertx vertx = Vertx.vertx();
+    Vertx vertx = Vertx.vertx()
     def kvs
     String addr, key, data
     Logger logger = LoggerFactory.getLogger(this.class.getName())
 
     @Before
-    public void before(TestContext context) {
+    void before(TestContext context) {
 
-        vertx.exceptionHandler(context.exceptionHandler());
+        vertx.exceptionHandler(context.exceptionHandler())
         kvs = new kvdnSession(vertx) as kvdnSession
         addr = UUID.randomUUID().toString()
 
     }
 
     @After
-    public void after(TestContext context) {
+    void after(TestContext context) {
         //vertx.close(context.asyncAssertSuccess());
     }
 
     @Test
-    public void test1(TestContext context) {
-        Async async = context.async();
+    void test1(TestContext context) {
+        Async async = context.async()
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
         def d = new distributedWaitGroup(['1','2','3'].toSet(),{
@@ -56,8 +56,8 @@ public class Tdwg {
 
     }
     @Test
-    public void test2(TestContext context) {
-        Async async = context.async();
+    void test2(TestContext context) {
+        Async async = context.async()
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
         def tokens=['1','2','3']
@@ -74,8 +74,8 @@ public class Tdwg {
         }
     }
     @Test
-    public void test3(TestContext context) {
-        Async async = context.async();
+    void test3(TestContext context) {
+        Async async = context.async()
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
         def s = new kvdnSession(vertx)

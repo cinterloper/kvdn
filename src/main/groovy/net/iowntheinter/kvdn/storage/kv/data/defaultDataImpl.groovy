@@ -9,6 +9,7 @@ import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.SharedData
 import net.iowntheinter.kvdn.storage.kv.kvdata
 import net.iowntheinter.kvdn.storage.kv.local.shimAsyncMap
+import net.iowntheinter.kvdn.storage.txnHook
 
 /**
  * Created by g on 10/6/16.
@@ -34,5 +35,15 @@ class defaultDataImpl implements kvdata {
             logger.trace("starting local kvdn operation with vertx.isClustered() == ${vertx.isClustered()}")
             cb.handle(Future.succeededFuture(new shimAsyncMap(vertx, sa)))
         }
+    }
+
+    @Override
+    LinkedHashSet<txnHook> getPreHooks() {
+        return new LinkedHashSet<txnHook>()
+    }
+
+    @Override
+    LinkedHashSet<txnHook> getPostHooks() {
+        return new LinkedHashSet<txnHook>()
     }
 }

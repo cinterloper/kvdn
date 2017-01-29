@@ -38,28 +38,38 @@ class kvdnSession {
     //roMode should not issue new sessions, new tx's on existing sessions will get the ROFLAG
     boolean roMode = false
     boolean transition = false
-    def customDataImpl = null
     Set txflags
     EventBus eb
     Logger logger
     def sessionid, keyprov, config
-    def D
+    public D
 
     ArrayList<txnHook> preHooks = []
     ArrayList<txnHook> postHooks = []
     LocalMap accessCache
 
-    def sessionPreTxHooks = { tx, cb -> cb() }
-    def sessionPostTxHooks = { tx, cb -> cb() }
+    void sessionPreTxHooks(tx, cb) {
+        _hookCaller(tx as kvdnTX, this.preHooks, 0, cb)
+    }
+
+    void sessionPostTxHooks(tx, cb) {
+        _hookCaller(tx as kvdnTX, this.postHooks, 0, cb)
+    }
     Closure txEndHandler = { KvTx tx, cb ->
         sessionPostTxHooks(tx, cb)
     }
 
     void _hookCaller(kvdnTX tx, ArrayList<txnHook> hooks, int ptr, cb) {
+        logger.trace("inside hook caller ptr: $ptr hooks: $hooks")
         if (ptr != hooks.size()) {
+
+            def nxt = hooks[ptr] as txnHook
+            logger.trace("calling hook")
+
             ptr++
-            def nxt = hooks[ptr]
-            nxt.call(tx, this, this.&_hookCaller(tx, hooks, ptr, cb))
+            nxt.call(tx, this, {
+                _hookCaller(tx, hooks, ptr, cb)
+            })
         } else
             cb()
     }
@@ -77,6 +87,8 @@ class kvdnSession {
         String configured_data = config.getString('data_implementation') ?: 'net.iowntheinter.kvdn.storage.kv.data.defaultDataImpl'
         try {
             this.D = this.class.classLoader.loadClass(configured_data)?.newInstance(vertx as Vertx) as kvdata
+            this.preHooks.addAll((D as kvdata).getPreHooks())
+            this.postHooks.addAll((D as kvdata).getPostHooks())
         } catch (e) {
             e.printStackTrace()
             logger.fatal("could not load data impl $configured_data: ${e.getMessage()}")
@@ -87,7 +99,7 @@ class kvdnSession {
             String configured_provider = config.getString('key_provider') ?: null
             //  'net.iowntheinter.kvdn.storage.kv.key.impl.CRDTKeyProvider' // not working right now
             try {
-                this.keyprov = this.class.classLoader.loadClass(configured_provider)?.newInstance(vertx,this.D) as keyProvider
+                this.keyprov = this.class.classLoader.loadClass(configured_provider)?.newInstance(vertx, this.D) as keyProvider
             } catch (e) {
                 e.printStackTrace()
                 logger.fatal("could not load key provider $configured_provider : ${e.getMessage()}")

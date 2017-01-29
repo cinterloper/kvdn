@@ -30,12 +30,12 @@ import io.vertx.groovy.core.Vertx as GVertx
         setLevel(Level.TRACE)
 v = (vertx as GVertx).getDelegate() as Vertx //get the instance of the java class
 
-s = new kvserver(v);
+s = new kvserver(v)
 logger = new LoggerFactory().getLogger("kvdn")
 
 router = Router.router(v)
 router.route().handler(BodyHandler.create())
-JsonObject config = new JsonObject().put("properties_path", "classpath:test-auth.properties");
+JsonObject config = new JsonObject().put("properties_path", "classpath:test-auth.properties")
 
 def opts = new ShiroAuthOptions().setConfig(config).setType(ShiroAuthRealmType.PROPERTIES)
 //AuthProvider provider = ShiroAuth.create(v, opts);
@@ -47,7 +47,7 @@ def options = new BridgeOptions()
         .addOutboundPermitted(new PermittedOptions()
         .setAddressRegex(".*"))
         .addInboundPermitted(new PermittedOptions()
-        .setAddressRegex(".*"));
+        .setAddressRegex(".*"))
 sjsh.bridge(options)
 
 
@@ -57,20 +57,20 @@ router.route("/eb/*").handler(sjsh)
 //router.route("/loginhandler").handler(FormLoginHandler.create(provider));
 
 s.init(router as Router, {
-    router.route().handler(StaticHandler.create());
+    router.route().handler(StaticHandler.create())
 
-    router.route().handler(CookieHandler.create());
-    router.route().handler(BodyHandler.create());
-    router.route().handler(SessionHandler.create(LocalSessionStore.create(v)));
+    router.route().handler(CookieHandler.create())
+    router.route().handler(BodyHandler.create())
+    router.route().handler(SessionHandler.create(LocalSessionStore.create(v)))
   //  router.route().handler(UserSessionHandler.create(provider))
 // Any requests to URI starting '/private/' require login
 //router.route("/KVDN/*").handler(RedirectAuthHandler.create(provider, "/loginpage.html"));
     //router.route("/eb/*").handler(BasicAuthHandler.create(provider))
     router.route("/logout").handler({context ->
-        context.clearUser();
+        context.clearUser()
         // Redirect back to the index page
-        context.response().putHeader("location", "/").setStatusCode(302).end();
-    });
+        context.response().putHeader("location", "/").setStatusCode(302).end()
+    })
     try {
 
         def server = v.createHttpServer()

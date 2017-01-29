@@ -28,9 +28,8 @@ sourceCompatibility = '1.8'
 dependencies {
     compile "io.vertx:vertx-core:$libversion"
     compile 'org.mapdb:mapdb:3.0.3'
+
     compile "net.iowntheinter:kvdn:$projversion"
-
-
 }
 
 publishing {

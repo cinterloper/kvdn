@@ -3,13 +3,13 @@ import io.vertx.core.Vertx
 import io.vertx.core.logging.LoggerFactory
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
 import net.iowntheinter.kvdn.storage.kvdnSession
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import io.vertx.ext.unit.Async
+import io.vertx.ext.unit.TestContext
+import io.vertx.ext.unit.junit.VertxUnitRunner
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
 
 
 /*
@@ -19,30 +19,30 @@ import org.junit.runner.RunWith;
  */
 
 @RunWith(VertxUnitRunner.class)
-public class Tgetput {
+class Tgetput {
 
-    Vertx vertx = Vertx.vertx();
+    Vertx vertx = Vertx.vertx()
     def kvs
     String addr, key, data
     Logger logger = LoggerFactory.getLogger(this.class.getName())
 
     @Before
-    public void before(TestContext context) {
+    void before(TestContext context) {
 
-        vertx.exceptionHandler(context.exceptionHandler());
+        vertx.exceptionHandler(context.exceptionHandler())
         kvs = new kvdnSession(vertx) as kvdnSession
         addr = UUID.randomUUID().toString()
 
     }
 
     @After
-    public void after(TestContext context) {
+    void after(TestContext context) {
         //vertx.close(context.asyncAssertSuccess());
     }
 
     @Test
-    public void test1(TestContext context) {
-        Async async = context.async();
+    void test1(TestContext context) {
+        Async async = context.async()
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
         (kvs as kvdnSession).init({
@@ -59,7 +59,7 @@ public class Tgetput {
                         async.complete()
                     }
                     context.assertEquals(gresult.result, data)
-                    async.complete();
+                    async.complete()
 
                 })
             })
@@ -71,8 +71,8 @@ public class Tgetput {
     }
 
     @Test
-    public void test2(TestContext context) {
-        Async async = context.async();
+    void test2(TestContext context) {
+        Async async = context.async()
 
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
@@ -91,7 +91,7 @@ public class Tgetput {
                     }
                     println("got result ${xresult.result}")
                     context.assertEquals((xresult.result as Set)[0], key)
-                    async.complete();
+                    async.complete()
 
                 })
 
