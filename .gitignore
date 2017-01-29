@@ -9,3 +9,4 @@ build/
 *.iml
 note*.txt
 node_modules
+.gradle/
