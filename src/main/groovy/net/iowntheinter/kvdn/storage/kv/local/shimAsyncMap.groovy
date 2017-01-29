@@ -11,8 +11,8 @@ import io.vertx.core.shareddata.SharedData
  * Created by g on 7/17/16.
  */
 class shimAsyncMap implements AsyncMap {
-    LocalMap sham;
-    SharedData sd;
+    LocalMap sham
+    SharedData sd
 
     shimAsyncMap(Vertx vertx, String name) {
         this.sd = vertx.sharedData()

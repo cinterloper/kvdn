@@ -4,6 +4,7 @@ import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import net.iowntheinter.kvdn.ignite.igniteExtension
 import net.iowntheinter.kvdn.storage.kv.key.keyProvider
+import net.iowntheinter.kvdn.storage.kv.kvdata
 import org.apache.ignite.IgniteCache
 import org.apache.ignite.cache.query.ScanQuery
 import org.apache.ignite.lang.IgniteClosure
@@ -15,6 +16,12 @@ import javax.cache.Cache.Entry
  */
 class igKeyProvider extends igniteExtension implements keyProvider {
 
+    private final Vertx vertx
+    def DataImpl
+    igKeyProvider(Vertx vertx, kvdata DataImpl){
+        this.vertx = vertx
+        this.DataImpl = DataImpl
+    }
     @Override
     void getKeys(String name, cb) {
         IgniteCache cache = ignite.cache(name)

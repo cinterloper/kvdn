@@ -83,11 +83,11 @@ class kvdnSession {
             throw e
         }
 
-        try {  //vertx cluster mode
+        try {
             String configured_provider = config.getString('key_provider') ?: null
             //  'net.iowntheinter.kvdn.storage.kv.key.impl.CRDTKeyProvider' // not working right now
             try {
-                this.keyprov = this.class.classLoader.loadClass(configured_provider)?.newInstance() as keyProvider
+                this.keyprov = this.class.classLoader.loadClass(configured_provider)?.newInstance(vertx,this.D) as keyProvider
             } catch (e) {
                 e.printStackTrace()
                 logger.fatal("could not load key provider $configured_provider : ${e.getMessage()}")
@@ -137,7 +137,7 @@ class kvdnSession {
             if (tracking)
                 accessCache.put(tx.strAddr, tx.txid)
             else
-                accessCache.putIfAbsent(tx.strAddr, null)
+                accessCache.putIfAbsent(tx.strAddr, true)
             cb()
         })
     }

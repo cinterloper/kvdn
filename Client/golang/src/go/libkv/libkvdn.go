@@ -112,6 +112,9 @@ func (l *Lock) Lock(stopCh chan struct{}) (<-chan struct{}, error) {
 	return args.Get(0).(<-chan struct{}), args.Error(1)
 }
 
+
+func (s string) Call(method string, data string) 
+
 // Unlock mock
 func (l *Lock) Unlock() error {
 	args := l.Mock.Called()

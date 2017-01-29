@@ -5,11 +5,19 @@ import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import net.iowntheinter.kvdn.hazelcast.hzExtension
 import net.iowntheinter.kvdn.storage.kv.key.keyProvider
+import net.iowntheinter.kvdn.storage.kv.kvdata
 
 /**
  * Created by g on 7/17/16.
  */
 class hzKeyProvider extends hzExtension implements keyProvider  {
+    private final Vertx vertx
+    def DataImpl
+
+    hzKeyProvider(Vertx vertx, kvdata DataImpl){
+        this.vertx = vertx
+        this.DataImpl = DataImpl
+    }
 
     @Override
     void getKeys(String name, cb) {

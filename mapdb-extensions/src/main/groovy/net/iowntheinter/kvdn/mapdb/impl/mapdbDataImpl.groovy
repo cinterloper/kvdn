@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.AsyncMap
+import net.iowntheinter.kvdn.mapdb.mapdbData
 import net.iowntheinter.kvdn.mapdb.mapdbExtension
 import net.iowntheinter.kvdn.storage.kv.kvdata
 import org.mapdb.DB
@@ -36,9 +37,11 @@ class mapdbDataImpl extends mapdbExtension implements kvdata {
     @Override
     void getMap(String s, Handler<AsyncResult<AsyncMap>> handler) {
         vertx.executeBlocking({ future ->
-            future.complete(db.hashMap(s))
+            future.complete( new shimAsyncMapDB(vertx, this.db, s))
         }, { asyncResult ->
             handler.handle(asyncResult)
         })
     }
+
+
 }

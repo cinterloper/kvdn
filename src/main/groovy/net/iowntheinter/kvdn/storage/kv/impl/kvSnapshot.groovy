@@ -13,7 +13,7 @@ class kvSnapshot implements Map{
     public final long txId
 
    kvSnapshot(String mapId, int snapTxCtrId){
-       txId=snapTxCtrId;
+       txId=snapTxCtrId
    }
     @Override
     int size() {

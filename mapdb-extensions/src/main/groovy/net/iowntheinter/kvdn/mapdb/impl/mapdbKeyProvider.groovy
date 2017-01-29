@@ -1,15 +1,23 @@
 package net.iowntheinter.kvdn.mapdb.impl
 
+import io.vertx.core.Vertx
+import net.iowntheinter.kvdn.mapdb.mapdbData
 import net.iowntheinter.kvdn.mapdb.mapdbExtension
 import net.iowntheinter.kvdn.storage.kv.key.keyProvider
 import org.mapdb.DB
 
 class mapdbKeyProvider extends mapdbExtension implements keyProvider {
 
-    DB db
-
-    mapdbKeyProvider(DB db) {
-        this.db = db
+    private final Vertx vertx
+    private final DB db
+    def DataImpl
+    mapdbKeyProvider(){
+        throw new Exception("YOU MUST PASS THE DATA IMPL TO ${this.class.name} constructor")
+    }
+    mapdbKeyProvider(Vertx vertx, DataImpl) {
+        this.db = (DataImpl as mapdbDataImpl).db
+        this.vertx = vertx
+        this.DataImpl = DataImpl
     }
 
     @Override

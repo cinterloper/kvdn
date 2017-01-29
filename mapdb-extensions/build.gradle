@@ -49,7 +49,15 @@ publishing {
 
 mainClassName = 'io.vertx.core.Launcher'
 
-
+shadowJar {
+    classifier = 'fat'
+    manifest {
+        attributes 'Main-Verticle': 'groovy:kvdn-start.groovy'
+    }
+    mergeServiceFiles {
+        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+    }
+}
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.8'

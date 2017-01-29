@@ -44,7 +44,7 @@ abstract class kvdnTX {
             throw new Exception("tx has already been invoked, you must create another tx")
         logger.trace("${type}:${strAddr}:${params.toString()}")
         this.dirty = true
-        preTxHooks(cb)
+        preTxHooks(this, cb)
     }
 
     Set getFlags() {
