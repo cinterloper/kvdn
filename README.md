@@ -16,7 +16,9 @@ You can also:
 
 Some of these fetures are achived through cluster-manager specific `provider` implementations. 
 
-right now KVDN supports Hazelcast and Apache Ignite
+right now KVDN supports MapDB for local persistance, with support for Hazelcast and Apache Ignite for distributed persistance
+
+A JDBC mapstore is included for Hazelcast, Apache Ignite users should follow the Ignite docs for Cassandra or JDBC persistance
 
 
 ### Drivers
