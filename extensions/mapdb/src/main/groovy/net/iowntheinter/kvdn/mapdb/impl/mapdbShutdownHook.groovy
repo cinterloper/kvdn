@@ -1,9 +1,7 @@
 package net.iowntheinter.kvdn.mapdb.impl
 
-import net.iowntheinter.kvdn.kvdnTX
 import net.iowntheinter.kvdn.mapdb.mapdbExtension
 import net.iowntheinter.kvdn.storage.kvdnSession
-import net.iowntheinter.kvdn.storage.txnHook
 import org.mapdb.DB
 
 /**

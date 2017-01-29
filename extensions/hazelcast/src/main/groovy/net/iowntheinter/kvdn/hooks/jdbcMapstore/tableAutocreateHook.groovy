@@ -2,19 +2,10 @@ package net.iowntheinter.kvdn.hooks.jdbcMapstore
 
 import groovy.text.SimpleTemplateEngine
 import io.vertx.core.Vertx
-import io.vertx.core.json.JsonObject
-import io.vertx.ext.jdbc.JDBCClient
 import net.iowntheinter.cornerstone.util.resourceLoader
 import net.iowntheinter.kvdn.hazelcast.hzExtension
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.jdbc.JDBCClient;
-import io.vertx.ext.sql.ResultSet;
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.ext.jdbc.JDBCClient
 import net.iowntheinter.kvdn.kvdnTX
 import net.iowntheinter.kvdn.storage.kvdnSession
 import net.iowntheinter.kvdn.storage.txnHook;

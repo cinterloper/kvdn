@@ -1,11 +1,11 @@
 rootProject.name = 'kvdn'
 if (!System.getenv("DISABLE_EXTENSIONS")) {
-    include 'hazelcast-extensions'
+    include "extension/hazelcast"
 //    include 'crdt-keys' //deprecated ~on ice
     include 'service-proxy'
-    include 'ignite-extensions'
+   include 'extensions/ignite'
     include 'util'
-    include 'mapdb-extensions'
+    include 'extensions/mapdb'
  //   include 'Client/golang'
 //    include 'graph-extensions' //not finished
 }

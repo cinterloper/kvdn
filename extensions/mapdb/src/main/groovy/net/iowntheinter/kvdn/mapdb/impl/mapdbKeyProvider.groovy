@@ -1,7 +1,6 @@
 package net.iowntheinter.kvdn.mapdb.impl
 
 import io.vertx.core.Vertx
-import net.iowntheinter.kvdn.mapdb.mapdbData
 import net.iowntheinter.kvdn.mapdb.mapdbExtension
 import net.iowntheinter.kvdn.storage.kv.key.keyProvider
 import org.mapdb.DB

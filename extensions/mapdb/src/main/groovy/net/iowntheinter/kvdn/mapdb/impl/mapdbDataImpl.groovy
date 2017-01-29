@@ -7,7 +7,6 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.AsyncMap
-import net.iowntheinter.kvdn.mapdb.mapdbData
 import net.iowntheinter.kvdn.mapdb.mapdbExtension
 import net.iowntheinter.kvdn.storage.kv.kvdata
 import net.iowntheinter.kvdn.storage.txnHook
