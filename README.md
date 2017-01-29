@@ -1,6 +1,5 @@
 # KVDN
 
-
 KVDN is an extensible distributed data framework and key-value storage protocol server.
 
 It builds on the Vert.X SharedData interface with features such as:
@@ -30,6 +29,8 @@ KVDN has client drivers for
   - CLI
 * Javascript
 * (vert.x languages supporting codegen)
+
+out of these, only the python driver is mature, and even it is still under development
 
 KVDN also has a saltstack integration where it can be a `pillar` data provider
 
