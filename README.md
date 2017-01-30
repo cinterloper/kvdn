@@ -30,7 +30,7 @@ KVDN has client drivers for
 * Javascript
 * (vert.x languages supporting codegen)
 
-out of these, only the python driver is mature, and even it is still under development
+out of these, only the python driver and the code generated Vert.X service-proxy drivers are mature, and even they are still under development
 
 KVDN also has a saltstack integration where it can be a `pillar` data provider
 
