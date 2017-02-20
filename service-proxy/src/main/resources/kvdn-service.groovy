@@ -15,8 +15,9 @@ import io.vertx.groovy.core.Vertx as GVertx
 import net.iowntheinter.kvdn.service.impl.kvdnService
 import net.iowntheinter.kvdn.service.kvsvc
 
-s = new kvserver();
 v = (vertx as GVertx).getDelegate() as Vertx //get the instance of the java class
+s = new kvserver(v)
+
 logger = new LoggerFactory().getLogger("kvdn")
 
 router = Router.router(v)
