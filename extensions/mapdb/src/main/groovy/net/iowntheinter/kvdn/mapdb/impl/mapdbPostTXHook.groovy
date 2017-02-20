@@ -16,6 +16,7 @@ class mapdbPostTXHook extends mapdbExtension implements txnHook {
     def DataImpl
     DB db
     Logger logger = LoggerFactory.getLogger(this.class)
+    Set TXTYPES = ["W","RW","D"]
     @Override
     void call(kvdnTX kvdnTX, kvdnSession kvdnSession, cb) {
         logger.trace("calling db.commit() hook for mapdb")
