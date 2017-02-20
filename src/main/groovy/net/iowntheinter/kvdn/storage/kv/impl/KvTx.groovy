@@ -34,6 +34,7 @@ class KvTx extends kvdnTX implements TXKV {
         this.sd = vertx.sharedData() as SharedData
         this.eb = vertx.eventBus() as EventBus
         this.D = session.D as kvdata
+        this.M = session.D as kvdata
 
     }
 
@@ -71,7 +72,7 @@ class KvTx extends kvdnTX implements TXKV {
 
     @Override
     void set(String key, content, cb) {
-        startTX("set", [key: key], {
+        startTX("set", [keys: [key]], {
             D.getMap(this.strAddr, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
                     AsyncMap map = res.result()
@@ -98,7 +99,7 @@ class KvTx extends kvdnTX implements TXKV {
 
     @Override
     void get(String key, cb) {
-        startTX("get", [key: key], {
+        startTX("get", [keys: [key]], {
             D.getMap(this.strAddr, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_READ)) {
                     AsyncMap map = res.result()
@@ -120,7 +121,7 @@ class KvTx extends kvdnTX implements TXKV {
 
     @Override
     void del(String key, cb) {
-        startTX("del", [key: key], {
+        startTX("del", [keys: [key]], {
             D.getMap(this.strAddr, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
                     AsyncMap map = res.result()

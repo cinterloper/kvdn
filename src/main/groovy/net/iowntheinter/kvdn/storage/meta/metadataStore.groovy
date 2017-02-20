@@ -7,7 +7,8 @@ import com.bettercloud.vault.json.JsonObject
  */
 interface metadataStore {
 
-    void setAttr(String path, String name, JsonObject data, cb)
+    void setMetadata(String path, Map data, cb)
+    void setAttr(String path, String name, String data, cb)
     void listAttrs(String path, cb)
     void removeAttr(String path, String name, cb)
 }

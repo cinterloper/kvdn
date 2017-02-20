@@ -9,6 +9,7 @@ import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.AsyncMap
 import net.iowntheinter.kvdn.mapdb.mapdbExtension
 import net.iowntheinter.kvdn.storage.kv.kvdata
+import net.iowntheinter.kvdn.storage.kvdnSession
 import net.iowntheinter.kvdn.storage.txnHook
 import org.mapdb.DB
 import org.mapdb.DBMaker
@@ -24,7 +25,7 @@ class mapdbDataImpl extends mapdbExtension implements kvdata {
 
 
 
-    mapdbDataImpl(Vertx vertx) {
+    mapdbDataImpl(Vertx vertx, kvdnSession s) {
         this.vertx = vertx
         this.config = vertx.getOrCreateContext().config().getJsonObject('kvdn') ?: new JsonObject()
         dbpath = config.getJsonObject("mapdb")?.getString("dbPath")

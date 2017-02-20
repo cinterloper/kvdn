@@ -17,15 +17,20 @@ abstract class kvdnTX {
         MODE_ADMIN
     }
 
-    boolean dirty
+    boolean dirty = false
+    boolean multi = false
     SharedData sd
     Logger logger
     EventBus eb
     String strAddr
     UUID txid
     Vertx vertx
+    Map metabuffer = null
     def keyprov
     def session
+    def metaData
+    LinkedList opKeys
+
     def preTxHooks = { kvdnTX tx, cb ->
         ((kvdnSession) session).sessionPreTxHooks(tx,cb)
     }
@@ -54,6 +59,13 @@ abstract class kvdnTX {
     boolean checkFlags(txtype) {
         return (!session.txflags.contains(txtype))
     }
+
+    def putMeta =  {String name , String data ->
+        if (!metabuffer)
+            metabuffer = [:]
+        metabuffer[name]=data
+        return this
+    } as Closure<kvdnTX> //fluent
 
     Map getDebug() {
         return [

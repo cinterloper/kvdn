@@ -10,6 +10,7 @@ import net.iowntheinter.kvdn.ignite.igniteExtension
 import net.iowntheinter.kvdn.ignite.util.IgVxAsyncCoupler
 import net.iowntheinter.kvdn.ignite.util.shimAsyncIgniteMap
 import net.iowntheinter.kvdn.storage.kv.kvdata
+import net.iowntheinter.kvdn.storage.kvdnSession
 import net.iowntheinter.kvdn.storage.txnHook
 import org.apache.ignite.IgniteCache
 
@@ -18,7 +19,7 @@ import org.apache.ignite.IgniteCache
  */
 class igniteDataImpl extends igniteExtension implements kvdata{
     def iv
-    igniteDataImpl(Vertx vertx){
+    igniteDataImpl(Vertx vertx, kvdnSession s){
         iv  = new IgVxAsyncCoupler()
     }
 

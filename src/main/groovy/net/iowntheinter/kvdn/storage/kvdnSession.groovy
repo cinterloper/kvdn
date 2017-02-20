@@ -86,7 +86,7 @@ class kvdnSession {
 
         String configured_data = config.getString('data_implementation') ?: 'net.iowntheinter.kvdn.storage.kv.data.defaultDataImpl'
         try {
-            this.D = this.class.classLoader.loadClass(configured_data)?.newInstance(vertx as Vertx) as kvdata
+            this.D = this.class.classLoader.loadClass(configured_data)?.newInstance(vertx as Vertx, this) as kvdata
             this.preHooks.addAll((D as kvdata).getPreHooks())
             this.postHooks.addAll((D as kvdata).getPostHooks())
         } catch (e) {

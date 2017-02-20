@@ -9,6 +9,7 @@ import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.SharedData
 import net.iowntheinter.kvdn.storage.kv.kvdata
 import net.iowntheinter.kvdn.storage.kv.local.shimAsyncMap
+import net.iowntheinter.kvdn.storage.kvdnSession
 import net.iowntheinter.kvdn.storage.txnHook
 
 /**
@@ -19,7 +20,7 @@ class defaultDataImpl implements kvdata {
     Vertx vertx
     Logger logger
 
-    defaultDataImpl(Vertx v) {
+    defaultDataImpl(Vertx v, kvdnSession s) {
         this.vertx = v
 
         this.logger = new LoggerFactory().getLogger(this.class.getName())

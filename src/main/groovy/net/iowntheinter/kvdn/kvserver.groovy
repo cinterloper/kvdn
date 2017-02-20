@@ -79,9 +79,9 @@ class kvserver {
             KvTx tx = session.newTx("${sName}${_token}${mName}")
             tx.getKeys({ resGetK ->
                 if (resGetK.error == null) {
+                    response.putHeader("Content-Type","application/json")
                     response.end(new JsonArray(resGetK.result as List).toString())
                 } else {
-
                     response.setStatusCode(501).end(resGetK.error.toString())
                 }
             })
@@ -120,6 +120,9 @@ class kvserver {
             KvTx tx = session.newTx("${sName}${_token}${mName}")
             tx.get(kName, { resGet ->
                 if (resGet.error == null) {
+                    def ctype = (resGet?.meta["Content-Type"]) ?: null
+                    if(ctype)
+                        response.putHeader("Content-Type",ctype as String)
                     response.end(resGet.result.toString())
                 } else {
                     response.setStatusCode(501).end(resGet.error.toString())
@@ -151,6 +154,9 @@ class kvserver {
                     response.setStatusCode(400).end()
                 } else {
                     KvTx tx = session.newTx("${sName}${_token}${mName}")
+                    def ctype = routingContext.request().getHeader("Content-Type")
+                    if(ctype)
+                        tx.putMeta("Content-Type",ctype)
                     tx.set(kName as String, content, { resPut ->
                         if (resPut.error == null) {
                             response.end(mName + ":" + kName)
@@ -172,6 +178,7 @@ class kvserver {
         def mName = filterAddr(routingContext.request().getParam("map"))
         def sName = filterAddr(routingContext.request().getParam("str"))
         def kName = routingContext.get('keyOverride') ?: routingContext.request().getParam("key")
+        def mtype = routingContext.request().getHeader("Content-Type")
 
         HttpServerResponse response = routingContext.response()
         if (mName == null || kName == null) {
@@ -182,6 +189,9 @@ class kvserver {
                 response.setStatusCode(400).end(response.toString())
             } else {
                 KvTx tx = session.newTx("${sName}${_token}${mName}")
+                def ctype = routingContext.request().getHeader("Content-Type")
+                if(ctype)
+                    tx.putMeta("Content-Type",ctype)
                 tx.set(kName as String, content, { resPut ->
                     if (resPut.error == null) {
                         response.end(mName + ":" + kName)
@@ -209,6 +219,9 @@ class kvserver {
                     response.setStatusCode(400).end()
                 } else {
                     KvTx tx = session.newTx("${sName}${_token}${mName}")
+                    def ctype = routingContext.request().getHeader("Content-Type")
+                    if(ctype)
+                        tx.putMeta("Content-Type",ctype)
                     tx.submit(content, { resPut ->
                         if (resPut.error == null) {
                             response.end(mName + ":" + resPut.key)
