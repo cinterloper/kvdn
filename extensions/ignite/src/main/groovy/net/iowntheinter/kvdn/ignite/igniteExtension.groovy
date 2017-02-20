@@ -1,6 +1,7 @@
 package net.iowntheinter.kvdn.ignite
 
 import io.vertx.core.Vertx
+import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import net.iowntheinter.cornerstone.util.extensionManager.extension
@@ -33,5 +34,14 @@ abstract class igniteExtension implements extension {
         assert ignite.cluster().localNode().version().major(), 1
         _version = ignite.cluster().localNode().version().minor()
         log.debug("init key provider with IGNITE 1.${_version}")
+    }
+    @Override
+    void load(Vertx vertx, Object o) {
+
+    }
+
+    @Override
+    JsonObject register(Vertx vertx) {
+        return null
     }
 }

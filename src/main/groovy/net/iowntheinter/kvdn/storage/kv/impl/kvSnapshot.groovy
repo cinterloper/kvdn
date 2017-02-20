@@ -15,6 +15,10 @@ class kvSnapshot implements Map{
    kvSnapshot(String mapId, int snapTxCtrId){
        txId=snapTxCtrId
    }
+    void ImmutableError(){
+        throw new Exception("you cannot perform this")
+
+    }
     @Override
     int size() {
         return 0
@@ -42,16 +46,20 @@ class kvSnapshot implements Map{
 
     @Override
     Object put(Object o, Object o2) {
+        ImmutableError()
         return null
     }
 
     @Override
     Object remove(Object o) {
+        ImmutableError()
+
         return null
     }
 
     @Override
     void putAll(Map map) {
+        ImmutableError()
 
     }
 
