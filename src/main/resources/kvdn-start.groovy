@@ -79,4 +79,5 @@ s.init(router as Router, {
     } catch (e) {
         logger.error "could not setup http server:" + e.getMessage()
     }
+
 })
