@@ -6,6 +6,7 @@ if (!System.getenv("DISABLE_EXTENSIONS")) {
     include 'util'
     include 'extensions/mapdb'
     include 'extensions/unipop'
+    include 'extensions/xodus'
  //   include 'Client/golang'
 //    include 'graph-extensions' //not finished
 }

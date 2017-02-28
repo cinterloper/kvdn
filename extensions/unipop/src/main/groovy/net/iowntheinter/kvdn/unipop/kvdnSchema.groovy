@@ -9,9 +9,5 @@ import org.unipop.schema.property.PropertySchema
  * Created by g on 2/23/17.
  */
 interface kvdnSchema extends ElementSchema {
-    BaseRequest getSearch(SearchQuery<E> query);
-    List<E> parseResults(HttpResponse<JsonNode> result, PredicateQuery query);
 
-    BaseRequest addElement(E element) throws NoSuchElementException;
-    BaseRequest delete(E element);
 }
