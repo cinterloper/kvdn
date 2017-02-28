@@ -12,11 +12,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 
-/*
- * Example of an asynchronous unit test written in JUnit style using vertx-unit
- *
- * @author <a href="http://tfox.org">Tim Fox</a>
- */
 
 @RunWith(VertxUnitRunner.class)
 class Tgetput {

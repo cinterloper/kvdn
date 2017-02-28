@@ -20,7 +20,7 @@ import java.security.MessageDigest
  */
 
 class KvTx extends kvdnTX implements TXKV {
-    def D
+    def D, M
     boolean finished
 
 

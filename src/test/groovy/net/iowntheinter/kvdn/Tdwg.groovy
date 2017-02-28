@@ -91,6 +91,7 @@ class Tdwg {
                 def t = s.newTx('this/that') as KvTx
                 println("setting ${token}")
                 t.set(token,token,{})
+
             }
 
         },{
