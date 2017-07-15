@@ -35,7 +35,7 @@ class LTx extends kvdnTX implements TXLCK {
         this.session = session as kvdnSession
         this.txid = txid
         strAddr = sa
-        logger = new LoggerFactory().getLogger("KvTx:" + strAddr)
+        logger = new LoggerFactory().getLogger("${this.class.simpleName}" + strAddr)
         sd = vertx.sharedData() as SharedData
         eb = vertx.eventBus() as EventBus
     }
@@ -43,12 +43,14 @@ class LTx extends kvdnTX implements TXLCK {
 
     @Override
     void release(Lock l, cb) {
-        startTX("LCK:release", {
+        startTX(txtype.LCK_RELEASE, {
 
             try {
                 assert checkFlags(txmode.MODE_WRITE)
                 (this.session as kvdnSession).finishTx(this, {
                     l.release()
+                    logger.trace("release:${strAddr}")
+
                     cb([result: true, error: null])
                 })
             } catch (e) {
@@ -60,23 +62,20 @@ class LTx extends kvdnTX implements TXLCK {
 
     @Override
     void get(cb) {
-        startTX("LCK:get", {
+        startTX(txtype.LKC_ACQUIRE, {
             D.getLock(this, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_READ)) {
-                    Counter ctr = res.result()
-                    ctr.get({ resGet ->
-                        if (resGet.succeeded()) {
-                            logger.trace("get:${strAddr}")
-                            (this.session as kvdnSession).finishTx(this, {
-                                cb([result: resGet.result() as Lock, error: null])
-                            })
-                        } else {
-                            bailTx([error: res.cause(), tx: this], cb)
-                        }
+                    Lock l = res.result()
+
+                    logger.trace("acquire:${strAddr}")
+                    (this.session as kvdnSession).finishTx(this, {
+                        cb([result: l as Lock, error: null])
                     })
                 } else {
                     bailTx([error: res.cause(), tx: this], cb)
                 }
+
+
             })
         })
     }

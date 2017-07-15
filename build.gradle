@@ -19,7 +19,7 @@ plugins {
     id 'java'
     id 'application'
     id 'com.github.johnrengelman.shadow' version '1.2.3'
-    id "com.linkedin.python-sdist" version "0.3.9"
+    //id "com.linkedin.python-sdist" version "0.3.9"
     id 'maven-publish'
     id "net.ltgt.apt" version "0.6"
 }
@@ -38,6 +38,7 @@ if(System.getenv("VERTX_VERSION") != null)
     libversion = System.getenv("VERTX_VERSION")
 
 version =  "$libversion-${new File('src/main/resources/_KVDN_VERSION.txt').text.trim()}"
+println("version $version")
 def GH_TOKEN = System.getenv("GH_TOKEN")
 def AWS_MVN_BUCKET = System.getenv("AWS_MVN_BUCKET")
 def AWS_DEFAULT_REGION = System.getenv("AWS_DEFAULT_REGION")
@@ -80,7 +81,7 @@ repositories {
     mavenCentral()
     mavenLocal()
     jcenter()
-    pyGradlePyPi()
+   // pyGradlePyPi()
     maven { url 'http://dl.bintray.com/gesellix/docker-utils' }
     flatDir { dirs '/usr/share/java' }
     flatDir { dirs 'lib/' }
@@ -132,7 +133,7 @@ dependencies {
     compile "io.vertx:vertx-service-proxy:$libversion"
     compile 'ch.qos.logback:logback-classic:1.1.7'
     compile 'ch.qos.logback:logback-core:1.1.7'
-    compile "net.iowntheinter:cornerstone-util:$libversion-0.9.2"
+    compile "net.iowntheinter:kvdn-util:$version"
     testCompile "io.vertx:vertx-unit:$libversion"
     testCompile group: 'junit', name: 'junit', version: '4.+'
 }
@@ -151,7 +152,7 @@ shadowJar {
     manifest {
         attributes 'Main-Verticle': 'groovy:kvdn-start.groovy'
     }
-    mergeServiceFiles {
+    mergeServiceFiles{
         include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
     }
 }

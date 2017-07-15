@@ -1,6 +1,7 @@
 import io.vertx.core.logging.Logger
 import io.vertx.core.Vertx
 import io.vertx.core.logging.LoggerFactory
+
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
 import net.iowntheinter.kvdn.storage.kvdnSession
 import io.vertx.ext.unit.Async

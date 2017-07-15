@@ -4,6 +4,7 @@ import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.eventbus.MessageConsumer
+import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
@@ -41,8 +42,9 @@ class kvdnSession {
     Set txflags
     EventBus eb
     Logger logger
-    def sessionid, keyprov, config
-    public D
+    def sessionid, keyprov
+    final JsonObject config
+    def D, M
 
     ArrayList<txnHook> preHooks = []
     ArrayList<txnHook> postHooks = []
@@ -58,6 +60,15 @@ class kvdnSession {
     Closure txEndHandler = { KvTx tx, cb ->
         sessionPostTxHooks(tx, cb)
     }
+/*
+ * this is a recursive traversal of the hooks array
+ * it jumps into the next hook, then the hook jumps either back into a new _hookCaller call, or straight to the next cb
+ * it will probably explode if you have an unreasonable number of hooks to call
+ *
+ */
+    def txHookLoader = { String it ->
+        return this.class.classLoader.loadClass(it)?.newInstance(vertx as Vertx, this) as txnHook
+    }
 
     void _hookCaller(kvdnTX tx, ArrayList<txnHook> hooks, int ptr, cb) {
         logger.trace("inside hook caller ptr: $ptr hooks: $hooks")
@@ -67,26 +78,40 @@ class kvdnSession {
             logger.trace("calling hook")
 
             ptr++
-            nxt.call(tx, this, {
+            nxt.call(tx, this, { //trampoline
                 _hookCaller(tx, hooks, ptr, cb)
             })
         } else
             cb()
     }
 
+    void processConfiguredHooks() {
+        JsonArray configuredPreHooks = config.getJsonArray('preHooks')
+        JsonArray configuredPostHooks = config.getJsonArray('preHooks')
+        configuredPreHooks.each { name ->
+            preHooks.add(txHookLoader(name as String))
+        }
+        configuredPostHooks.each { name ->
+            postHooks.add(txHookLoader(name as String))
+        }
+
+    }
+
     kvdnSession(Vertx vx, stype = sessionType.NATIVE_SESSION) {
         vertx = vx
+        config = vertx.getOrCreateContext().config().getJsonObject('kvdn') ?: new JsonObject()
+
         txflags = []
         outstandingTX = new HashSet()
-        config = vertx.getOrCreateContext().config().getJsonObject('kvdn') ?: new JsonObject()
         sessionid = UUID.randomUUID().toString()
         logger = new LoggerFactory().getLogger("Kvdnsession:${sessionid.toString()}")
         eb = vertx.eventBus()
         accessCache = vertx.sharedData().getLocalMap(ACCESS_CACHE_LOC)
 
-        String configured_data = config.getString('data_implementation') ?: 'net.iowntheinter.kvdn.storage.kv.data.defaultDataImpl'
+        String configured_data = config.getString('data_implementation') ?:
+                'net.iowntheinter.kvdn.storage.kv.data.defaultDataImpl'
         try {
-            this.D = this.class.classLoader.loadClass(configured_data)?.newInstance(vertx as Vertx, this) as kvdata
+            this.D = txHookLoader(configured_data) as kvdata
             this.preHooks.addAll((D as kvdata).getPreHooks())
             this.postHooks.addAll((D as kvdata).getPostHooks())
         } catch (e) {
@@ -95,8 +120,10 @@ class kvdnSession {
             throw e
         }
 
+        processConfiguredHooks()
         try {
-            String configured_provider = config.getString('key_provider') ?: null
+            String configured_provider = config.getString('key_provider') ?:
+                    'net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider'
             //  'net.iowntheinter.kvdn.storage.kv.key.impl.CRDTKeyProvider' // not working right now
             try {
                 this.keyprov = this.class.classLoader.loadClass(configured_provider)?.newInstance(vertx, this.D) as keyProvider
@@ -120,6 +147,12 @@ class kvdnSession {
             cb()
         }, error_cb)
     }
+    /*
+     * This is the entrypoint to using the kv api, get your transactions here.
+     *
+     * @param strAddr storage address
+     * @return kvdnTX your transaction
+     */
 
     def newTx(String strAddr, datatype = dataType.KV) {
         if (!initalized) {
@@ -142,6 +175,9 @@ class kvdnSession {
             }
         }
     }
+/*
+ * you must call this as the last action
+ */
 
     void finishTx(kvdnTX tx, cb) {
         outstandingTX.remove(tx.txid)

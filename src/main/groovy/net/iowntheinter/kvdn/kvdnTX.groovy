@@ -9,12 +9,32 @@ import net.iowntheinter.kvdn.storage.kvdnSession
 /**
  * Created by g on 9/24/16.
  */
-abstract class kvdnTX {
+abstract class  kvdnTX {
     enum txmode {
         MODE_WRITE,
         MODE_READ,
         MODE_COMPLEX,
         MODE_ADMIN
+    }
+    enum txtype {
+        KV_SUBMIT,
+        KV_GET,
+        KV_SET,
+        KV_KEYS,
+        KV_SIZE,
+        KV_DEL,
+        CTR_GET,
+        CTR_ADDNGET,
+        CTR_GETNADD,
+        CTR_COMPSET,
+        LKC_ACQUIRE,
+        LCK_RELEASE,
+        QUEUE_ADD,
+        QUEUE_TAKE,
+        STACK_PUSH,
+        STACK_POP
+
+
     }
 
     boolean dirty = false
@@ -24,6 +44,7 @@ abstract class kvdnTX {
     EventBus eb
     String strAddr
     UUID txid
+    String type
     Vertx vertx
     Map metabuffer = null
     def keyprov
@@ -44,9 +65,10 @@ abstract class kvdnTX {
         })
     }
 
-    protected void startTX(String type, Map params = [:], cb) {
+    protected void startTX(txtype type, Map params = [:], cb) {
         if (this.dirty)
             throw new Exception("tx has already been invoked, you must create another tx")
+        this.type = type
         logger.trace("${type}:${strAddr}:${params.toString()}")
         this.dirty = true
         preTxHooks(this, cb)

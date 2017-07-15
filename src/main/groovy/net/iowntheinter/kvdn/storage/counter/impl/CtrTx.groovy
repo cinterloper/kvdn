@@ -38,7 +38,7 @@ class CtrTx extends kvdnTX implements TXCTR {
         this.session = session as kvdnSession
         this.txid = txid
         strAddr = sa
-        logger = new LoggerFactory().getLogger("KvTx:" + strAddr)
+        logger = new LoggerFactory().getLogger("${this.class.simpleName}" + strAddr)
         sd = vertx.sharedData() as SharedData
         eb = vertx.eventBus() as EventBus
     }
@@ -50,7 +50,7 @@ class CtrTx extends kvdnTX implements TXCTR {
 
     @Override
     void get(cb) {
-        startTX("CTR:get", {
+        startTX(txtype.CTR_GET, {
             D.getCtr(this, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_READ)) {
                     Counter ctr = res.result()
@@ -73,7 +73,7 @@ class CtrTx extends kvdnTX implements TXCTR {
 
     @Override
     void addAndGet(long value, cb) {
-        startTX("CTR:addAndGet", {
+        startTX(txtype.CTR_ADDNGET, {
             D.getCtr(this, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
                     Counter ctr = res.result()
@@ -100,7 +100,7 @@ class CtrTx extends kvdnTX implements TXCTR {
 
     @Override
     void getAndAdd(long value, cb) {
-        startTX("CTR:getAndAdd", {
+        startTX(txtype.CTR_GETNADD, {
             D.getCtr(this, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
                     Counter ctr = res.result()
@@ -127,7 +127,7 @@ class CtrTx extends kvdnTX implements TXCTR {
 
     @Override
     void compareAndSet(long oldv, long newv, cb) {
-        startTX("CTR:compareAndSet", {
+        startTX(txtype.CTR_COMPSET, {
 
             D.getCtr(this, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {

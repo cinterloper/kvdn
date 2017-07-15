@@ -30,7 +30,7 @@ class KvTx extends kvdnTX implements TXKV {
         this.session = session as kvdnSession
         this.txid = txid
         this.strAddr = sa
-        this.logger = new LoggerFactory().getLogger("KvTx:" + strAddr)
+        logger = new LoggerFactory().getLogger("${this.class.simpleName}" + strAddr)
         this.sd = vertx.sharedData() as SharedData
         this.eb = vertx.eventBus() as EventBus
         this.D = session.D as kvdata
@@ -45,7 +45,7 @@ class KvTx extends kvdnTX implements TXKV {
 
     @Override
     void submit(content, cb) {
-        startTX("submit", {
+        startTX(txtype.KV_SUBMIT, {
             D.getMap(this.strAddr, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
                     AsyncMap map = res.result()
@@ -72,7 +72,7 @@ class KvTx extends kvdnTX implements TXKV {
 
     @Override
     void set(String key, content, cb) {
-        startTX("set", [keys: [key]], {
+        startTX(txtype.KV_SET, [keys: [key]], {
             D.getMap(this.strAddr, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
                     AsyncMap map = res.result()
@@ -99,7 +99,7 @@ class KvTx extends kvdnTX implements TXKV {
 
     @Override
     void get(String key, cb) {
-        startTX("get", [keys: [key]], {
+        startTX(txtype.KV_GET, [keys: [key]], {
             D.getMap(this.strAddr, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_READ)) {
                     AsyncMap map = res.result()
@@ -121,7 +121,7 @@ class KvTx extends kvdnTX implements TXKV {
 
     @Override
     void del(String key, cb) {
-        startTX("del", [keys: [key]], {
+        startTX(txtype.KV_DEL, [keys: [key]], {
             D.getMap(this.strAddr, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
                     AsyncMap map = res.result()
@@ -146,7 +146,7 @@ class KvTx extends kvdnTX implements TXKV {
 
     @Override
     void getKeys(cb) {
-        startTX("getKeys", {
+        startTX(txtype.KV_KEYS, {
             keyprov.getKeys(this.strAddr, { Map asyncResult ->
                 (this.session as kvdnSession).finishTx(this, {
                     cb(asyncResult)
@@ -157,7 +157,7 @@ class KvTx extends kvdnTX implements TXKV {
 
     @Override
     void size(cb) {
-        startTX("size", {
+        startTX(txtype.KV_SIZE, {
             D.getMap(this.strAddr, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_READ)) {
                     AsyncMap map = res.result()

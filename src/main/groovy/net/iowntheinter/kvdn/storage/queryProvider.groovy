@@ -1,5 +1,6 @@
 package net.iowntheinter.kvdn.storage
-import net.iowntheinter.cornerstone.util.extensionManager.extension
+
+import net.iowntheinter.kvdn.util.extensionManager.extension
 
 /**
  * Created by g on 1/8/17.

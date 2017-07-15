@@ -14,7 +14,7 @@ import net.iowntheinter.kvdn.storage.kv.key.keyProvider
 class LocalKeyProvider implements keyProvider {
     SharedData sd
 
-    LocalKeyProvider(Vertx vertx) {
+    LocalKeyProvider(Vertx vertx, D) {
         sd = vertx.sharedData()
     }
 
