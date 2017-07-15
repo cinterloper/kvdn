@@ -30,6 +30,7 @@ class mapdbDataImpl extends mapdbExtension implements kvdata {
         this.config = vertx.getOrCreateContext().config().getJsonObject('kvdn') ?: new JsonObject()
         dbpath = config.getJsonObject("mapdb")?.getString("dbPath")
         if (dbpath) {
+
             db = DBMaker.fileDB(dbpath).make()
         } else {
             db = DBMaker.memoryDB().make()

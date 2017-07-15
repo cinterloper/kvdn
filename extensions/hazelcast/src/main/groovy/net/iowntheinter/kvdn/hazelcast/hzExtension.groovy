@@ -7,7 +7,7 @@ import com.hazelcast.core.HazelcastInstance
 import io.vertx.core.Vertx
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
-import net.iowntheinter.cornerstone.util.extensionManager.extension
+import net.iowntheinter.kvdn.util.extensionManager.extension
 
 
 /**

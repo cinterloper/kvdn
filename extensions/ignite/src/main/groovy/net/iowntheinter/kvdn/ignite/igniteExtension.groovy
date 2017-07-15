@@ -4,7 +4,7 @@ import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
-import net.iowntheinter.cornerstone.util.extensionManager.extension
+import net.iowntheinter.kvdn.util.extensionManager.extension
 import org.apache.ignite.Ignite
 import org.apache.ignite.IgniteSet
 import org.apache.ignite.Ignition

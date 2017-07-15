@@ -2,13 +2,13 @@ package net.iowntheinter.kvdn.hooks.jdbcMapstore
 
 import groovy.text.SimpleTemplateEngine
 import io.vertx.core.Vertx
-import net.iowntheinter.cornerstone.util.resourceLoader
 import net.iowntheinter.kvdn.hazelcast.hzExtension
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.jdbc.JDBCClient
 import net.iowntheinter.kvdn.kvdnTX
 import net.iowntheinter.kvdn.storage.kvdnSession
-import net.iowntheinter.kvdn.storage.txnHook;
+import net.iowntheinter.kvdn.storage.txnHook
+import net.iowntheinter.kvdn.util.resourceLoader
 
 /**
  * Created by g on 1/9/17.
@@ -20,7 +20,7 @@ class tableAutocreateHook extends hzExtension implements txnHook {
         client = JDBCClient.createShared(vertx, new JsonObject()
                 .put("url", System.getenv("HZ_MAPSTORE_JDBC_DBURL"))
                 .put("driver_class", "org.postgresql.Driver")
-                .put("max_pool_size", 30));
+                .put("max_pool_size", 30))
 
     }
 
