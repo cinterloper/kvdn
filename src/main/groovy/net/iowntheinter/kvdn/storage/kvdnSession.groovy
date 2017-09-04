@@ -87,7 +87,7 @@ class kvdnSession {
 
     void processConfiguredHooks() {
         JsonArray configuredPreHooks = config.getJsonArray('preHooks')
-        JsonArray configuredPostHooks = config.getJsonArray('preHooks')
+        JsonArray configuredPostHooks = config.getJsonArray('postHooks')
         configuredPreHooks.each { name ->
             preHooks.add(txHookLoader(name as String))
         }
