@@ -1,0 +1,1 @@
+eventbus callback intercepters / handlers to have remote hooks, and to include java code in ss js with callbacks into js via eb intercepter(java provided with channel name)
