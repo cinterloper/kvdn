@@ -141,5 +141,30 @@ class shimAsyncMapDB implements AsyncMap {
         })
     }
 
+    @Override
+    void keys(Handler handler) {
+        vertx.executeBlocking({ future ->
+            future.complete(sham.keySet())
+        }, { asyncResult ->
+            handler.handle(asyncResult)
+        })
+    }
 
+    @Override
+    void values(Handler handler) {
+        vertx.executeBlocking({ future ->
+            future.complete(sham.values())
+        }, { asyncResult ->
+            handler.handle(asyncResult)
+        })
+    }
+
+    @Override
+    void entries(Handler handler) {
+        vertx.executeBlocking({ future ->
+            future.complete(sham)
+        }, { asyncResult ->
+            handler.handle(asyncResult)
+        })
+    }
 }

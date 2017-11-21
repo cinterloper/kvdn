@@ -1,6 +1,8 @@
 package net.iowntheinter.kvdn.storage
 
 import io.vertx.core.AsyncResult
+import io.vertx.core.Future
+import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.eventbus.MessageConsumer
@@ -99,7 +101,8 @@ class kvdnSession {
 
     kvdnSession(Vertx vx, stype = sessionType.NATIVE_SESSION) {
         vertx = vx
-        config = vertx.getOrCreateContext().config().getJsonObject('kvdn') ?: new JsonObject()
+        JsonObject Vconfig = vertx.getOrCreateContext().config()
+        config = Vconfig.getJsonObject('kvdn') ?: new JsonObject()
 
         txflags = []
         outstandingTX = new HashSet()
@@ -121,8 +124,9 @@ class kvdnSession {
         }
 
         processConfiguredHooks()
+        String configured_provider
         try {
-            String configured_provider = config.getString('key_provider') ?:
+           configured_provider= config.getString('key_provider') ?:
                     'net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider'
             //  'net.iowntheinter.kvdn.storage.kv.key.impl.CRDTKeyProvider' // not working right now
             try {
@@ -136,15 +140,16 @@ class kvdnSession {
         } catch (e) { // in memory mode
             this.keyprov = new LocalKeyProvider(vertx)
         }
+        logger.info("CONFIGURED PROVIDER: "+ this.keyprov)
 
         logger.trace("starting new kvdn session with clustered = ${vertx.isClustered()} keyprovider = ${this.keyprov}")
 
     }
 
-    void init(cb, error_cb) {
+    void init(Handler cb, Handler error_cb) {
         zeroState(vertx, { kvdnSession s ->
             s.initalized = true
-            cb()
+            cb.handle(Future.succeededFuture())
         }, error_cb)
     }
     /*
@@ -208,18 +213,18 @@ class kvdnSession {
     }
 
 
-    MessageConsumer onWrite(String strAddr, String key = null, Closure cb) {
+    MessageConsumer onWrite(String strAddr, String key = null, Handler<JsonObject> cb) {
         return eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this key
             if ((key == null) || (message.body() == key))
-                cb(message.body())
+                cb.handle(message.body() as JsonObject)
         })
     }
 
 
-    MessageConsumer onDelete(String strAddr, String key = null, Closure cb) {
+    MessageConsumer onDelete(String strAddr, String key = null, Handler<JsonObject> cb) {
         return eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this key
             if ((key == null) || (message.body() == key))
-                cb(message.body())
+                cb.handle(message.body() as JsonObject)
         })
     }
 
@@ -232,7 +237,7 @@ class kvdnSession {
         })
     }
 
-    private void zeroState(Vertx v, cb, error_cb) {
+    private void zeroState(Vertx v, Handler cb, Handler error_cb) {
         boolean goodstate = false
         assert (!txflags.contains(txFlags.READ_ONLY) && !roMode && !transition)
         //when initializing a session, there should be no outstanding admin operations
@@ -240,23 +245,23 @@ class kvdnSession {
             try {
                 assert ar.succeeded()
             } catch (gce) {
-                error_cb(gce)
+                error_cb.handle(gce)
             }
             Counter l = ar.result()
             l.get({ AsyncResult r ->
                 try {
                     assert r.succeeded()
                 } catch (gre) {
-                    error_cb(gre)
+                    error_cb.handle(gre)
                 }
                 try {
                     assert r.result() == 0
                     goodstate = true
                 } catch (ase) {
-                    error_cb(ase)
+                    error_cb.handle(ase)
                 }
                 if (goodstate)
-                    cb(this)
+                    cb.handle(this)
             })
         })
     }

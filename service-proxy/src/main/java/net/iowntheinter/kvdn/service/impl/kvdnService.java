@@ -11,7 +11,9 @@ import net.iowntheinter.kvdn.service.kvsvc;
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx;
 import net.iowntheinter.kvdn.storage.kvdnSession;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class kvdnService implements kvsvc {
     private Vertx vertx;
@@ -21,17 +23,18 @@ public class kvdnService implements kvsvc {
     public kvdnService(Vertx vertx) {
         this.vertx = vertx;
         logger.info("started kvdnservice");
-        this.setup();
     }
 
-    public void setup() {
+    public void setup(Handler cb) {
         try {
             this.session = new kvdnSession(vertx);
+            session.init(cb, (Handler<Throwable>) event -> logger.error(event));
 
         } catch (Exception e) {
             System.out.println("problem getting cassandra session: ");
             e.printStackTrace();
         }
+
     }
 
     @Override
@@ -61,6 +64,7 @@ public class kvdnService implements kvsvc {
         mapjsonintercepter mji = new mapjsonintercepter().setCb(resultHandler);
         KvTx tx = (KvTx) this.session.newTx(document.getString("straddr"));
         tx.getKeys(mji);
+
     }
 
     @Override
@@ -82,7 +86,6 @@ public class kvdnService implements kvsvc {
     public void query(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
         logger.fatal("no query provider loaded");
     }
-
 
     private class mapjsonintercepter implements Handler {
         Handler cb;

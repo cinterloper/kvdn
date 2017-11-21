@@ -33,7 +33,7 @@ apply plugin: 'distribution'
 apply plugin: 'idea'
 
 
-def libversion = '3.3.3'
+def libversion = '3.5.0'
 if(System.getenv("VERTX_VERSION") != null)
     libversion = System.getenv("VERTX_VERSION")
 

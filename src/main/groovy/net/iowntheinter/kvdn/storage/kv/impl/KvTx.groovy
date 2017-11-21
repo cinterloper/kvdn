@@ -1,5 +1,6 @@
 package net.iowntheinter.kvdn.storage.kv.impl
 
+import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.EventBus
@@ -161,8 +162,9 @@ class KvTx extends kvdnTX implements TXKV {
             D.getMap(this.strAddr, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_READ)) {
                     AsyncMap map = res.result()
-                    map.size({ resGet ->
+                    map.size({ AsyncResult<Integer> resGet ->
                         if (resGet.succeeded()) {
+                            logger.trace("got size":resGet.result())
                             (this.session as kvdnSession).finishTx(this, {
                                 cb([result: resGet.result(), error: null])
                             })

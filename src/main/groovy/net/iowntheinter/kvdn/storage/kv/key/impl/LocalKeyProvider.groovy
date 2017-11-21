@@ -2,6 +2,8 @@ package net.iowntheinter.kvdn.storage.kv.key.impl
 
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
+import io.vertx.core.logging.Logger
+import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.SharedData
 import net.iowntheinter.kvdn.storage.kv.key.keyProvider
 
@@ -13,6 +15,7 @@ import net.iowntheinter.kvdn.storage.kv.key.keyProvider
  */
 class LocalKeyProvider implements keyProvider {
     SharedData sd
+    Logger logger = LoggerFactory.getLogger(this.class.name)
 
     LocalKeyProvider(Vertx vertx, D) {
         sd = vertx.sharedData()
@@ -20,6 +23,7 @@ class LocalKeyProvider implements keyProvider {
 
     @Override
     void getKeys(String name, cb) {
+        logger.trace("Name: $name keyset: ${sd.getLocalMap(name).keySet()} ")
         cb([result: new ArrayList(sd.getLocalMap(name).keySet()), error: null])
     }
 

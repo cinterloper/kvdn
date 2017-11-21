@@ -87,5 +87,20 @@ class shimAsyncMap implements AsyncMap {
         handler.handle(Future.succeededFuture(sham.size()))
     }
 
+    @Override
+    void keys(Handler handler) {
+        handler.handle(Future.succeededFuture(sham.keySet()))
+    }
 
+    @Override
+    void values(Handler handler) {
+        handler.handle(Future.succeededFuture(sham.values()))
+
+    }
+
+    @Override
+    void entries(Handler handler) {
+        handler.handle(Future.succeededFuture(sham))
+
+    }
 }

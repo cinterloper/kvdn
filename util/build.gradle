@@ -1,15 +1,4 @@
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "io.vertx:vertx-service-proxy:3.3.3"
-        classpath "net.ltgt.gradle:gradle-apt-plugin:0.6"
 
-    }
-}
 plugins {
     id 'groovy'
     id 'java'
@@ -29,7 +18,7 @@ repositories {
 }
 
 
-def libversion = '3.3.3'
+def libversion = '3.5.0'
 def projversion = rootProject.getVersion()
 if (System.getenv("VERTX_VERSION"))
     libversion = System.getenv("VERTX_VERSION")
@@ -42,7 +31,7 @@ sourceCompatibility = '1.8'
 
 dependencies {
     compile "io.vertx:vertx-core:$libversion"
-    compile "io.vertx:vertx-lang-groovy:$libversion"
+    compile "io.vertx:vertx-lang-groovy:3.5.0"
     compile 'io.github.lukehutch:fast-classpath-scanner:2.0.10'
 }
 
