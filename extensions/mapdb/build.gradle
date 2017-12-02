@@ -28,7 +28,7 @@ sourceCompatibility = '1.8'
 dependencies {
     compile "io.vertx:vertx-core:$libversion"
     compile 'org.mapdb:mapdb:3.0.3'
-
+    compile "net.iowntheinter:kvdn-service-proxy:$projversion"
     compile "net.iowntheinter:kvdn:$projversion"
 }
 
@@ -51,7 +51,7 @@ mainClassName = 'io.vertx.core.Launcher'
 shadowJar {
     classifier = 'fat'
     manifest {
-        attributes 'Main-Verticle': 'groovy:kvdn-start.groovy'
+        attributes 'Main-Verticle': 'groovy:kvdn-start-service.groovy'
     }
     mergeServiceFiles {
         include 'META-INF/services/io.vertx.core.spi.VerticleFactory'

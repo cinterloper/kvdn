@@ -60,6 +60,9 @@ abstract class  kvdnTX {
 
     void bailTx(context, cb) {
         logger.error("KVTX error: ${getDebug()}")
+        logger.error(context.error as Exception)
+        if(logger.isTraceEnabled())
+            (context.error as Exception).printStackTrace()
         (this.session as kvdnSession).finishTx(this, {
             cb([result: null, error: context.error ?: getFlags()])
         })

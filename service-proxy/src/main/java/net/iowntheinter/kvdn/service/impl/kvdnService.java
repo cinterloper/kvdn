@@ -48,6 +48,8 @@ public class kvdnService implements kvsvc {
     public void submit(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
         mapjsonintercepter mji = new mapjsonintercepter().setCb(resultHandler);
         KvTx tx = (KvTx) this.session.newTx(document.getString("straddr"));
+
+
         tx.submit(document.getString("value"), mji);
     }
 
@@ -71,7 +73,7 @@ public class kvdnService implements kvsvc {
     public void getSize(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
         logger.trace("getting keys request " + document.toString());
         mapjsonintercepter mji = new mapjsonintercepter().setCb(resultHandler);
-        KvTx tx = (KvTx) this.session.newTx(document.getString("straddr"));
+         KvTx tx = (KvTx) this.session.newTx(document.getString("straddr"));
         tx.size(mji);
     }
 
@@ -100,7 +102,7 @@ public class kvdnService implements kvsvc {
             Map m = (Map) event;
             JsonObject j = new JsonObject(m);
             logger.trace("SP json result " + j.toString());
-            cb.handle(Future.succeededFuture(j));
+            cb.handle(Future.succeededFuture(j.toString()));
         }
 
         public void call(Map m) throws Exception {

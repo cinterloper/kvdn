@@ -51,8 +51,8 @@ class KvTx extends kvdnTX implements TXKV {
                 if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
                     AsyncMap map = res.result()
                     String key = MessageDigest.getInstance("MD5").digest(Buffer.buffer(content.toString()).getBytes()).encodeHex().toString()
-                    map.put(key, content, { resPut ->
-                        if (resPut.succeeded()) {
+                    map.put(key, content, { resSubmit ->
+                        if (resSubmit.succeeded()) {
                             keyprov.setKey(strAddr, key, {
                                 (this.session as kvdnSession).finishTx(this, {
                                     eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
@@ -61,7 +61,7 @@ class KvTx extends kvdnTX implements TXKV {
                             })
 
                         } else {
-                            bailTx([result: false, error: res.cause(), tx: this], cb)
+                            bailTx([result: false, error: resSubmit.cause(), tx: this], cb)
                         }
                     })
                 } else {
@@ -77,8 +77,8 @@ class KvTx extends kvdnTX implements TXKV {
             D.getMap(this.strAddr, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
                     AsyncMap map = res.result()
-                    map.put(key, content, { resPut ->
-                        if (resPut.succeeded()) {
+                    map.put(key, content, { resSet ->
+                        if (resSet.succeeded()) {
                             keyprov.setKey(strAddr, key, {
                                 (this.session as kvdnSession).finishTx(this, {
                                     eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
@@ -86,7 +86,7 @@ class KvTx extends kvdnTX implements TXKV {
                                 })
                             })
                         } else {
-                            bailTx([result: false, error: res.cause(), tx: this], cb)
+                            bailTx([result: false, error: resSet.cause(), tx: this], cb)
                         }
                     })
                 } else {
@@ -110,7 +110,7 @@ class KvTx extends kvdnTX implements TXKV {
                                 cb([result: resGet.result(), error: null])
                             })
                         } else {
-                            bailTx([result: false, error: res.cause(), tx: this], cb)
+                            bailTx([result: false, error: resGet.cause(), tx: this], cb)
                         }
                     })
                 } else {
@@ -135,7 +135,7 @@ class KvTx extends kvdnTX implements TXKV {
                                 })
                             })
                         } else {
-                            bailTx([result: false, error: res.cause(), tx: this], cb)
+                            bailTx([result: false, error: resDel.cause(), tx: this], cb)
                         }
                     })
                 } else {
@@ -162,14 +162,14 @@ class KvTx extends kvdnTX implements TXKV {
             D.getMap(this.strAddr, { res ->
                 if (res.succeeded() && checkFlags(txmode.MODE_READ)) {
                     AsyncMap map = res.result()
-                    map.size({ AsyncResult<Integer> resGet ->
-                        if (resGet.succeeded()) {
-                            logger.trace("got size":resGet.result())
+                    map.size({ AsyncResult<Integer> resSize ->
+                        if (resSize.succeeded()) {
+                            logger.trace("got size":resSize.result())
                             (this.session as kvdnSession).finishTx(this, {
-                                cb([result: resGet.result(), error: null])
+                                cb([result: resSize.result(), error: null])
                             })
                         } else {
-                            bailTx([result: false, error: res.cause(), tx: this], cb)
+                            bailTx([result: false, error: resSize.cause(), tx: this], cb)
                         }
                     })
                 } else {

@@ -120,9 +120,9 @@ class kvserver {
             KvTx tx = session.newTx("${sName}${_token}${mName}")
             tx.get(kName, { resGet ->
                 if (resGet.error == null) {
-                    def ctype = (resGet?.meta["Content-Type"]) ?: null
+                  /*  def ctype = (resGet?.meta["Content-Type"]) ?: null
                     if(ctype)
-                        response.putHeader("Content-Type",ctype as String)
+                        response.putHeader("Content-Type",ctype as String)*/
                     response.end(resGet.result.toString())
                 } else {
                     response.setStatusCode(501).end(resGet.error.toString())

@@ -23,6 +23,8 @@ import net.iowntheinter.kvdn.storage.lock.impl.LTx
 
 class kvdnSession {
     static final ACCESS_CACHE_LOC = '__KVDN_ACCESS_CACHE'
+    Logger logger = new LoggerFactory().getLogger("Kvdnsession:${sessionid.toString()}")
+
     enum sessionType {
         NATIVE_SESSION, PROTOCOL_SERVER, PROXY_SERVER
     }
@@ -43,7 +45,6 @@ class kvdnSession {
     boolean transition = false
     Set txflags
     EventBus eb
-    Logger logger
     def sessionid, keyprov
     final JsonObject config
     def D, M
@@ -102,12 +103,15 @@ class kvdnSession {
     kvdnSession(Vertx vx, stype = sessionType.NATIVE_SESSION) {
         vertx = vx
         JsonObject Vconfig = vertx.getOrCreateContext().config()
-        config = Vconfig.getJsonObject('kvdn') ?: new JsonObject()
+        logger.trace("VERTX CONFIG:" + Vconfig.encodePrettily())
+        config = Vconfig.getJsonObject('kvdn')
+        if (config == null)
+            config = new JsonObject()
+        logger.trace("KVDN CONFIG:" + config.encodePrettily())
 
         txflags = []
         outstandingTX = new HashSet()
         sessionid = UUID.randomUUID().toString()
-        logger = new LoggerFactory().getLogger("Kvdnsession:${sessionid.toString()}")
         eb = vertx.eventBus()
         accessCache = vertx.sharedData().getLocalMap(ACCESS_CACHE_LOC)
 
@@ -126,7 +130,7 @@ class kvdnSession {
         processConfiguredHooks()
         String configured_provider
         try {
-           configured_provider= config.getString('key_provider') ?:
+            configured_provider = config.getString('key_provider') ?:
                     'net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider'
             //  'net.iowntheinter.kvdn.storage.kv.key.impl.CRDTKeyProvider' // not working right now
             try {
@@ -140,7 +144,7 @@ class kvdnSession {
         } catch (e) { // in memory mode
             this.keyprov = new LocalKeyProvider(vertx)
         }
-        logger.info("CONFIGURED PROVIDER: "+ this.keyprov)
+        logger.info("CONFIGURED PROVIDER: " + this.keyprov)
 
         logger.trace("starting new kvdn session with clustered = ${vertx.isClustered()} keyprovider = ${this.keyprov}")
 
