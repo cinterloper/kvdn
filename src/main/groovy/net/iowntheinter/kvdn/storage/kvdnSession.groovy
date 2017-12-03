@@ -142,7 +142,8 @@ class kvdnSession {
             }
             //load cluster key provider
         } catch (e) { // in memory mode
-            this.keyprov = new LocalKeyProvider(vertx)
+
+            this.keyprov = new LocalKeyProvider(vertx, D)
         }
         logger.info("CONFIGURED PROVIDER: " + this.keyprov)
 

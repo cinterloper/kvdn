@@ -14,6 +14,7 @@ import net.iowntheinter.kvdn.storage.txnHook
 import org.mapdb.DB
 import org.mapdb.DBMaker
 
+
 class mapdbDataImpl extends mapdbExtension implements kvdata {
     JsonObject config
     Vertx vertx
@@ -27,7 +28,8 @@ class mapdbDataImpl extends mapdbExtension implements kvdata {
 
     mapdbDataImpl(Vertx vertx, kvdnSession s) {
         this.vertx = vertx
-        this.config = vertx.getOrCreateContext().config().getJsonObject('kvdn') ?: new JsonObject()
+        JsonObject vertxConfig = vertx.getOrCreateContext().config()
+        this.config = vertxConfig.getJsonObject('kvdn') ?: new JsonObject()
         dbpath = config.getJsonObject("mapdb")?.getString("dbPath")
         if (dbpath) {
 

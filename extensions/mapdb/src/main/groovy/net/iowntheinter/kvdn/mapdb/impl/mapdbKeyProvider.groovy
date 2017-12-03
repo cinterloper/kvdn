@@ -4,6 +4,7 @@ import io.vertx.core.Vertx
 import net.iowntheinter.kvdn.mapdb.mapdbExtension
 import net.iowntheinter.kvdn.storage.kv.key.keyProvider
 import org.mapdb.DB
+import net.iowntheinter.kvdn.storage.kv.kvdata
 
 class mapdbKeyProvider extends mapdbExtension implements keyProvider {
 
@@ -14,7 +15,7 @@ class mapdbKeyProvider extends mapdbExtension implements keyProvider {
         throw new Exception("YOU MUST PASS THE DATA IMPL TO ${this.class.name} constructor")
     }
     mapdbKeyProvider(Vertx vertx, DataImpl) {
-        this.db = (DataImpl as mapdbDataImpl).db
+        this.db = DataImpl.db//untyped, groovy proxy error
         this.vertx = vertx
         this.DataImpl = DataImpl
     }
