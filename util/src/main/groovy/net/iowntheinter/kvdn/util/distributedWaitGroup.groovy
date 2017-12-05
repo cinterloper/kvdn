@@ -1,5 +1,7 @@
 package net.iowntheinter.kvdn.util
 
+import groovy.transform.CompileStatic
+import groovy.transform.TypeChecked
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.eventbus.MessageConsumer
@@ -10,6 +12,8 @@ import io.vertx.core.logging.LoggerFactory
 /**
  * Created by g on 9/24/16.
  */
+
+//@CompileStatic //@FixMe need an interface for KvdnSession available here
 class distributedWaitGroup {
     Vertx vertx
     int timeout

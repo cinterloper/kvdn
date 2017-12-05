@@ -3,14 +3,13 @@ package net.iowntheinter.kvdn.storage.lock.impl
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.logging.LoggerFactory
-import io.vertx.core.shareddata.Counter
 import io.vertx.core.shareddata.Lock
 import io.vertx.core.shareddata.SharedData
-import net.iowntheinter.kvdn.kvdnTX
-import net.iowntheinter.kvdn.storage.kvdnSession
+import net.iowntheinter.kvdn.KvdnTX
+import net.iowntheinter.kvdn.storage.KvdnSession
 import net.iowntheinter.kvdn.storage.lock.TXLCK
 
-class LTx extends kvdnTX implements TXLCK {
+class LTx extends KvdnTX implements TXLCK {
 
     def D = new _data_impl()
 
@@ -29,10 +28,10 @@ class LTx extends kvdnTX implements TXLCK {
         }
     }
 
-    LTx(String sa, UUID txid, kvdnSession session, Vertx vertx) {
+    LTx(String sa, UUID txid, KvdnSession session, Vertx vertx) {
         // keys = new ORSet()
         this.vertx = vertx
-        this.session = session as kvdnSession
+        this.session = session as KvdnSession
         this.txid = txid
         strAddr = sa
         logger = new LoggerFactory().getLogger("${this.class.simpleName}" + strAddr)
@@ -43,11 +42,11 @@ class LTx extends kvdnTX implements TXLCK {
 
     @Override
     void release(Lock l, cb) {
-        startTX(txtype.LCK_RELEASE, {
+        startTX(TXTYPE.LCK_RELEASE, {
 
             try {
-                assert checkFlags(txmode.MODE_WRITE)
-                (this.session as kvdnSession).finishTx(this, {
+                assert checkFlags(TXMODE.MODE_WRITE)
+                (this.session as KvdnSession).finishTx(this, {
                     l.release()
                     logger.trace("release:${strAddr}")
 
@@ -62,13 +61,13 @@ class LTx extends kvdnTX implements TXLCK {
 
     @Override
     void get(cb) {
-        startTX(txtype.LKC_ACQUIRE, {
+        startTX(TXTYPE.LKC_ACQUIRE, {
             D.getLock(this, { res ->
-                if (res.succeeded() && checkFlags(txmode.MODE_READ)) {
+                if (res.succeeded() && checkFlags(TXMODE.MODE_READ)) {
                     Lock l = res.result()
 
                     logger.trace("acquire:${strAddr}")
-                    (this.session as kvdnSession).finishTx(this, {
+                    (this.session as KvdnSession).finishTx(this, {
                         cb([result: l as Lock, error: null])
                     })
                 } else {

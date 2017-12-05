@@ -1,10 +1,13 @@
 package net.iowntheinter.kvdn.storage
 
+import groovy.transform.CompileStatic
+import groovy.transform.TypeChecked
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
+import io.vertx.core.eventbus.Message
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
@@ -12,18 +15,20 @@ import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.Counter
 import io.vertx.core.shareddata.LocalMap
-import net.iowntheinter.kvdn.kvdnTX
+import net.iowntheinter.kvdn.KvdnTX
 import net.iowntheinter.kvdn.storage.counter.impl.CtrTx
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
 import net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider
-import net.iowntheinter.kvdn.storage.kv.key.keyProvider
-import net.iowntheinter.kvdn.storage.kv.kvdata
+import net.iowntheinter.kvdn.storage.kv.key.KeyProvider
+import net.iowntheinter.kvdn.storage.kv.KVData
 import net.iowntheinter.kvdn.storage.lock.impl.LTx
 
-
-class kvdnSession {
-    static final ACCESS_CACHE_LOC = '__KVDN_ACCESS_CACHE'
-    Logger logger = new LoggerFactory().getLogger("Kvdnsession:${sessionid.toString()}")
+@TypeChecked
+@CompileStatic
+class KvdnSession {
+    static final String ACCESS_CACHE_LOC = '__KVDN_ACCESS_CACHE'
+    private String cname = this.getClass().getName()
+    private Logger logger
 
     enum sessionType {
         NATIVE_SESSION, PROTOCOL_SERVER, PROXY_SERVER
@@ -38,29 +43,30 @@ class kvdnSession {
     }
     boolean initalized = false
     boolean tracking = false
-    Vertx vertx
+    private Vertx vertx
     Set outstandingTX
-    //roMode should not issue new sessions, new tx's on existing sessions will get the ROFLAG
+    //roMode should not issue new sessions, new kvdnTX's on existing sessions will get the ROFLAG
     boolean roMode = false
     boolean transition = false
     Set txflags
     EventBus eb
-    def sessionid, keyprov
+    String sessionid
+    KeyProvider keyprov
     final JsonObject config
-    def D, M
+    KVData D, M
 
-    ArrayList<txnHook> preHooks = []
-    ArrayList<txnHook> postHooks = []
+    ArrayList<TXNHook> preHooks = []
+    ArrayList<TXNHook> postHooks = []
     LocalMap accessCache
 
-    void sessionPreTxHooks(tx, cb) {
-        _hookCaller(tx as kvdnTX, this.preHooks, 0, cb)
+    void sessionPreTxHooks(KvdnTX tx, Handler cb) {
+        _hookCaller(tx as KvdnTX, this.preHooks, 0, cb)
     }
 
-    void sessionPostTxHooks(tx, cb) {
-        _hookCaller(tx as kvdnTX, this.postHooks, 0, cb)
+    void sessionPostTxHooks(KvdnTX tx, Handler cb) {
+        _hookCaller(tx as KvdnTX, this.postHooks, 0, cb)
     }
-    Closure txEndHandler = { KvTx tx, cb ->
+    Closure txEndHandler = { KvTx tx, Handler cb ->
         sessionPostTxHooks(tx, cb)
     }
 /*
@@ -69,23 +75,24 @@ class kvdnSession {
  * it will probably explode if you have an unreasonable number of hooks to call
  *
  */
-    def txHookLoader = { String it ->
-        return this.class.classLoader.loadClass(it)?.newInstance(vertx as Vertx, this) as txnHook
+
+    private TXNHook txHookLoader(String it) {
+        return this.class.classLoader.loadClass(it)?.newInstance(vertx as Vertx, this) as TXNHook
     }
 
-    void _hookCaller(kvdnTX tx, ArrayList<txnHook> hooks, int ptr, cb) {
+    void _hookCaller(KvdnTX tx, ArrayList<TXNHook> hooks, int ptr, Handler cb) {
         logger.trace("inside hook caller ptr: $ptr hooks: $hooks")
         if (ptr != hooks.size()) {
 
-            def nxt = hooks[ptr] as txnHook
+            def nxt = hooks[ptr] as TXNHook
             logger.trace("calling hook")
 
             ptr++
-            nxt.call(tx, this, { //trampoline
-                _hookCaller(tx, hooks, ptr, cb)
+            nxt.call(tx, this, { AsyncResult res ->
+                _hookCaller(tx, hooks, ptr, cb) //trampoline
             })
         } else
-            cb()
+            cb.handle(Future.succeededFuture())
     }
 
     void processConfiguredHooks() {
@@ -100,27 +107,29 @@ class kvdnSession {
 
     }
 
-    kvdnSession(Vertx vx, stype = sessionType.NATIVE_SESSION) {
-        vertx = vx
-        JsonObject Vconfig = vertx.getOrCreateContext().config()
+    KvdnSession(Vertx vertx, stype = sessionType.NATIVE_SESSION) {
+        sessionid = UUID.randomUUID().toString()
+        String loggerName = cname + ":" + sessionid.toString()
+        logger = new LoggerFactory().getLogger(loggerName)
+
+        this.vertx = vertx
+        JsonObject Vconfig = this.vertx.getOrCreateContext().config()
         logger.trace("VERTX CONFIG:" + Vconfig.encodePrettily())
-        config = Vconfig.getJsonObject('kvdn')
-        if (config == null)
-            config = new JsonObject()
+        config = Vconfig.getJsonObject('kvdn') ?: new JsonObject()
+
         logger.trace("KVDN CONFIG:" + config.encodePrettily())
 
         txflags = []
         outstandingTX = new HashSet()
-        sessionid = UUID.randomUUID().toString()
-        eb = vertx.eventBus()
-        accessCache = vertx.sharedData().getLocalMap(ACCESS_CACHE_LOC)
+        eb = this.vertx.eventBus()
+        accessCache = this.vertx.sharedData().getLocalMap(ACCESS_CACHE_LOC)
 
         String configured_data = config.getString('data_implementation') ?:
                 'net.iowntheinter.kvdn.storage.kv.data.defaultDataImpl'
         try {
-            this.D = txHookLoader(configured_data) as kvdata
-            this.preHooks.addAll((D as kvdata).getPreHooks())
-            this.postHooks.addAll((D as kvdata).getPostHooks())
+            this.D = txHookLoader(configured_data) as KVData
+            this.preHooks.addAll((D as KVData).getPreHooks())
+            this.postHooks.addAll((D as KVData).getPostHooks())
         } catch (e) {
             e.printStackTrace()
             logger.fatal("could not load data impl $configured_data: ${e.getMessage()}")
@@ -134,7 +143,7 @@ class kvdnSession {
                     'net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider'
             //  'net.iowntheinter.kvdn.storage.kv.key.impl.CRDTKeyProvider' // not working right now
             try {
-                this.keyprov = this.class.classLoader.loadClass(configured_provider)?.newInstance(vertx, this.D) as keyProvider
+                this.keyprov = this.class.classLoader.loadClass(configured_provider)?.newInstance(this.vertx, this.D) as KeyProvider
             } catch (e) {
                 e.printStackTrace()
                 logger.fatal("could not load key provider $configured_provider : ${e.getMessage()}")
@@ -142,17 +151,19 @@ class kvdnSession {
             }
             //load cluster key provider
         } catch (e) { // in memory mode
-
-            this.keyprov = new LocalKeyProvider(vertx, D)
+            logger.trace("Defaulting to LocalKeyProvider because of ${e.message}")
         }
+        if (this.keyprov == null)
+            this.keyprov = new LocalKeyProvider(this.vertx, D)
+
         logger.info("CONFIGURED PROVIDER: " + this.keyprov)
 
-        logger.trace("starting new kvdn session with clustered = ${vertx.isClustered()} keyprovider = ${this.keyprov}")
+        logger.trace("starting new kvdn session with clustered = ${this.vertx.isClustered()} keyprovider = ${this.keyprov}")
 
     }
 
     void init(Handler cb, Handler error_cb) {
-        zeroState(vertx, { kvdnSession s ->
+        zeroState(vertx, { KvdnSession s ->
             s.initalized = true
             cb.handle(Future.succeededFuture())
         }, error_cb)
@@ -161,7 +172,7 @@ class kvdnSession {
      * This is the entrypoint to using the kv api, get your transactions here.
      *
      * @param strAddr storage address
-     * @return kvdnTX your transaction
+     * @return KvdnTX your transaction
      */
 
     def newTx(String strAddr, datatype = dataType.KV) {
@@ -189,37 +200,37 @@ class kvdnSession {
  * you must call this as the last action
  */
 
-    void finishTx(kvdnTX tx, cb) {
+    void finishTx(KvdnTX tx, Handler cb) {
         outstandingTX.remove(tx.txid)
         txEndHandler(tx, {
             if (tracking)
                 accessCache.put(tx.strAddr, tx.txid)
             else
                 accessCache.putIfAbsent(tx.strAddr, true)
-            cb()
+            cb.handle(Future.succeededFuture())
         })
     }
 
 
-    def onWrite_f(String strAddr, String key = null, Closure cb) {
-        eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this key
+    def onWrite_f(String strAddr, String key = null, Handler cb) {
+        eb.consumer("_KVDN_+${strAddr}", { Message message -> //listen for updates on this key
             if ((key == null) || (message.body() == key))
-                cb(message.body())
+                cb.handle(message.body())
         })
         return this
     }
 
-    def onDelete_f(String strAddr, String key = null, Closure cb) {
-        eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this keyset
+    def onDelete_f(String strAddr, String key = null, Handler cb) {
+        eb.consumer("_KVDN_-${strAddr}", { Message message -> //listen for deletes on this keyset
             if ((key == null) || (message.body() == key))
-                cb(message.body())
+                cb.handle(message.body())
         })
         return this
     }
 
 
     MessageConsumer onWrite(String strAddr, String key = null, Handler<JsonObject> cb) {
-        return eb.consumer("_KVDN_+${strAddr}", { message -> //listen for updates on this key
+        return eb.consumer("_KVDN_+${strAddr}", { Message message -> //listen for updates on this key
             if ((key == null) || (message.body() == key))
                 cb.handle(message.body() as JsonObject)
         })
@@ -227,14 +238,14 @@ class kvdnSession {
 
 
     MessageConsumer onDelete(String strAddr, String key = null, Handler<JsonObject> cb) {
-        return eb.consumer("_KVDN_-${strAddr}", { message -> //listen for deletes on this key
+        return eb.consumer("_KVDN_-${strAddr}", { Message message -> //listen for deletes on this key
             if ((key == null) || (message.body() == key))
                 cb.handle(message.body() as JsonObject)
         })
     }
 
     void adminCommandListener() {
-        eb.consumer("_KVDN_ADMIN_COMMANDS", { event ->
+        eb.consumer("_KVDN_ADMIN_COMMANDS", { Message event ->
             JsonObject cmd = event.body() as JsonObject
             switch (cmd.getString("CMD")) {
 
@@ -242,11 +253,11 @@ class kvdnSession {
         })
     }
 
-    private void zeroState(Vertx v, Handler cb, Handler error_cb) {
+    private void zeroState(Vertx vertx, Handler cb, Handler error_cb) {
         boolean goodstate = false
         assert (!txflags.contains(txFlags.READ_ONLY) && !roMode && !transition)
         //when initializing a session, there should be no outstanding admin operations
-        v.sharedData().getCounter("_KVDN_ADMIN_OPERATIONS", { ar ->
+        vertx.sharedData().getCounter("_KVDN_ADMIN_OPERATIONS", { AsyncResult<Counter> ar ->
             try {
                 assert ar.succeeded()
             } catch (gce) {

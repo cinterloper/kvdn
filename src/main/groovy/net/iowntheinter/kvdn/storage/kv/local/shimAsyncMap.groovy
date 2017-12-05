@@ -1,5 +1,7 @@
 package net.iowntheinter.kvdn.storage.kv.local
 
+import groovy.transform.CompileStatic
+import groovy.transform.TypeChecked
 import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
@@ -12,6 +14,8 @@ import io.vertx.core.shareddata.SharedData
 /**
  * Created by g on 7/17/16.
  */
+@TypeChecked
+@CompileStatic
 class shimAsyncMap implements AsyncMap {
     LocalMap sham
     SharedData sd
@@ -158,7 +162,7 @@ class shimAsyncMap implements AsyncMap {
 
     @Override
     void values(Handler handler) {
-        Set result = null
+        Collection result = null
         try {
             result = sham.values()
         } catch (e) {

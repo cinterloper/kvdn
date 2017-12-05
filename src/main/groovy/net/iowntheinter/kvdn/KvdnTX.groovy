@@ -1,22 +1,30 @@
 package net.iowntheinter.kvdn
 
+import com.sun.istack.internal.NotNull
+import groovy.transform.CompileStatic
+import groovy.transform.TypeChecked
+import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.logging.Logger
 import io.vertx.core.shareddata.SharedData
-import net.iowntheinter.kvdn.storage.kvdnSession
+import net.iowntheinter.kvdn.storage.KvdnSession
+import net.iowntheinter.kvdn.storage.kv.KVData
+import net.iowntheinter.kvdn.storage.kv.key.KeyProvider
 
 /**
  * Created by g on 9/24/16.
  */
-abstract class  kvdnTX {
-    enum txmode {
+@TypeChecked
+@CompileStatic
+abstract class KvdnTX {
+    enum TXMODE {
         MODE_WRITE,
         MODE_READ,
         MODE_COMPLEX,
         MODE_ADMIN
     }
-    enum txtype {
+    enum TXTYPE {
         KV_SUBMIT,
         KV_GET,
         KV_SET,
@@ -44,33 +52,35 @@ abstract class  kvdnTX {
     EventBus eb
     String strAddr
     UUID txid
-    String type
+    TXTYPE type
     Vertx vertx
     Map metabuffer = null
-    def keyprov
-    def session
-    def metaData
+    @NotNull
+    KeyProvider keyprov
+    @NotNull
+    KvdnSession session
+    KVData metaData
     LinkedList opKeys
 
-    def preTxHooks = { kvdnTX tx, cb ->
-        ((kvdnSession) session).sessionPreTxHooks(tx,cb)
+    Closure preTxHooks = { KvdnTX tx, Handler cb ->
+        ((KvdnSession) session).sessionPreTxHooks(tx,cb)
     }
 
 
 
-    void bailTx(context, cb) {
+    void bailTx(Map context, Handler cb) {
         logger.error("KVTX error: ${getDebug()}")
         logger.error(context.error as Exception)
         if(logger.isTraceEnabled())
             (context.error as Exception).printStackTrace()
-        (this.session as kvdnSession).finishTx(this, {
-            cb([result: null, error: context.error ?: getFlags()])
+        (this.session as KvdnSession).finishTx(this, {
+            cb.handle([result: null, error: context.error ?: getFlags()])
         })
     }
 
-    protected void startTX(txtype type, Map params = [:], cb) {
+    protected void startTX(TXTYPE type, Map params = [:], cb) {
         if (this.dirty)
-            throw new Exception("tx has already been invoked, you must create another tx")
+            throw new Exception("kvdnTX has already been invoked, you must create another kvdnTX")
         this.type = type
         logger.trace("${type}:${strAddr}:${params.toString()}")
         this.dirty = true
@@ -90,12 +100,12 @@ abstract class  kvdnTX {
             metabuffer = [:]
         metabuffer[name]=data
         return this
-    } as Closure<kvdnTX> //fluent
+    } as Closure<KvdnTX> //fluent
 
     Map getDebug() {
         return [
                 txid   : this.txid,
-                seid   : ((kvdnSession) this.session).sessionid,
+                seid   : ((KvdnSession) this.session).sessionid,
                 straddr: this.strAddr,
                 flags  : this.flags
         ]

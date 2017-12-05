@@ -1,5 +1,6 @@
 package net.iowntheinter.kvdn.mapdb
 
+import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import net.iowntheinter.kvdn.util.extensionManager.extension
@@ -9,7 +10,7 @@ import net.iowntheinter.kvdn.util.extensionManager.extension
  */
 abstract class mapdbExtension implements extension {
     @Override
-    void load(Vertx vertx, Object o) {
+    void load(Vertx vertx, Handler cb) {
 
     }
 

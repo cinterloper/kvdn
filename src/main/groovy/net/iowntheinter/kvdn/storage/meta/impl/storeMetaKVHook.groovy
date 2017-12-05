@@ -1,18 +1,18 @@
 package net.iowntheinter.kvdn.storage.meta.impl
 
-import io.vertx.core.json.JsonObject
-import io.vertx.core.shareddata.LocalMap
-import net.iowntheinter.kvdn.kvdnTX
-import net.iowntheinter.kvdn.storage.kvdnSession
+import io.vertx.core.Handler
+import net.iowntheinter.kvdn.KvdnTX
+import net.iowntheinter.kvdn.storage.KvdnSession
 import net.iowntheinter.kvdn.storage.meta.metadataStore
-import net.iowntheinter.kvdn.storage.txnHook
+import net.iowntheinter.kvdn.storage.TXNHook
+
 
 /**
  * Created by g on 2/20/17.
  */
-class storeMetaKVHook implements txnHook {
+class storeMetaKVHook implements TXNHook {
     @Override
-    void call(kvdnTX tx, kvdnSession session, Object cb) {
+    void call(KvdnTX tx, KvdnSession session, Handler cb) {
         (tx.metaData as metadataStore).setMetadata(tx.strAddr, tx.metabuffer, cb)
     }
 }

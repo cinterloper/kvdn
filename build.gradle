@@ -23,9 +23,16 @@ plugins {
     id 'maven-publish'
     id "net.ltgt.apt" version "0.6"
 }
+def strict = false
+if(System.getenv("STRICT_TYPECHECKING") != null)
+    strict = true
 
 compileGroovy {
     groovyOptions.javaAnnotationProcessing = true
+    if(strict)
+        groovyOptions.configurationScript = file("gradle/config.groovy")
+}
+compileGroovy {
 }
 
 apply plugin: "co.riiid.gradle"
@@ -120,8 +127,7 @@ publishing {
 }
 
 sourceCompatibility = '1.8'
-mainClassName = 'io.vertx.core.Launcher'
-
+mainClassName = 'io.vertx.core.Launcher';
 dependencies {
     compile "io.vertx:vertx-web:$libversion"
     compile "io.vertx:vertx-core:$libversion"

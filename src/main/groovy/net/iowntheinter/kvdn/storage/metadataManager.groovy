@@ -1,6 +1,5 @@
 package net.iowntheinter.kvdn.storage
 
-import net.iowntheinter.kvdn.kvdnTX
 import net.iowntheinter.kvdn.storage.meta.metadataStore
 
 /**
@@ -8,5 +7,5 @@ import net.iowntheinter.kvdn.storage.meta.metadataStore
  */
 interface metadataManager {
     void setStore(metadataStore store)
-    Map<String,txnHook> getHooks()
+    Map<String,TXNHook> getHooks()
 }

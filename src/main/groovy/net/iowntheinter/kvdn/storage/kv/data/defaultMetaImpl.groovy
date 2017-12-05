@@ -1,17 +1,7 @@
 package net.iowntheinter.kvdn.storage.kv.data
 
-import io.vertx.core.Future
-import io.vertx.core.Handler
-import io.vertx.core.Vertx
-import io.vertx.core.json.JsonObject
-import io.vertx.core.logging.Logger
-import io.vertx.core.logging.LoggerFactory
-import io.vertx.core.shareddata.SharedData
-import net.iowntheinter.kvdn.storage.kv.kvdata
-import net.iowntheinter.kvdn.storage.kv.local.shimAsyncMap
-import net.iowntheinter.kvdn.storage.kvdnSession
+import net.iowntheinter.kvdn.storage.kv.KVData
 import net.iowntheinter.kvdn.storage.meta.metadataStore
-import net.iowntheinter.kvdn.storage.txnHook
 
 /**
  * Created by g on 2/9/17.
@@ -26,7 +16,7 @@ import net.iowntheinter.kvdn.storage.txnHook
 
 
 class defaultMetaImpl implements metadataStore {
-    defaultMetaImpl(kvdata DataImpl){
+    defaultMetaImpl(KVData DataImpl){
 
     }
 

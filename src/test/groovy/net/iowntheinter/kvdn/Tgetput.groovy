@@ -1,9 +1,8 @@
 import io.vertx.core.logging.Logger
 import io.vertx.core.Vertx
 import io.vertx.core.logging.LoggerFactory
-
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
-import net.iowntheinter.kvdn.storage.kvdnSession
+import net.iowntheinter.kvdn.storage.KvdnSession
 import io.vertx.ext.unit.Async
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
@@ -26,7 +25,7 @@ class Tgetput {
     void before(TestContext context) {
 
         vertx.exceptionHandler(context.exceptionHandler())
-        kvs = new kvdnSession(vertx) as kvdnSession
+        kvs = new KvdnSession(vertx) as KvdnSession
         addr = UUID.randomUUID().toString()
 
     }
@@ -41,8 +40,8 @@ class Tgetput {
         Async async = context.async()
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
-        (kvs as kvdnSession).init({
-            KvTx tx = kvs.newTx(addr, kvdnSession.dataType.KV) as KvTx
+        (kvs as KvdnSession).init({
+            KvTx tx = kvs.newTx(addr, KvdnSession.dataType.KV) as KvTx
             tx.set(key, data, { result ->
                 if (result.error) {
                     context.fail(result.error.toString())
@@ -72,8 +71,8 @@ class Tgetput {
 
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
-        (kvs as kvdnSession).init({
-            KvTx tx = kvs.newTx(addr, kvdnSession.dataType.KV) as KvTx
+        (kvs as KvdnSession).init({
+            KvTx tx = kvs.newTx(addr, KvdnSession.dataType.KV) as KvTx
             tx.set(key, data, { result ->
                 if (result.error) {
                     context.fail(result.error.toString())

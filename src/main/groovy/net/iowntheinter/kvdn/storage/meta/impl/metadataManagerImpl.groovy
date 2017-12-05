@@ -1,10 +1,11 @@
 package net.iowntheinter.kvdn.storage.meta.impl
 
-import net.iowntheinter.kvdn.kvdnTX
-import net.iowntheinter.kvdn.storage.kvdnSession
+import io.vertx.core.Handler
+import net.iowntheinter.kvdn.KvdnTX
+import net.iowntheinter.kvdn.storage.KvdnSession
 import net.iowntheinter.kvdn.storage.meta.metadataStore
 import net.iowntheinter.kvdn.storage.metadataManager
-import net.iowntheinter.kvdn.storage.txnHook
+import net.iowntheinter.kvdn.storage.TXNHook
 
 /**
  * Created by g on 2/20/17.
@@ -16,22 +17,22 @@ class metadataManagerImpl implements metadataManager {
     }
 
     @Override
-    Map<String, txnHook> getHooks() {
+    Map<String, TXNHook> getHooks() {
         return null
     }
 
-    class startHook implements txnHook{
+    class startHook implements TXNHook{
         def meta
 
         @Override
-        void call(kvdnTX tx, kvdnSession session, Object cb) {
+        void call(KvdnTX tx, KvdnSession session, Handler cb) {
 
         }
     }
-    class endHook implements txnHook{
+    class endHook implements TXNHook{
 
         @Override
-        void call(kvdnTX tx, kvdnSession session, Object cb) {
+        void call(KvdnTX tx, KvdnSession session, Handler cb) {
 
         }
     }

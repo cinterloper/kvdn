@@ -7,7 +7,7 @@ import io.vertx.ext.unit.Async
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
-import net.iowntheinter.kvdn.storage.kvdnSession
+import net.iowntheinter.kvdn.storage.KvdnSession
 import net.iowntheinter.kvdn.util.distributedWaitGroup
 import org.junit.After
 import org.junit.Before
@@ -32,7 +32,7 @@ class Tdwg {
     void before(TestContext context) {
 
         vertx.exceptionHandler(context.exceptionHandler())
-        kvs = new kvdnSession(vertx) as kvdnSession
+        kvs = new KvdnSession(vertx) as KvdnSession
         addr = UUID.randomUUID().toString()
 
     }
@@ -78,7 +78,7 @@ class Tdwg {
         Async async = context.async()
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
-        def s = new kvdnSession(vertx)
+        def s = new KvdnSession(vertx)
         s.init({
 
             def tokens=['1','2','3']

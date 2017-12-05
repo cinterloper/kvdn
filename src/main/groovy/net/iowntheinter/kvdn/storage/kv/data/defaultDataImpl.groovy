@@ -1,26 +1,29 @@
 package net.iowntheinter.kvdn.storage.kv.data
 
+import groovy.transform.CompileStatic
+import groovy.transform.TypeChecked
 import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
-import io.vertx.core.impl.VertxImpl
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.SharedData
-import net.iowntheinter.kvdn.storage.kv.kvdata
+import net.iowntheinter.kvdn.storage.kv.KVData
 import net.iowntheinter.kvdn.storage.kv.local.shimAsyncMap
-import net.iowntheinter.kvdn.storage.kvdnSession
-import net.iowntheinter.kvdn.storage.txnHook
+import net.iowntheinter.kvdn.storage.KvdnSession
+import net.iowntheinter.kvdn.storage.TXNHook
 
 /**
  * Created by g on 10/6/16.
  */
-class defaultDataImpl implements kvdata {
+@TypeChecked
+@CompileStatic
+class defaultDataImpl implements KVData {
     SharedData sd
     Vertx vertx
     Logger logger
 
-    defaultDataImpl(Vertx v, kvdnSession s) {
+    defaultDataImpl(Vertx v, KvdnSession s) {
         this.vertx = v
 
         this.logger = new LoggerFactory().getLogger(this.class.getName())
@@ -39,12 +42,12 @@ class defaultDataImpl implements kvdata {
     }
 
     @Override
-    LinkedHashSet<txnHook> getPreHooks() {
-        return new LinkedHashSet<txnHook>()
+    LinkedHashSet<TXNHook> getPreHooks() {
+        return new LinkedHashSet<TXNHook>()
     }
 
     @Override
-    LinkedHashSet<txnHook> getPostHooks() {
-        return new LinkedHashSet<txnHook>()
+    LinkedHashSet<TXNHook> getPostHooks() {
+        return new LinkedHashSet<TXNHook>()
     }
 }

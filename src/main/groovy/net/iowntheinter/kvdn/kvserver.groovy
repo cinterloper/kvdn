@@ -1,5 +1,6 @@
 package net.iowntheinter.kvdn
 
+import groovy.transform.TypeChecked
 import io.vertx.core.http.HttpServerResponse
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
@@ -11,8 +12,9 @@ import io.vertx.core.eventbus.EventBus
 import io.vertx.ext.web.Router
 import io.vertx.core.logging.LoggerFactory
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
-import net.iowntheinter.kvdn.storage.kvdnSession
+import net.iowntheinter.kvdn.storage.KvdnSession
 
+//@TypeChecked
 class kvserver {
     final String version
     final JsonObject config
@@ -21,15 +23,15 @@ class kvserver {
     Vertx vertx
     Router router
     Context ctx
-    def session
-    def _token = '_'
+    KvdnSession session
+    String _token = '_'
     //used in a vertx program, or standalone
     kvserver(Vertx vertx) {
         logger = new LoggerFactory().getLogger("kvdn")
         this.vertx = vertx
         ctx = vertx.getOrCreateContext()
         config = ctx.config() as JsonObject
-        session = new kvdnSession(vertx)
+        session = new KvdnSession(vertx)
         def classloader = (URLClassLoader) (Thread.currentThread().getContextClassLoader())
         this.version=(classloader.getResourceAsStream('_KVDN_VERSION.txt').getText())
     }

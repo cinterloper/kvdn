@@ -1,6 +1,9 @@
 package net.iowntheinter.kvdn.storage.kv.impl
 
+import groovy.transform.CompileStatic
+import groovy.transform.TypeChecked
 import io.vertx.core.AsyncResult
+import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.EventBus
@@ -8,34 +11,42 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.shareddata.AsyncMap
 import io.vertx.core.shareddata.SharedData
 import io.vertx.core.logging.LoggerFactory
-import net.iowntheinter.kvdn.kvdnTX
+import net.iowntheinter.kvdn.KvdnTX
 
 import net.iowntheinter.kvdn.storage.kv.TXKV
-import net.iowntheinter.kvdn.storage.kv.kvdata
-import net.iowntheinter.kvdn.storage.kvdnSession
+import net.iowntheinter.kvdn.storage.kv.KVData
+import net.iowntheinter.kvdn.storage.KvdnSession
 
 import java.security.MessageDigest
 
 /**
  * Created by grant on 11/19/15.
  */
+@TypeChecked
+@CompileStatic
+class KvTx extends KvdnTX implements TXKV {
+    public KVData D
+    public KVData M
 
-class KvTx extends kvdnTX implements TXKV {
-    def D, M
     boolean finished
 
 
-    KvTx(String sa, UUID txid, kvdnSession session, Vertx vertx) {
+    KvTx(String sa, UUID txid, KvdnSession session, Vertx vertx) {
         this.vertx = vertx
         this.keyprov = session.keyprov
-        this.session = session as kvdnSession
+        this.session = session as KvdnSession
         this.txid = txid
         this.strAddr = sa
-        logger = new LoggerFactory().getLogger("${this.class.simpleName}" + strAddr)
+        //doing it this way avoids a wierd compile static error
+        // Type 'java/lang/Object' (current frame, stack[6]) is not assignable to 'java/lang/String'
+        String classname = this.getClass().getName().toString()
+        String ID = classname + ":${strAddr}" //
+        this.logger = new LoggerFactory().getLogger(ID)
+        //end wierd hack
         this.sd = vertx.sharedData() as SharedData
         this.eb = vertx.eventBus() as EventBus
-        this.D = session.D as kvdata
-        this.M = session.D as kvdata
+        this.D = session.D as KVData
+        this.M = session.D as KVData
 
     }
 
@@ -45,18 +56,20 @@ class KvTx extends kvdnTX implements TXKV {
     }
 
     @Override
-    void submit(content, cb) {
-        startTX(txtype.KV_SUBMIT, {
-            D.getMap(this.strAddr, { res ->
-                if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
+    @TypeChecked
+    void submit(String content, Handler cb) {
+        startTX(TXTYPE.KV_SUBMIT, {
+            D.getMap(this.strAddr, { AsyncResult<AsyncMap> res ->
+                if (res.succeeded() && checkFlags(TXMODE.MODE_WRITE)) {
                     AsyncMap map = res.result()
                     String key = MessageDigest.getInstance("MD5").digest(Buffer.buffer(content.toString()).getBytes()).encodeHex().toString()
-                    map.put(key, content, { resSubmit ->
+                    map.put(key, content, { AsyncResult resSubmit ->
                         if (resSubmit.succeeded()) {
                             keyprov.setKey(strAddr, key, {
-                                (this.session as kvdnSession).finishTx(this, {
+                                (this.session as KvdnSession).finishTx(this, {
                                     eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
-                                    cb([result: true, key: key, error: null])
+                                    cb.handle([result: true, key: key, error: null])
+                                    //cb.handle(Future.succeededFuture(key))
                                 })
                             })
 
@@ -72,17 +85,18 @@ class KvTx extends kvdnTX implements TXKV {
     }
 
     @Override
-    void set(String key, content, cb) {
-        startTX(txtype.KV_SET, [keys: [key]], {
-            D.getMap(this.strAddr, { res ->
-                if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
+    @TypeChecked
+    void set(String key, String content, Handler cb) {
+        startTX(TXTYPE.KV_SET, [keys: [key]], {
+            D.getMap(this.strAddr, { AsyncResult<AsyncMap> res ->
+                if (res.succeeded() && checkFlags(TXMODE.MODE_WRITE)) {
                     AsyncMap map = res.result()
-                    map.put(key, content, { resSet ->
+                    map.put(key, content, { AsyncResult resSet ->
                         if (resSet.succeeded()) {
                             keyprov.setKey(strAddr, key, {
-                                (this.session as kvdnSession).finishTx(this, {
+                                (this.session as KvdnSession).finishTx(this, {
                                     eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
-                                    cb([result: true, key: key, error: null])
+                                    cb.handle([result: true, key: key, error: null])
                                 })
                             })
                         } else {
@@ -99,15 +113,16 @@ class KvTx extends kvdnTX implements TXKV {
 
 
     @Override
-    void get(String key, cb) {
-        startTX(txtype.KV_GET, [keys: [key]], {
-            D.getMap(this.strAddr, { res ->
-                if (res.succeeded() && checkFlags(txmode.MODE_READ)) {
+    @TypeChecked
+    void get(String key, Handler cb) {
+        startTX(TXTYPE.KV_GET, [keys: [key]], {
+            D.getMap(this.strAddr, { AsyncResult<AsyncMap> res ->
+                if (res.succeeded() && checkFlags(TXMODE.MODE_READ)) {
                     AsyncMap map = res.result()
-                    map.get(key, { resGet ->
+                    map.get(key, { AsyncResult<String> resGet ->
                         if (resGet.succeeded()) {
-                            (this.session as kvdnSession).finishTx(this, {
-                                cb([result: resGet.result(), error: null])
+                            (this.session as KvdnSession).finishTx(this, {
+                                cb.handle([result: resGet.result(), error: null])
                             })
                         } else {
                             bailTx([result: false, error: resGet.cause(), tx: this], cb)
@@ -121,17 +136,18 @@ class KvTx extends kvdnTX implements TXKV {
     }
 
     @Override
-    void del(String key, cb) {
-        startTX(txtype.KV_DEL, [keys: [key]], {
-            D.getMap(this.strAddr, { res ->
-                if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
+    @TypeChecked
+    void del(String key, Handler cb) {
+        startTX(TXTYPE.KV_DEL, [keys: [key]], {
+            D.getMap(this.strAddr, { AsyncResult<AsyncMap> res ->
+                if (res.succeeded() && checkFlags(TXMODE.MODE_WRITE)) {
                     AsyncMap map = res.result()
-                    map.remove(key, { resDel ->
+                    map.remove(key, { AsyncResult resDel ->
                         if (resDel.succeeded()) {
                             keyprov.deleteKey(strAddr, key, {
-                                (this.session as kvdnSession).finishTx(this, {
+                                (this.session as KvdnSession).finishTx(this, {
                                     eb.publish("_KVDN_-${strAddr}", new JsonObject().put('key', key))
-                                    cb([result: true, key: key, error: null])
+                                    cb.handle([result: true, key: key, error: null])
                                 })
                             })
                         } else {
@@ -146,27 +162,29 @@ class KvTx extends kvdnTX implements TXKV {
     }
 
     @Override
-    void getKeys(cb) {
-        startTX(txtype.KV_KEYS, {
-            keyprov.getKeys(this.strAddr, { Map asyncResult ->
-                (this.session as kvdnSession).finishTx(this, {
-                    cb(asyncResult)
+    @TypeChecked
+    void getKeys(Handler cb) {
+        startTX(TXTYPE.KV_KEYS, {
+            keyprov.getKeys(this.strAddr, { Map asyncResult -> //@FixMe this should be a real AsyncResult
+                (this.session as KvdnSession).finishTx(this, {
+                    cb.handle(asyncResult)
                 })
             })
         })
     }
 
     @Override
-    void size(cb) {
-        startTX(txtype.KV_SIZE, {
-            D.getMap(this.strAddr, { res ->
-                if (res.succeeded() && checkFlags(txmode.MODE_READ)) {
+    @TypeChecked
+    void size(Handler cb) {
+        startTX(TXTYPE.KV_SIZE, {
+            D.getMap(this.strAddr, { AsyncResult<AsyncMap> res ->
+                if (res.succeeded() && checkFlags(TXMODE.MODE_READ)) {
                     AsyncMap map = res.result()
                     map.size({ AsyncResult<Integer> resSize ->
                         if (resSize.succeeded()) {
-                            logger.trace("got size":resSize.result())
-                            (this.session as kvdnSession).finishTx(this, {
-                                cb([result: resSize.result(), error: null])
+                            logger.trace("got size": resSize.result())
+                            (this.session as KvdnSession).finishTx(this, {
+                                cb.handle([result: resSize.result(), error: null])
                             })
                         } else {
                             bailTx([result: false, error: resSize.cause(), tx: this], cb)

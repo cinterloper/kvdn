@@ -6,15 +6,15 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.shareddata.Counter
 import io.vertx.core.shareddata.SharedData
 import io.vertx.core.logging.LoggerFactory
-import net.iowntheinter.kvdn.kvdnTX
+import net.iowntheinter.kvdn.KvdnTX
 import net.iowntheinter.kvdn.storage.counter.TXCTR
-import net.iowntheinter.kvdn.storage.kvdnSession
+import net.iowntheinter.kvdn.storage.KvdnSession
 
 /**
  * Created by grant on 11/19/15.
  */
 
-class CtrTx extends kvdnTX implements TXCTR {
+class CtrTx extends KvdnTX implements TXCTR {
 
     def D = new _data_impl()
 
@@ -32,10 +32,10 @@ class CtrTx extends kvdnTX implements TXCTR {
         }
     }
 
-    CtrTx(String sa, UUID txid, kvdnSession session, Vertx vertx) {
+    CtrTx(String sa, UUID txid, KvdnSession session, Vertx vertx) {
         // keys = new ORSet()
         this.vertx = vertx
-        this.session = session as kvdnSession
+        this.session = session as KvdnSession
         this.txid = txid
         strAddr = sa
         logger = new LoggerFactory().getLogger("${this.class.simpleName}" + strAddr)
@@ -50,14 +50,14 @@ class CtrTx extends kvdnTX implements TXCTR {
 
     @Override
     void get(cb) {
-        startTX(txtype.CTR_GET, {
+        startTX(TXTYPE.CTR_GET, {
             D.getCtr(this, { res ->
-                if (res.succeeded() && checkFlags(txmode.MODE_READ)) {
+                if (res.succeeded() && checkFlags(TXMODE.MODE_READ)) {
                     Counter ctr = res.result()
                     ctr.get({ resGet ->
                         if (resGet.succeeded()) {
                             logger.trace("get:${strAddr}")
-                            (this.session as kvdnSession).finishTx(this, {
+                            (this.session as KvdnSession).finishTx(this, {
                                 cb([result: resGet.result().toString(), error: null])
                             })
                         } else {
@@ -73,14 +73,14 @@ class CtrTx extends kvdnTX implements TXCTR {
 
     @Override
     void addAndGet(long value, cb) {
-        startTX(txtype.CTR_ADDNGET, {
+        startTX(TXTYPE.CTR_ADDNGET, {
             D.getCtr(this, { res ->
-                if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
+                if (res.succeeded() && checkFlags(TXMODE.MODE_WRITE)) {
                     Counter ctr = res.result()
                     ctr.addAndGet(value, { resGet ->
                         if (resGet.succeeded()) {
                             logger.trace("get:${strAddr}")
-                            (this.session as kvdnSession).finishTx(this, {
+                            (this.session as KvdnSession).finishTx(this, {
                                 if (value > 0)
                                     eb.publish("_KVDN_c+${strAddr}", new JsonObject().put('ctr', strAddr))
                                 else
@@ -100,14 +100,14 @@ class CtrTx extends kvdnTX implements TXCTR {
 
     @Override
     void getAndAdd(long value, cb) {
-        startTX(txtype.CTR_GETNADD, {
+        startTX(TXTYPE.CTR_GETNADD, {
             D.getCtr(this, { res ->
-                if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
+                if (res.succeeded() && checkFlags(TXMODE.MODE_WRITE)) {
                     Counter ctr = res.result()
                     ctr.getAndAdd(value, { resGet ->
                         if (resGet.succeeded()) {
                             logger.trace("get:${strAddr}")
-                            (this.session as kvdnSession).finishTx(this, {
+                            (this.session as KvdnSession).finishTx(this, {
                                 if (value > 0)
                                     eb.publish("_KVDN_c+${strAddr}", new JsonObject().put('ctr', strAddr))
                                 else
@@ -127,15 +127,15 @@ class CtrTx extends kvdnTX implements TXCTR {
 
     @Override
     void compareAndSet(long oldv, long newv, cb) {
-        startTX(txtype.CTR_COMPSET, {
+        startTX(TXTYPE.CTR_COMPSET, {
 
             D.getCtr(this, { res ->
-                if (res.succeeded() && checkFlags(txmode.MODE_WRITE)) {
+                if (res.succeeded() && checkFlags(TXMODE.MODE_WRITE)) {
                     Counter ctr = res.result()
                     ctr.compareAndSet(oldv, newv, { resGet ->
                         if (resGet.succeeded()) {
                             logger.trace("ctr cas:${strAddr}")
-                            (this.session as kvdnSession).finishTx(this, {
+                            (this.session as KvdnSession).finishTx(this, {
                                 eb.publish("_KVDN_c=${strAddr}", new JsonObject().put('ctr', strAddr))
                                 cb([result: resGet.result().toString(), error: null])
                             })
