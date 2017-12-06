@@ -2,6 +2,7 @@ package net.iowntheinter.kvdn.storage.kv.key
 
 import groovy.transform.CompileStatic
 import groovy.transform.TypeChecked
+import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 import net.iowntheinter.kvdn.util.extensionManager.extension
 
@@ -12,7 +13,7 @@ import net.iowntheinter.kvdn.util.extensionManager.extension
 @TypeChecked
 @CompileStatic
 interface KeyProvider extends extension {
-    void getKeys(String name, Handler cb)
+    void getKeys(String name, Handler<AsyncResult<Set>> cb)
     void deleteKey(String map, String name, Handler cb)
     void setKey(String map, String name, Handler cb)
 

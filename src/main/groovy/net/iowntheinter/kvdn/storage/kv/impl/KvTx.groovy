@@ -3,6 +3,7 @@ package net.iowntheinter.kvdn.storage.kv.impl
 import groovy.transform.CompileStatic
 import groovy.transform.TypeChecked
 import io.vertx.core.AsyncResult
+import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
@@ -68,17 +69,17 @@ class KvTx extends KvdnTX implements TXKV {
                             keyprov.setKey(strAddr, key, {
                                 (this.session as KvdnSession).finishTx(this, {
                                     eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
-                                    cb.handle([result: true, key: key, error: null])
+                                    cb.handle(Future.succeededFuture(key))
                                     //cb.handle(Future.succeededFuture(key))
                                 })
                             })
 
                         } else {
-                            bailTx([result: false, error: resSubmit.cause(), tx: this], cb)
+                            bailTx(Future.failedFuture(resSubmit.cause()),this,cb)
                         }
                     })
                 } else {
-                    bailTx([result: false, error: res.cause(), tx: this], cb)
+                    bailTx(Future.failedFuture(res.cause()),this,cb)
                 }
             })
         })
@@ -96,15 +97,15 @@ class KvTx extends KvdnTX implements TXKV {
                             keyprov.setKey(strAddr, key, {
                                 (this.session as KvdnSession).finishTx(this, {
                                     eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
-                                    cb.handle([result: true, key: key, error: null])
+                                    cb.handle(Future.succeededFuture(key))
                                 })
                             })
                         } else {
-                            bailTx([result: false, error: resSet.cause(), tx: this], cb)
+                            bailTx(Future.failedFuture(resSet.cause()),this,cb)
                         }
                     })
                 } else {
-                    bailTx([result: false, error: res.cause(), tx: this], cb)
+                    bailTx(Future.failedFuture(res.cause()),this,cb)
 
                 }
             })
@@ -122,14 +123,14 @@ class KvTx extends KvdnTX implements TXKV {
                     map.get(key, { AsyncResult<String> resGet ->
                         if (resGet.succeeded()) {
                             (this.session as KvdnSession).finishTx(this, {
-                                cb.handle([result: resGet.result(), error: null])
+                                cb.handle(Future.succeededFuture(resGet.result()))
                             })
                         } else {
-                            bailTx([result: false, error: resGet.cause(), tx: this], cb)
+                            bailTx(Future.failedFuture(resGet.cause()),this,cb)
                         }
                     })
                 } else {
-                    bailTx([result: false, error: res.cause(), tx: this], cb)
+                    bailTx(Future.failedFuture(res.cause()),this,cb)
                 }
             })
         })
@@ -147,15 +148,15 @@ class KvTx extends KvdnTX implements TXKV {
                             keyprov.deleteKey(strAddr, key, {
                                 (this.session as KvdnSession).finishTx(this, {
                                     eb.publish("_KVDN_-${strAddr}", new JsonObject().put('key', key))
-                                    cb.handle([result: true, key: key, error: null])
+                                    cb.handle(Future.succeededFuture(key))
                                 })
                             })
                         } else {
-                            bailTx([result: false, error: resDel.cause(), tx: this], cb)
+                            bailTx(Future.failedFuture(resDel.cause()),this,cb)
                         }
                     })
                 } else {
-                    bailTx([result: false, error: res.cause(), tx: this], cb)
+                    bailTx(Future.failedFuture(res.cause()),this,cb)
                 }
             })
         })
@@ -165,7 +166,7 @@ class KvTx extends KvdnTX implements TXKV {
     @TypeChecked
     void getKeys(Handler cb) {
         startTX(TXTYPE.KV_KEYS, {
-            keyprov.getKeys(this.strAddr, { Map asyncResult -> //@FixMe this should be a real AsyncResult
+            keyprov.getKeys(this.strAddr, { AsyncResult asyncResult -> //@FixMe this should be a real AsyncResult
                 (this.session as KvdnSession).finishTx(this, {
                     cb.handle(asyncResult)
                 })
@@ -175,7 +176,7 @@ class KvTx extends KvdnTX implements TXKV {
 
     @Override
     @TypeChecked
-    void size(Handler cb) {
+    void size(Handler<AsyncResult<Integer>> cb) {
         startTX(TXTYPE.KV_SIZE, {
             D.getMap(this.strAddr, { AsyncResult<AsyncMap> res ->
                 if (res.succeeded() && checkFlags(TXMODE.MODE_READ)) {
@@ -184,14 +185,14 @@ class KvTx extends KvdnTX implements TXKV {
                         if (resSize.succeeded()) {
                             logger.trace("got size": resSize.result())
                             (this.session as KvdnSession).finishTx(this, {
-                                cb.handle([result: resSize.result(), error: null])
+                                cb.handle(Future.succeededFuture(resSize.result()))
                             })
                         } else {
-                            bailTx([result: false, error: resSize.cause(), tx: this], cb)
+                            bailTx(Future.failedFuture(resSize.cause()),this,cb)
                         }
                     })
                 } else {
-                    bailTx([result: false, error: res.cause(), tx: this], cb)
+                    bailTx(Future.failedFuture(res.cause()),this,cb)
                 }
             })
         })

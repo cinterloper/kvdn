@@ -1,31 +1,38 @@
 package net.iowntheinter.kvdn.mapdb.impl
 
+import groovy.transform.CompileStatic
+import groovy.transform.TypeChecked
+import io.vertx.core.Future
 import io.vertx.core.Handler
-import net.iowntheinter.kvdn.kvdnTX
+import net.iowntheinter.kvdn.KvdnTX
 import net.iowntheinter.kvdn.mapdb.mapdbExtension
 
-import net.iowntheinter.kvdn.storage.kvdnSession
-import net.iowntheinter.kvdn.storage.txnHook
+import net.iowntheinter.kvdn.storage.KvdnSession
+import net.iowntheinter.kvdn.storage.TXNHook
+import net.iowntheinter.kvdn.storage.kv.KVData
 import org.mapdb.DB
 
 /**
  * Created by g on 1/29/17.
  */
-class mapdbShutdownHook extends mapdbExtension implements txnHook {
+@TypeChecked
+@CompileStatic
+class mapdbShutdownHook extends mapdbExtension implements TXNHook {
 
-    def DataImpl
+    KVData DataImpl
     DB db
 
 
     @Override
-    void call(kvdnTX kvdnTX, kvdnSession kvs, Handler cb) {
-        this.DataImpl = kvs.d
+    void call(KvdnTX KvdnTX, KvdnSession kvs, Handler cb) {
+        this.DataImpl = kvs.D
         this.db = (DataImpl as mapdbDataImpl).db
         try{
             db.close()
         }catch (e){
-
+            cb.handle(Future.failedFuture(e))
+            return
         }
-        cb()
+        cb.handle(Future.succeededFuture())
     }
 }

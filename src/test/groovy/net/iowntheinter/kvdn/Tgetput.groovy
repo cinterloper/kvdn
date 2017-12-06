@@ -1,3 +1,6 @@
+import groovy.transform.CompileStatic
+import groovy.transform.TypeChecked
+import io.vertx.core.AsyncResult
 import io.vertx.core.logging.Logger
 import io.vertx.core.Vertx
 import io.vertx.core.logging.LoggerFactory
@@ -11,13 +14,13 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-
-
+@TypeChecked
+@CompileStatic
 @RunWith(VertxUnitRunner.class)
 class Tgetput {
 
     Vertx vertx = Vertx.vertx()
-    def kvs
+    KvdnSession kvs
     String addr, key, data
     Logger logger = LoggerFactory.getLogger(this.class.getName())
 
@@ -42,18 +45,18 @@ class Tgetput {
         key = UUID.randomUUID().toString()
         (kvs as KvdnSession).init({
             KvTx tx = kvs.newTx(addr, KvdnSession.dataType.KV) as KvTx
-            tx.set(key, data, { result ->
-                if (result.error) {
-                    context.fail(result.error.toString())
+            tx.set(key, data, { AsyncResult<String> result ->
+                if (result.failed()) {
+                    context.fail(result.cause().toString())
                     async.complete()
                 }
-                def tx2 = kvs.newTx(addr)
-                tx2.get(key, { gresult ->
-                    if (!gresult.result) {
-                        context.fail(result.error.toString())
+                KvTx tx2 = kvs.newTx(addr) as KvTx
+                tx2.get(key, { AsyncResult<String> gresult ->
+                    if (!gresult.succeeded()) {
+                        context.fail(result.cause().toString())
                         async.complete()
                     }
-                    context.assertEquals(gresult.result, data)
+                    context.assertEquals(gresult.result(), data)
                     async.complete()
 
                 })
@@ -73,19 +76,19 @@ class Tgetput {
         key = UUID.randomUUID().toString()
         (kvs as KvdnSession).init({
             KvTx tx = kvs.newTx(addr, KvdnSession.dataType.KV) as KvTx
-            tx.set(key, data, { result ->
-                if (result.error) {
-                    context.fail(result.error.toString())
+            tx.set(key, data, { AsyncResult result ->
+                if (result.failed()) {
+                    context.fail(result.cause().toString())
                     async.complete()
                 }
-                def tx3 = kvs.newTx(addr) as KvTx
-                tx3.getKeys({ xresult ->
-                    if (!xresult.result) {
-                        context.fail(xresult.error.toString())
+                KvTx tx3 = kvs.newTx(addr) as KvTx
+                tx3.getKeys({ AsyncResult xresult ->
+                    if (!xresult.succeeded()) {
+                        context.fail(xresult.cause().toString())
                         async.complete()
                     }
-                    println("got result ${xresult.result}")
-                    context.assertEquals((xresult.result as Set)[0], key)
+                    println("got result ${xresult.result()}")
+                    context.assertEquals((xresult.result() as Set)[0], key)
                     async.complete()
 
                 })

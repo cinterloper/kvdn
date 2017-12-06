@@ -1,6 +1,9 @@
 package net.iowntheinter.kvdn.mapdb.impl
 
+import groovy.transform.CompileStatic
+import groovy.transform.TypeChecked
 import io.vertx.core.AsyncResult
+import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
@@ -8,25 +11,26 @@ import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.AsyncMap
 import net.iowntheinter.kvdn.mapdb.mapdbExtension
-import net.iowntheinter.kvdn.storage.kv.kvdata
-import net.iowntheinter.kvdn.storage.kvdnSession
-import net.iowntheinter.kvdn.storage.txnHook
+import net.iowntheinter.kvdn.storage.kv.KVData
+import net.iowntheinter.kvdn.storage.KvdnSession
+import net.iowntheinter.kvdn.storage.TXNHook
 import org.mapdb.DB
 import org.mapdb.DBMaker
 
-
-class mapdbDataImpl extends mapdbExtension implements kvdata {
+@TypeChecked
+@CompileStatic
+class mapdbDataImpl extends mapdbExtension implements KVData {
     JsonObject config
     Vertx vertx
-    DB db
+    public DB db
     String dbpath = null
     Logger logger = LoggerFactory.getLogger(this.class.getName())
-    LinkedHashSet<txnHook> postHooks = new LinkedHashSet<txnHook>()
-    LinkedHashSet<txnHook> preHooks = new LinkedHashSet<txnHook>()
+    LinkedHashSet<TXNHook> postHooks = new LinkedHashSet<TXNHook>()
+    LinkedHashSet<TXNHook> preHooks = new LinkedHashSet<TXNHook>()
 
 
 
-    mapdbDataImpl(Vertx vertx, kvdnSession s) {
+    mapdbDataImpl(Vertx vertx, KvdnSession s) {
         this.vertx = vertx
         JsonObject vertxConfig = vertx.getOrCreateContext().config()
         this.config = vertxConfig.getJsonObject('kvdn') ?: new JsonObject()
@@ -39,25 +43,25 @@ class mapdbDataImpl extends mapdbExtension implements kvdata {
             logger.warn("initalized MapDB as in-memory database")
             logger.warn("THIS IS NOT PERSISTENT")
         }
-        postHooks.add(new mapdbPostTXHook())
+        postHooks.add(new mapdbPostTXHook() as TXNHook)
 
     }
 
     @Override
     void getMap(String s, Handler<AsyncResult<AsyncMap>> handler) {
-        vertx.executeBlocking({ future ->
+        vertx.executeBlocking({ Future future ->
             future.complete( new shimAsyncMapDB(vertx, this.db, s))
-        }, { asyncResult ->
+        }, { AsyncResult asyncResult ->
             handler.handle(asyncResult)
         })
     }
     @Override
-    LinkedHashSet<txnHook> getPreHooks() {
+    LinkedHashSet<TXNHook> getPreHooks() {
         return this.preHooks
     }
 
     @Override
-    LinkedHashSet<txnHook> getPostHooks() {
+    LinkedHashSet<TXNHook> getPostHooks() {
         return this.postHooks
     }
 

@@ -22,10 +22,11 @@ import net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider
 import net.iowntheinter.kvdn.storage.kv.key.KeyProvider
 import net.iowntheinter.kvdn.storage.kv.KVData
 import net.iowntheinter.kvdn.storage.lock.impl.LTx
+import net.iowntheinter.kvdn.util.KvdnSessionInterface
 
 @TypeChecked
 @CompileStatic
-class KvdnSession {
+class KvdnSession implements KvdnSessionInterface {
     static final String ACCESS_CACHE_LOC = '__KVDN_ACCESS_CACHE'
     private String cname = this.getClass().getName()
     private Logger logger
@@ -53,7 +54,7 @@ class KvdnSession {
     String sessionid
     KeyProvider keyprov
     final JsonObject config
-    KVData D, M
+    public KVData D, M
 
     ArrayList<TXNHook> preHooks = []
     ArrayList<TXNHook> postHooks = []

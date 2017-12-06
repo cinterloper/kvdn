@@ -1,5 +1,9 @@
 package net.iowntheinter.kvdn.mapdb.impl
 
+import groovy.transform.CompileStatic
+import groovy.transform.TypeChecked
+import io.vertx.core.AsyncResult
+import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.logging.Logger
@@ -12,6 +16,8 @@ import java.util.concurrent.ConcurrentMap
 /**
  * Created by g on 7/17/16.
  */
+@CompileStatic
+@TypeChecked
 class shimAsyncMapDB implements AsyncMap {
     final ConcurrentMap sham
     final DB db
@@ -30,7 +36,7 @@ class shimAsyncMapDB implements AsyncMap {
     @Override
     void get(Object o, Handler handler) {
         logger.trace("GET:" + o)
-        vertx.executeBlocking({ future ->
+        vertx.executeBlocking({ Future future ->
             Object result = null
             try {
                 result = sham.get(o)
@@ -39,7 +45,7 @@ class shimAsyncMapDB implements AsyncMap {
             } catch (e) {
                 future.fail(e)
             }
-        }, { asyncResult ->
+        }, { AsyncResult asyncResult ->
             logger.trace("GET:" + asyncResult.succeeded())
 
             handler.handle(asyncResult)
@@ -49,14 +55,14 @@ class shimAsyncMapDB implements AsyncMap {
     @Override
     void put(Object o, Object o2, Handler handler) {
         logger.trace("PUT:" + o)
-        vertx.executeBlocking({ future ->
+        vertx.executeBlocking({ Future future ->
             try {
                 sham.put(o, o2)
                 future.complete()
             } catch (e) {
                 future.fail(e)
             }
-        }, { asyncResult ->
+        }, { AsyncResult asyncResult ->
             logger.trace("PUT:" + asyncResult.succeeded())
 
             handler.handle(asyncResult)
@@ -68,14 +74,14 @@ class shimAsyncMapDB implements AsyncMap {
         logger.trace("PUT/TTL:${ttl}:" + o)
 
         //todo: implement mapdb ttl for expiring entries
-        vertx.executeBlocking({ future ->
+        vertx.executeBlocking({ Future future ->
             try {
                 sham.put(o, o2)
                 future.complete()
             } catch (e) {
                 future.fail(e)
             }
-        }, { asyncResult ->
+        }, { AsyncResult asyncResult ->
             logger.trace("PUT/TTL:${ttl}:" + asyncResult.succeeded())
 
             handler.handle(asyncResult)
@@ -86,7 +92,7 @@ class shimAsyncMapDB implements AsyncMap {
     void putIfAbsent(Object o, Object o2, Handler handler) {
         logger.trace("putIfAbsent:" + o)
 
-        vertx.executeBlocking({ future ->
+        vertx.executeBlocking({ Future future ->
 
             if (!sham.get(o))
                 try {
@@ -97,7 +103,7 @@ class shimAsyncMapDB implements AsyncMap {
                 }
             else
                 future.fail(false as String)
-        }, { asyncResult ->
+        }, { AsyncResult asyncResult ->
             logger.trace("putIfAbsent:" + asyncResult.succeeded())
 
             handler.handle(asyncResult)
@@ -107,7 +113,7 @@ class shimAsyncMapDB implements AsyncMap {
     @Override
     void putIfAbsent(Object o, Object o2, long ttl, Handler handler) {
         logger.trace("putIfAbsent/TTL:${ttl}:" + o)
-        vertx.executeBlocking({ future ->
+        vertx.executeBlocking({ Future future ->
             if (!sham.get(o))
                 try {
                     sham.put(o, o2)
@@ -117,7 +123,7 @@ class shimAsyncMapDB implements AsyncMap {
                 }
             else
                 future.fail(false as String)
-        }, { asyncResult ->
+        }, { AsyncResult asyncResult ->
             logger.trace("putIfAbsent/TTL:${ttl}:" + asyncResult.succeeded())
 
             handler.handle(asyncResult)
@@ -127,14 +133,14 @@ class shimAsyncMapDB implements AsyncMap {
     @Override
     void remove(Object o, Handler handler) {
         logger.trace("remove:${o}")
-        vertx.executeBlocking({ future ->
+        vertx.executeBlocking({ Future future ->
             try {
                 sham.remove(o)
                 future.complete()
             } catch (e) {
                 future.fail(e)
             }
-        }, { asyncResult ->
+        }, { AsyncResult asyncResult ->
             logger.trace("remove:${asyncResult.succeeded()}")
 
             handler.handle(asyncResult)
@@ -146,7 +152,7 @@ class shimAsyncMapDB implements AsyncMap {
     void removeIfPresent(Object o, Object o2, Handler handler) {
         logger.trace("removeIfPresent:${o}")
 
-        vertx.executeBlocking({ future ->
+        vertx.executeBlocking({ Future future ->
 
             if (sham.get(o))
                 try {
@@ -156,7 +162,7 @@ class shimAsyncMapDB implements AsyncMap {
                     future.fail(e)
                 } else
                 future.fail(false as String)
-        }, { asyncResult ->
+        }, { AsyncResult asyncResult ->
             logger.trace("removeIfPresent:${asyncResult.succeeded()}")
 
             handler.handle(asyncResult)
@@ -166,14 +172,14 @@ class shimAsyncMapDB implements AsyncMap {
     @Override
     void replace(Object o, Object o2, Handler handler) {
         logger.trace("replace:${o}")
-        vertx.executeBlocking({ future ->
+        vertx.executeBlocking({ Future future ->
             try {
                 sham.put(o, o2)
                 future.complete()
             } catch (e) {
                 future.fail(e)
             }
-        }, { asyncResult ->
+        }, { AsyncResult asyncResult ->
             logger.trace("replace:${asyncResult.succeeded()}")
 
             handler.handle(asyncResult)
@@ -184,7 +190,7 @@ class shimAsyncMapDB implements AsyncMap {
     @Override
     void replaceIfPresent(Object o, Object oldValue, Object newValue, Handler handler) {
         logger.trace("replaceIfPresent ${o}")
-        vertx.executeBlocking({ future ->
+        vertx.executeBlocking({ Future future ->
             if (sham.get(o) == oldValue)
                 try {
                     sham.put(o, newValue)
@@ -193,7 +199,7 @@ class shimAsyncMapDB implements AsyncMap {
                     future.fail(e)
                 } else
                 future.fail(false as String)
-        }, { asyncResult ->
+        }, { AsyncResult asyncResult ->
             logger.trace("replaceIfPresent ${asyncResult.succeeded()}")
 
             handler.handle(asyncResult)
@@ -203,14 +209,14 @@ class shimAsyncMapDB implements AsyncMap {
     @Override
     void clear(Handler handler) {
         logger.trace("CLEAR")
-        vertx.executeBlocking({ future ->
+        vertx.executeBlocking({ Future future ->
             try {
                 sham.clear()
                 future.complete()
             } catch (e) {
                 future.fail(e)
             }
-        }, { asyncResult ->
+        }, { AsyncResult asyncResult ->
             logger.trace("clear:${asyncResult.succeeded()}")
             handler.handle(asyncResult)
         })
@@ -220,14 +226,14 @@ class shimAsyncMapDB implements AsyncMap {
     void size(Handler handler) {
         logger.trace("size")
         Integer result = null
-        vertx.executeBlocking({ future ->
+        vertx.executeBlocking({ Future future ->
             try {
                 result = sham.size()
                 future.complete(result)
             } catch (e) {
                 future.fail(e)
             }
-        }, { asyncResult ->
+        }, { AsyncResult asyncResult ->
             logger.trace("size:${asyncResult.succeeded()}")
             handler.handle(asyncResult)
         })
@@ -238,14 +244,14 @@ class shimAsyncMapDB implements AsyncMap {
         logger.trace("KEYS ${mapName}")
 
         Set result
-        vertx.executeBlocking({ future ->
+        vertx.executeBlocking({ Future future ->
             try {
                 result = sham.keySet()
                 future.complete(result)
             } catch (e) {
                 future.fail(e)
             }
-        }, { asyncResult ->
+        }, { AsyncResult asyncResult ->
             logger.trace("KEYS ${asyncResult.succeeded()}")
             handler.handle(asyncResult)
         })
@@ -255,14 +261,14 @@ class shimAsyncMapDB implements AsyncMap {
     void values(Handler handler) {
         logger.trace("VALUES ${mapName}")
         Collection result
-        vertx.executeBlocking({ future ->
+        vertx.executeBlocking({ Future future ->
             try {
                 result = sham.values()
                 future.complete(result)
             } catch (e) {
                 future.fail(e)
             }
-        }, { asyncResult ->
+        }, { AsyncResult asyncResult ->
             logger.trace("VALUES ${asyncResult.succeeded()}")
             handler.handle(asyncResult)
         })
@@ -270,9 +276,9 @@ class shimAsyncMapDB implements AsyncMap {
 
     @Override
     void entries(Handler handler) {
-        vertx.executeBlocking({ future ->
+        vertx.executeBlocking({ Future future ->
             future.complete(sham.clone())
-        }, { asyncResult ->
+        }, { AsyncResult asyncResult ->
             handler.handle(asyncResult)
         })
     }

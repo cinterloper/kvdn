@@ -3,6 +3,7 @@ package net.iowntheinter.kvdn
 import com.sun.istack.internal.NotNull
 import groovy.transform.CompileStatic
 import groovy.transform.TypeChecked
+import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
@@ -24,6 +25,7 @@ abstract class KvdnTX {
         MODE_COMPLEX,
         MODE_ADMIN
     }
+
     enum TXTYPE {
         KV_SUBMIT,
         KV_GET,
@@ -63,18 +65,17 @@ abstract class KvdnTX {
     LinkedList opKeys
 
     Closure preTxHooks = { KvdnTX tx, Handler cb ->
-        ((KvdnSession) session).sessionPreTxHooks(tx,cb)
+        ((KvdnSession) session).sessionPreTxHooks(tx, cb)
     }
 
 
-
-    void bailTx(Map context, Handler cb) {
-        logger.error("KVTX error: ${getDebug()}")
-        logger.error(context.error as Exception)
-        if(logger.isTraceEnabled())
-            (context.error as Exception).printStackTrace()
+    void bailTx(AsyncResult result, KvdnTX tx, Handler cb) {
+        logger.error("KVTX error: ${getDebug(tx)}")
+        logger.error(result.cause() as Exception)
+        if (logger.isTraceEnabled())
+            (result.cause() as Exception).printStackTrace()
         (this.session as KvdnSession).finishTx(this, {
-            cb.handle([result: null, error: context.error ?: getFlags()])
+            cb.handle(result)
         })
     }
 
@@ -95,19 +96,19 @@ abstract class KvdnTX {
         return (!session.txflags.contains(txtype))
     }
 
-    def putMeta =  {String name , String data ->
+    def putMeta = { String name, String data ->
         if (!metabuffer)
             metabuffer = [:]
-        metabuffer[name]=data
+        metabuffer[name] = data
         return this
     } as Closure<KvdnTX> //fluent
 
-    Map getDebug() {
+    Map getDebug(KvdnTX tx) {
         return [
-                txid   : this.txid,
+                txid   : tx.txid,
                 seid   : ((KvdnSession) this.session).sessionid,
-                straddr: this.strAddr,
-                flags  : this.flags
+                straddr: tx.strAddr,
+                flags  : tx.flags
         ]
     }
 }

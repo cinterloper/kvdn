@@ -2,28 +2,35 @@ package net.iowntheinter.kvdn.util
 
 import groovy.transform.CompileStatic
 import groovy.transform.TypeChecked
+import io.vertx.core.Future
+import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
+import io.vertx.core.eventbus.Message
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 
+import java.util.function.Function
+
+
 /**
  * Created by g on 9/24/16.
  */
-
-//@CompileStatic //@FixMe need an interface for KvdnSession available here
+@TypeChecked
+@CompileStatic
+//@FixMe need an interface for KvdnSessionInterface available here
 class distributedWaitGroup {
     Vertx vertx
-    int timeout
-    def abortcb, triggercb
+    long timeout
+    Handler abortcb, triggercb
     private boolean ran
     private Map events
     EventBus eb
     Logger logger
 
-    distributedWaitGroup(Set tokens, timeout = 0, triggercb, abortcb = {}, Vertx v) {
+    distributedWaitGroup(Set tokens, long timeout = 0, Handler triggercb, Handler abortcb = {}, Vertx v) {
         this.logger = LoggerFactory.getLogger(this.class.getName())
         logger.debug("initalized new distributedWaitGroup with tokens: $tokens ")
         ran = false
@@ -45,16 +52,16 @@ class distributedWaitGroup {
     }
 
 
-    void onChannel(String channel, evaluator = { body -> return body }) {
-        MessageConsumer c = eb.consumer(channel, { message ->
+    void onChannel(String channel, Function<String, String> evaluator = { body -> return body }) {
+        MessageConsumer c = eb.consumer(channel, { Message message ->
             String body = message.body() as String
             logger.trace("onAck ${channel} ${body}")
-            ack(evaluator(body))
+            ack(evaluator.apply(body))
         })
         abortTimer(c, abortcb)
     }
 
-    void onKeys(String straddr, kvdnSession) {
+    void onKeys(String straddr, KvdnSessionInterface kvdnSession) {
         //s loose typeing hack, should be a kvdnSession
         def c = kvdnSession.onWrite(straddr, { JsonObject body ->
             logger.trace("onKeys ${straddr} ${body}")
@@ -63,7 +70,7 @@ class distributedWaitGroup {
         abortTimer(c, abortcb)
     }
 
-    void check(cb) {
+    void check(Handler cb) {
         boolean run = true
         events.each({ k, v ->
             if (v != true)
@@ -71,16 +78,16 @@ class distributedWaitGroup {
         })
         if (run && !ran) {
             ran = true
-            cb()
+            cb.handle(Future.succeededFuture())
         }
 
     }
 
-    void abortTimer(c, abortcb) {
+    void abortTimer(MessageConsumer c, Handler abortcb) {
         if (this.timeout != 0) {
             vertx.setTimer(this.timeout, {
                 logger.debug("abort timed listener on time exceeded ${c.address()}")
-                (c as MessageConsumer).unregister({ abortcb() })
+                c.unregister({ abortcb.handle(Future.succeededFuture()) })
             })
         }
     }
