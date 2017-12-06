@@ -9,7 +9,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import net.iowntheinter.kvdn.service.kvsvc;
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx;
-import net.iowntheinter.kvdn.storage.kvdnSession;
+import net.iowntheinter.kvdn.storage.KvdnSession;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ import java.util.Set;
 
 public class kvdnService implements kvsvc {
     private Vertx vertx;
-    private kvdnSession session;
+    private KvdnSession session;
     private static final Logger logger = LoggerFactory.getLogger(kvdnService.class);
 
     public kvdnService(Vertx vertx) {
@@ -27,7 +27,7 @@ public class kvdnService implements kvsvc {
 
     public void setup(Handler cb) {
         try {
-            this.session = new kvdnSession(vertx);
+            this.session = new KvdnSession(vertx);
             session.init(cb, (Handler<Throwable>) event -> logger.error(event));
 
         } catch (Exception e) {
