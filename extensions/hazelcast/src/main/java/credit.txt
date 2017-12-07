@@ -1,0 +1,1 @@
+originally from https://github.com/rlindooren/hazelcast-json-jdbc-mapstore

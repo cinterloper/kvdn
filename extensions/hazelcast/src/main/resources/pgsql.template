@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS "${TABLE_NAME}"  (
+     key_md5 VARCHAR(32) PRIMARY KEY,
+     key_org VARCHAR(256) NOT NULL,
+     classname VARCHAR(256) NOT NULL,
+     value TEXT NULL,
+     lastUpdated TIMESTAMP default current_timestamp
+     );

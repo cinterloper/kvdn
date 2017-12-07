@@ -1,0 +1,168 @@
+
+buildscript {
+    repositories {
+        mavenLocal()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.co.riiid:gradle-github-plugin:0.4.2"
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.6"
+
+    }
+}
+
+
+plugins {
+    id 'groovy'
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '1.2.3'
+    //id "com.linkedin.python-sdist" version "0.3.9"
+    id 'maven-publish'
+    id "net.ltgt.apt" version "0.6"
+}
+def strict = false
+if(System.getenv("STRICT_TYPECHECKING") != null)
+    strict = true
+
+compileGroovy {
+    groovyOptions.javaAnnotationProcessing = true
+    if(strict)
+        groovyOptions.configurationScript = file("gradle/config.groovy")
+}
+compileGroovy {
+}
+
+apply plugin: "co.riiid.gradle"
+apply plugin: 'distribution'
+apply plugin: 'idea'
+
+
+def libversion = '3.5.0'
+if(System.getenv("VERTX_VERSION") != null)
+    libversion = System.getenv("VERTX_VERSION")
+
+version =  "$libversion-${new File('src/main/resources/_KVDN_VERSION.txt').text.trim()}"
+println("version $version")
+def GH_TOKEN = System.getenv("GH_TOKEN")
+def AWS_MVN_BUCKET = System.getenv("AWS_MVN_BUCKET")
+def AWS_DEFAULT_REGION = System.getenv("AWS_DEFAULT_REGION")
+def AWS_ACCESS_KEY_ID = System.getenv("AWS_ACCESS_KEY_ID")
+def AWS_SECRET_ACCESS_KEY = System.getenv("AWS_SECRET_ACCESS_KEY")
+def USER = System.getenv("USER")
+
+
+distributions {
+    clients {
+        baseName = 'clients'
+        contents {
+            from { 'Client/' }
+        }
+    }
+}
+
+if(System.getenv("GH_TOKEN") != null) {
+    github {
+        owner = 'cinterloper'
+        repo = 'kvdn'
+        token = GH_TOKEN
+        tagName = version
+        targetCommitish = 'master'
+        name = "v$version"
+        body = """# KVDN
+release $version
+${System.getenv('RELEASE_NOTES')?:""}
+"""
+
+        assets = [
+
+                "build/libs/kvdn-$version-fat.jar",
+                "build/distributions/clients-${version}.zip",
+                "build/distributions/clients-${version}.tar"
+        ]
+    }
+}
+repositories {
+    mavenCentral()
+    mavenLocal()
+    jcenter()
+   // pyGradlePyPi()
+    maven { url 'http://dl.bintray.com/gesellix/docker-utils' }
+    flatDir { dirs '/usr/share/java' }
+    flatDir { dirs 'lib/' }
+
+    if (AWS_MVN_BUCKET && !AWS_MVN_BUCKET.allWhitespace) {
+        maven {
+            url "s3://$AWS_MVN_BUCKET/maven2"
+            credentials(AwsCredentials) {
+                accessKey AWS_ACCESS_KEY_ID
+                secretKey AWS_SECRET_ACCESS_KEY
+            }
+        }
+    }
+}
+publishing {
+    repositories {
+	mavenLocal()
+        if (AWS_MVN_BUCKET && !AWS_MVN_BUCKET.allWhitespace) {
+            maven {
+                url "s3://$AWS_MVN_BUCKET/maven2"
+                credentials(AwsCredentials) {
+                    accessKey AWS_ACCESS_KEY_ID
+                    secretKey AWS_SECRET_ACCESS_KEY
+                }
+            }
+        }
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'net.iowntheinter'
+            artifactId 'kvdn'
+            from components.java
+        }
+    }
+}
+
+sourceCompatibility = '1.8'
+mainClassName = 'io.vertx.core.Launcher';
+dependencies {
+    compile "io.vertx:vertx-web:$libversion"
+    compile "io.vertx:vertx-core:$libversion"
+    compile "com.google.guava:guava:19.0"
+    compile "io.vertx:vertx-lang-groovy:$libversion"
+    compile "io.vertx:vertx-auth-common:$libversion"
+    compile "io.vertx:vertx-auth-jwt:$libversion"
+    compile "io.vertx:vertx-auth-shiro:$libversion"
+    compile "io.vertx:vertx-service-proxy:$libversion"
+    compile 'ch.qos.logback:logback-classic:1.1.7'
+    compile 'ch.qos.logback:logback-core:1.1.7'
+    compile "net.iowntheinter:kvdn-util:$version"
+    testCompile "io.vertx:vertx-unit:$libversion"
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+test {
+    testLogging {
+        // Show that tests are run in the command-line output
+        events 'started', 'passed'
+    }
+}
+processResources {
+    from 'src/main/groovy'
+}
+
+shadowJar {
+    classifier = 'fat'
+    manifest {
+        attributes 'Main-Verticle': 'groovy:kvdn-start.groovy'
+    }
+    mergeServiceFiles{
+        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.8'
+}

@@ -1,0 +1,57 @@
+
+plugins {
+    id 'groovy'
+    id 'java'
+    id 'application'
+}
+apply plugin: 'net.ltgt.apt'
+apply plugin: 'groovy'
+apply plugin: 'maven-publish'
+apply plugin: 'idea'
+
+
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    jcenter()
+}
+
+
+def libversion = '3.5.0'
+def projversion = rootProject.getVersion()
+if (System.getenv("VERTX_VERSION"))
+    libversion = System.getenv("VERTX_VERSION")
+if (System.getenv("CUSTOM_PROJVER") && System.getenv("PROJVER"))
+    projversion = System.getenv("PROJVER")
+mainClassName = 'io.vertx.core.Launcher'
+version = projversion
+println("util version: $version")
+sourceCompatibility = '1.8'
+
+dependencies {
+    compile "io.vertx:vertx-core:$libversion"
+    compile "io.vertx:vertx-lang-groovy:3.5.0"
+    compile 'io.github.lukehutch:fast-classpath-scanner:2.0.10'
+}
+
+
+publishing {
+    repositories {
+        mavenLocal()
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'net.iowntheinter'
+            artifactId 'kvdn-util'
+            from components.java
+        }
+    }
+}
+
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.8'
+}

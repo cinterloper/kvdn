@@ -1,0 +1,112 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath 'io.vertx:vertx-codegen:3.5.0'
+        classpath "io.vertx:vertx-service-proxy:3.5.0"
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.6"
+
+    }
+}
+plugins {
+    id 'groovy'
+    id 'java'
+    id 'application'
+}
+apply plugin: 'net.ltgt.apt'
+apply plugin: 'groovy'
+apply plugin: 'maven-publish'
+apply plugin: 'idea'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    jcenter()
+}
+
+
+def libversion = '3.5.0'
+def projversion = rootProject.getVersion()
+if (System.getenv("VERTX_VERSION"))
+    libversion = System.getenv("VERTX_VERSION")
+if (System.getenv("PROJVER"))
+    projversion = System.getenv("PROJVER")
+
+version = projversion
+
+sourceCompatibility = '1.8'
+
+dependencies {
+
+    compile "io.vertx:vertx-core:$libversion"
+    compile "io.vertx:vertx-lang-js:$libversion"
+    compile "io.vertx:vertx-lang-groovy:$libversion"
+    compile "io.vertx:vertx-service-proxy:$libversion"
+    compile "io.vertx:vertx-sockjs-service-proxy:$libversion"
+    compile 'io.vertx:vertx-codegen:3.5.0'
+    compile "net.iowntheinter:kvdn:$projversion"
+
+}
+def generateSrcPath = "$projectDir/src/main/generated-src"
+def generatedSrcDir = file(generateSrcPath)
+
+sourceSets {
+    main {
+        java.srcDirs += generatedSrcDir
+        output.dir(builtBy: 'generateServiceProxy', generateSrcPath)
+    }
+}
+
+
+publishing {
+    repositories {
+        mavenLocal()
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'net.iowntheinter'
+            artifactId 'kvdn-service-proxy'
+            from components.java
+        }
+    }
+}
+
+mainClassName = 'io.vertx.core.Launcher'
+compileGroovy {
+    groovyOptions.javaAnnotationProcessing = true
+}
+
+task generateServiceProxy(type: JavaCompile, description: 'Generates EBServiceProxies') {
+    source = sourceSets.main.java
+    classpath = configurations.
+            compile
+    destinationDir = generatedSrcDir
+    options.compilerArgs = [
+
+            "-proc:only",
+            "-processor", "io.vertx.codegen.CodeGenProcessor",
+
+            "-Acodegen.output=$generateSrcPath"
+    ]
+}
+
+
+shadowJar {
+    classifier = 'fat'
+    manifest {
+        attributes 'Main-Verticle': 'groovy:kvdn-start-service.groovy'
+    }
+    mergeServiceFiles {
+        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+    }
+}
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.8'
+}

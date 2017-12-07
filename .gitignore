@@ -1,11 +1,12 @@
 
 kvdn.iml
 .idea
-.gradle
-*.jar
+build/
 *.xml
 *.class
 *.zip
 *.tgz
 *.iml
 note*.txt
+node_modules
+.gradle/
