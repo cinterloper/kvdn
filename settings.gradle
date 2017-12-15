@@ -6,6 +6,7 @@ if (!System.getenv("DISABLE_EXTENSIONS")) {
     include 'util'
     include 'service-proxy-server'
     include 'extensions/mapdb'
+    include 'server'
 //    include 'extensions/chronicle'
  //   include 'extensions/unipop'
  //   include 'extensions/xodus'

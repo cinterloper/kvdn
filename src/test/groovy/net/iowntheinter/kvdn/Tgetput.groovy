@@ -44,7 +44,7 @@ class Tgetput {
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
         (kvs as KvdnSession).init({
-            KvTx tx = kvs.newTx(addr, KvdnSession.dataType.KV) as KvTx
+            KvTx tx = kvs.newTx(addr, KvdnSession.DATATYPE.KV) as KvTx
             tx.set(key, data, { AsyncResult<String> result ->
                 if (result.failed()) {
                     context.fail(result.cause().toString())
@@ -75,7 +75,7 @@ class Tgetput {
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
         (kvs as KvdnSession).init({
-            KvTx tx = kvs.newTx(addr, KvdnSession.dataType.KV) as KvTx
+            KvTx tx = kvs.newTx(addr, KvdnSession.DATATYPE.KV) as KvTx
             tx.set(key, data, { AsyncResult result ->
                 if (result.failed()) {
                     context.fail(result.cause().toString())

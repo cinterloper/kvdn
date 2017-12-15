@@ -32,6 +32,7 @@ import java.util.function.Function;
 import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.ServiceExceptionMessageCodec;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
@@ -64,13 +65,16 @@ public class kvsvcVertxEBProxy implements kvsvc {
     } catch (IllegalStateException ex) {}
   }
 
-  public void set(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
+  public void set(String straddr, String key, String value, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
-    _json.put("document", document);
+    _json.put("straddr", straddr);
+    _json.put("key", key);
+    _json.put("value", value);
+    _json.put("options", options);
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "set");
     _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
@@ -82,13 +86,15 @@ public class kvsvcVertxEBProxy implements kvsvc {
     });
   }
 
-  public void submit(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
+  public void submit(String straddr, String value, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
-    _json.put("document", document);
+    _json.put("straddr", straddr);
+    _json.put("value", value);
+    _json.put("options", options);
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "submit");
     _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
@@ -100,16 +106,18 @@ public class kvsvcVertxEBProxy implements kvsvc {
     });
   }
 
-  public void get(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
+  public void get(String straddr, String key, JsonObject options, Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
-    _json.put("document", document);
+    _json.put("straddr", straddr);
+    _json.put("key", key);
+    _json.put("options", options);
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "get");
-    _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
+    _vertx.eventBus().<String>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {
@@ -118,16 +126,17 @@ public class kvsvcVertxEBProxy implements kvsvc {
     });
   }
 
-  public void getSize(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
+  public void size(String straddr, JsonObject options, Handler<AsyncResult<Integer>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
-    _json.put("document", document);
+    _json.put("straddr", straddr);
+    _json.put("options", options);
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
-    _deliveryOptions.addHeader("action", "getSize");
-    _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
+    _deliveryOptions.addHeader("action", "size");
+    _vertx.eventBus().<Integer>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {
@@ -136,16 +145,17 @@ public class kvsvcVertxEBProxy implements kvsvc {
     });
   }
 
-  public void getKeys(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
+  public void getKeys(String straddr, JsonObject options, Handler<AsyncResult<JsonArray>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
-    _json.put("document", document);
+    _json.put("straddr", straddr);
+    _json.put("options", options);
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "getKeys");
-    _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
+    _vertx.eventBus().<JsonArray>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {
@@ -154,13 +164,15 @@ public class kvsvcVertxEBProxy implements kvsvc {
     });
   }
 
-  public void delete(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
+  public void delete(String straddr, String key, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
-    _json.put("document", document);
+    _json.put("straddr", straddr);
+    _json.put("key", key);
+    _json.put("options", options);
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "delete");
     _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
@@ -172,13 +184,15 @@ public class kvsvcVertxEBProxy implements kvsvc {
     });
   }
 
-  public void query(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler) {
+  public void query(String straddr, JsonObject query, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
     }
     JsonObject _json = new JsonObject();
-    _json.put("document", document);
+    _json.put("straddr", straddr);
+    _json.put("query", query);
+    _json.put("options", options);
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "query");
     _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {

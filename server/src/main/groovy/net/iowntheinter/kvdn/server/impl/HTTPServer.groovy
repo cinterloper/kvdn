@@ -1,21 +1,23 @@
-package net.iowntheinter.kvdn
+package net.iowntheinter.kvdn.server.impl
 
+import groovy.transform.CompileStatic
 import groovy.transform.TypeChecked
+import io.vertx.core.*
+import io.vertx.core.eventbus.EventBus
 import io.vertx.core.http.HttpServerResponse
 import io.vertx.core.json.JsonArray
-import io.vertx.ext.web.RoutingContext
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
-import io.vertx.core.Context
-import io.vertx.core.Vertx
-import io.vertx.core.eventbus.EventBus
-import io.vertx.ext.web.Router
 import io.vertx.core.logging.LoggerFactory
-import net.iowntheinter.kvdn.storage.kv.impl.KvTx
-import net.iowntheinter.kvdn.storage.KvdnSession
+import io.vertx.ext.web.Router
+import io.vertx.ext.web.RoutingContext
+import io.vertx.serviceproxy.ServiceBinder
+import net.iowntheinter.kvdn.service.impl.KvdnService
+import net.iowntheinter.kvdn.service.kvsvc
 
-//@TypeChecked
-class kvserver {
+@CompileStatic
+@TypeChecked
+class HTTPServer {
     final String version
     final JsonObject config
     Logger logger
@@ -23,22 +25,35 @@ class kvserver {
     Vertx vertx
     Router router
     Context ctx
-    KvdnSession session
     String _token = '_'
-    //used in a vertx program, or standalone
-    kvserver(Vertx vertx) {
+    KvdnService svc //used in a vertx program, or standalone
+    HTTPServer(Vertx vertx) {
+        this(vertx, new KvdnService(vertx))
+    }
+
+    HTTPServer(Vertx vertx, KvdnService svc) {
+        this.svc = svc;
         logger = new LoggerFactory().getLogger("kvdn")
         this.vertx = vertx
         ctx = vertx.getOrCreateContext()
         config = ctx.config() as JsonObject
-        session = new KvdnSession(vertx)
         def classloader = (URLClassLoader) (Thread.currentThread().getContextClassLoader())
-        this.version=(classloader.getResourceAsStream('_KVDN_VERSION.txt').getText())
+        this.version = (classloader.getResourceAsStream('_KVDN_VERSION.txt').getText())
     }
 
-    def init(Router r, cb) { //real initializaion function
+    void init(Router r, Handler cb) {
+        LoggerFactory.getLogger(this.class.name).debug("setup KvdnService inside HTTPServer")
+        new ServiceBinder(vertx).setAddress("kvdnsvc").register(kvsvc.class, svc as KvdnService)
+        init(r, svc, cb)
+    }
+
+    void init(Router r, KvdnService svc, Handler cb) {
         router = r
-        session.init({
+
+        this.svc = svc
+        svc.setup({
+            new ServiceBinder(vertx).setAddress("kvdnsvc").register(kvsvc.class, svc as KvdnService)
+            LoggerFactory.getLogger(this.class.name).debug("setup kvdnService complete")
 
             eb = vertx.eventBus()
             def prefix = ""
@@ -60,14 +75,15 @@ class kvserver {
                 rc.response().end(this.version)
             })
 
-            cb()
 
-        }, { Exception e -> logger.fatal(e) })
+            cb.handle(Future.succeededFuture())
+        })
+
 
     }
 
-    static String filterAddr(String s){
-        return s.replace('.','') //make this pluggable?
+    static String filterAddr(String s) {
+        return s.replace('.', '') //make this pluggable?
     }
 
     def handleMapKeys(RoutingContext routingContext) {
@@ -78,18 +94,19 @@ class kvserver {
         if (mName == null || sName == null) {
             response.setStatusCode(400).end()
         } else {
-            KvTx tx = session.newTx("${sName}${_token}${mName}")
-            tx.getKeys({ resGetK ->
-                if (resGetK.error == null) {
-                    response.putHeader("Content-Type","application/json")
-                    response.end(new JsonArray(resGetK.result as List).toString())
+            String straddr = "${sName}${_token}${mName}"
+            svc.getKeys(straddr, new JsonObject(), { AsyncResult<JsonArray> resGetK ->
+                if (resGetK.succeeded()) {
+                    response.putHeader("Content-Type", "application/json")
+                    response.end(resGetK.result().toString())
                 } else {
-                    response.setStatusCode(501).end(resGetK.error.toString())
+                    response.setStatusCode(501).end(resGetK.cause().toString())
                 }
             })
 
         }
     }
+
     def handleMapSize(RoutingContext routingContext) {
         def mName = filterAddr(routingContext.request().getParam("map"))
         def sName = filterAddr(routingContext.request().getParam("str"))
@@ -98,12 +115,12 @@ class kvserver {
         if (mName == null || sName == null) {
             response.setStatusCode(400).end()
         } else {
-            KvTx tx = session.newTx("${sName}${_token}${mName}")
-            tx.size({ resSize ->
-                if (resSize.error == null) {
-                    response.end(resSize.result.toString())
+            String straddr = "${sName}${_token}${mName}"
+            svc.size(straddr, new JsonObject(), { AsyncResult resSize ->
+                if (resSize.succeeded()) {
+                    response.end(resSize.result().toString())
                 } else {
-                    response.setStatusCode(501).end(resSize.error.toString())
+                    response.setStatusCode(501).end(resSize.cause().toString())
                 }
             })
 
@@ -119,15 +136,16 @@ class kvserver {
         if (mName == null || kName == null) {
             response.setStatusCode(400).end()
         } else {
-            KvTx tx = session.newTx("${sName}${_token}${mName}")
-            tx.get(kName, { resGet ->
-                if (resGet.error == null) {
-                  /*  def ctype = (resGet?.meta["Content-Type"]) ?: null
-                    if(ctype)
-                        response.putHeader("Content-Type",ctype as String)*/
-                    response.end(resGet.result.toString())
+            String straddr = "${sName}${_token}${mName}"
+            svc.get(straddr, kName, new JsonObject(), { AsyncResult resGet ->
+                if (resGet.succeeded()) {
+                    logger.trace("RESULT OF GET ${straddr} ${resGet.result().toString()}")
+                    /*  def ctype = (resGet?.meta["Content-Type"]) ?: null
+                      if(ctype)
+                          response.putHeader("Content-Type",ctype as String)*/
+                    response.end(resGet.result().toString())
                 } else {
-                    response.setStatusCode(501).end(resGet.error.toString())
+                    response.setStatusCode(501).end(resGet.cause().toString())
                 }
             })
 
@@ -155,15 +173,15 @@ class kvserver {
                 if (content == null) {
                     response.setStatusCode(400).end()
                 } else {
-                    KvTx tx = session.newTx("${sName}${_token}${mName}")
+                    String straddr = "${sName}${_token}${mName}"
                     def ctype = routingContext.request().getHeader("Content-Type")
-                    if(ctype)
-                        tx.putMeta("Content-Type",ctype)
-                    tx.set(kName as String, content, { resPut ->
-                        if (resPut.error == null) {
+                    //if(ctype)
+                    //    svc.putMeta("Content-Type",ctype)
+                    svc.set(straddr, kName as String, content, new JsonObject(), { AsyncResult resPut ->
+                        if (resPut.succeeded()) {
                             response.end(mName + ":" + kName)
                         } else {
-                            response.setStatusCode(501).end(resPut.error.toString())
+                            response.setStatusCode(501).end(resPut.cause().toString())
                         }
                     })
                 }
@@ -190,15 +208,15 @@ class kvserver {
             if (content == null) {
                 response.setStatusCode(400).end(response.toString())
             } else {
-                KvTx tx = session.newTx("${sName}${_token}${mName}")
+                String straddr = "${sName}${_token}${mName}"
                 def ctype = routingContext.request().getHeader("Content-Type")
-                if(ctype)
-                    tx.putMeta("Content-Type",ctype)
-                tx.set(kName as String, content, { resPut ->
-                    if (resPut.error == null) {
+                // if(ctype)
+                //   svc.putMeta("Content-Type",ctype)
+                svc.set(straddr, kName as String, content, new JsonObject(), { AsyncResult resPut ->
+                    if (resPut.succeeded()) {
                         response.end(mName + ":" + kName)
                     } else {
-                        response.setStatusCode(501).end(resPut.error.toString())
+                        response.setStatusCode(501).end(resPut.cause().toString())
                     }
                 })
             }
@@ -207,8 +225,11 @@ class kvserver {
     }
 
     def handleMapSubmit(RoutingContext routingContext) {
+
         def mName = filterAddr(routingContext.request().getParam("map"))
         def sName = filterAddr(routingContext.request().getParam("str"))
+        logger.trace "submit called ${mName} ${sName}"
+
         def response = routingContext.response()
         if (mName == null) {
             response.setStatusCode(400).end()
@@ -216,19 +237,22 @@ class kvserver {
             String content
             try {
                 content = routingContext.getBodyAsString()
-
                 if (content == null) {
+                    logger.trace("no content?")
                     response.setStatusCode(400).end()
                 } else {
-                    KvTx tx = session.newTx("${sName}${_token}${mName}")
-                    def ctype = routingContext.request().getHeader("Content-Type")
-                    if(ctype)
-                        tx.putMeta("Content-Type",ctype)
-                    tx.submit(content, { resPut ->
-                        if (resPut.error == null) {
-                            response.end(mName + ":" + resPut.key)
+                    logger.trace " creating new transaction "
+                    String straddr = "${sName}${_token}${mName}"
+                    String ctype = routingContext.request().getHeader("Content-Type") ?: ""
+                    //if(ctype)
+                    //    svc.putMeta("Content-Type",ctype)
+                    svc.submit(straddr, content, new JsonObject(), { AsyncResult resPut ->
+                        if (resPut.succeeded()) {
+                            logger.trace "transaction sucussful "
+                            response.end(mName + ":" + resPut.result())
                         } else {
-                            response.setStatusCode(501).end(resPut.error.toString())
+                            logger.trace " transaction failed"
+                            response.setStatusCode(501).end(resPut.cause().toString())
                         }
                     })
                 }
@@ -248,14 +272,14 @@ class kvserver {
         if (mName == null || kName == null) {
             response.setStatusCode(400).end()
         } else {
-            KvTx tx = session.newTx("${sName}${_token}${mName}")
+            String straddr = "${sName}${_token}${mName}"
 
-            tx.del(kName, { resDel ->
-                if (resDel.error == null) {
+            svc.delete(straddr, kName, new JsonObject(), { AsyncResult resDel ->
+                if (resDel.succeeded()) {
                     if (!response.ended()) //why ?
                         response.end(mName + ":" + kName)
                 } else {
-                    response.setStatusCode(501).end(resDel.error.toString())
+                    response.setStatusCode(501).end(resDel.cause().toString())
                 }
             })
 

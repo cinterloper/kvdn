@@ -30,53 +30,53 @@ export class kvsvc {
   constructor (private eb: any, private address: string) {
   }
 
-  set(document: Object, resultHandler: (err: any, result: any) => any) : void {
+  set(straddr: string, key: string, value: string, options: Object, resultHandler: (err: any, result: any) => any) : void {
     if (closed) {
       throw new Error('Proxy is closed');
     }
-    this.eb.send(this.address, {"document": document}, {"action":"set"}, function(err, result) { resultHandler(err, result &&result.body); });
+    this.eb.send(this.address, {"straddr": straddr, "key": key, "value": value, "options": options}, {"action":"set"}, function(err, result) { resultHandler(err, result &&result.body); });
   }
 
-  submit(document: Object, resultHandler: (err: any, result: any) => any) : void {
+  submit(straddr: string, value: string, options: Object, resultHandler: (err: any, result: any) => any) : void {
     if (closed) {
       throw new Error('Proxy is closed');
     }
-    this.eb.send(this.address, {"document": document}, {"action":"submit"}, function(err, result) { resultHandler(err, result &&result.body); });
+    this.eb.send(this.address, {"straddr": straddr, "value": value, "options": options}, {"action":"submit"}, function(err, result) { resultHandler(err, result &&result.body); });
   }
 
-  get(document: Object, resultHandler: (err: any, result: any) => any) : void {
+  get(straddr: string, key: string, options: Object, resultHandler: (err: any, result: any) => any) : void {
     if (closed) {
       throw new Error('Proxy is closed');
     }
-    this.eb.send(this.address, {"document": document}, {"action":"get"}, function(err, result) { resultHandler(err, result &&result.body); });
+    this.eb.send(this.address, {"straddr": straddr, "key": key, "options": options}, {"action":"get"}, function(err, result) { resultHandler(err, result &&result.body); });
   }
 
-  getSize(document: Object, resultHandler: (err: any, result: any) => any) : void {
+  size(straddr: string, options: Object, resultHandler: (err: any, result: any) => any) : void {
     if (closed) {
       throw new Error('Proxy is closed');
     }
-    this.eb.send(this.address, {"document": document}, {"action":"getSize"}, function(err, result) { resultHandler(err, result &&result.body); });
+    this.eb.send(this.address, {"straddr": straddr, "options": options}, {"action":"size"}, function(err, result) { resultHandler(err, result &&result.body); });
   }
 
-  getKeys(document: Object, resultHandler: (err: any, result: any) => any) : void {
+  getKeys(straddr: string, options: Object, resultHandler: (err: any, result: any) => any) : void {
     if (closed) {
       throw new Error('Proxy is closed');
     }
-    this.eb.send(this.address, {"document": document}, {"action":"getKeys"}, function(err, result) { resultHandler(err, result &&result.body); });
+    this.eb.send(this.address, {"straddr": straddr, "options": options}, {"action":"getKeys"}, function(err, result) { resultHandler(err, result &&result.body); });
   }
 
-  delete(document: Object, resultHandler: (err: any, result: any) => any) : void {
+  delete(straddr: string, key: string, options: Object, resultHandler: (err: any, result: any) => any) : void {
     if (closed) {
       throw new Error('Proxy is closed');
     }
-    this.eb.send(this.address, {"document": document}, {"action":"delete"}, function(err, result) { resultHandler(err, result &&result.body); });
+    this.eb.send(this.address, {"straddr": straddr, "key": key, "options": options}, {"action":"delete"}, function(err, result) { resultHandler(err, result &&result.body); });
   }
 
-  query(document: Object, resultHandler: (err: any, result: any) => any) : void {
+  query(straddr: string, query: Object, options: Object, resultHandler: (err: any, result: any) => any) : void {
     if (closed) {
       throw new Error('Proxy is closed');
     }
-    this.eb.send(this.address, {"document": document}, {"action":"query"}, function(err, result) { resultHandler(err, result &&result.body); });
+    this.eb.send(this.address, {"straddr": straddr, "query": query, "options": options}, {"action":"query"}, function(err, result) { resultHandler(err, result &&result.body); });
   }
 
 }
