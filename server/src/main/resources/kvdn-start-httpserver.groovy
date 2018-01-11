@@ -5,8 +5,11 @@ import ch.qos.logback.classic.Level
 import groovy.transform.TypeChecked
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpServer
+import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.LoggerFactory
+import io.vertx.core.net.JksOptions
 import io.vertx.ext.auth.shiro.ShiroAuthOptions
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType
 import io.vertx.ext.web.Router
@@ -17,6 +20,7 @@ import io.vertx.ext.web.handler.sockjs.PermittedOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import net.iowntheinter.kvdn.server.impl.HTTPServer
 import io.vertx.core.logging.Logger
+
 
 //import net.iowntheinter.kvdn.service.kvsvcVertxProxyHandler;
 (org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) as ch.qos.logback.classic.Logger).
@@ -74,8 +78,15 @@ s.init(router as Router, { AsyncResult result ->
          context.response().putHeader("location", "/").setStatusCode(302).end()
      })*/
     try {
-
-        def server = v.createHttpServer()
+        HttpServer server = null
+        if (System.getenv("KEYSTORE")) {
+            JksOptions j = new JksOptions()
+            j.path = System.getenv("KEYSTORE")
+            j.password = System.getenv("KEYSTORE_PASSWORD")
+            server = ((Vertx) v).createHttpServer(new HttpServerOptions().setKeyStoreOptions(j).setSsl(true))
+            logger.info("HTTPS ENABLED")
+        } else
+            server = ((Vertx) v).createHttpServer()
 
         server.requestHandler(router.&accept).listen(6501)
     } catch (e) {

@@ -28,6 +28,8 @@ public class KvdnService implements kvsvc {
     }
 
     public void setup(Handler cb) {
+        logger.info("service setup called");
+
         try {
             this.session = new KvdnSession(vertx);
             session.init(cb, (Handler<Throwable>) logger::error);

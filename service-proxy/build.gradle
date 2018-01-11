@@ -46,6 +46,10 @@ dependencies {
 
     compile "io.vertx:vertx-core:$libversion";
     compile "io.vertx:vertx-lang-js:$libversion"
+    //compile "io.vertx:vertx-lang-scala-stack_2.12:$libversion"
+    //compile "io.vertx:vertx-lang-kotlin:$libversion"
+    //compile "io.vertx:vertx-lang-ruby:$libversion
+    //compile "io.vertx:vertx-lang-ceylon:$libversion"
     compile "io.vertx:vertx-lang-groovy:$libversion"
     compile "io.vertx:vertx-service-proxy:$libversion"
     compile "io.vertx:vertx-sockjs-service-proxy:$libversion"

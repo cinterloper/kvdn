@@ -41,7 +41,8 @@ class HTTPServer implements AbstractServer {
         def classloader = (URLClassLoader) (Thread.currentThread().getContextClassLoader())
         this.version = (classloader.getResourceAsStream('_KVDN_VERSION.txt').getText())
     }
-    void init(Handler cb){
+
+    void init(Handler cb) {
         //not implemented yet
     }
 
@@ -55,37 +56,29 @@ class HTTPServer implements AbstractServer {
         router = r
 
         this.svc = svc
-        svc.setup({ AsyncResult svcResult ->
-            if (svcResult.failed()) {
-                cb.handle(svcResult)
-                return
-            } else {
-                new ServiceBinder(vertx).setAddress("kvdnsvc").register(kvsvc.class, svc as KvdnService)
-                LoggerFactory.getLogger(this.class.name).debug("setup kvdnService complete")
 
-                eb = vertx.eventBus()
-                def prefix = ""
-                if (config.containsKey('kvdn_prefix'))
-                    prefix = "/${config.getString('kvdn_prefix')}"
-                if (config.containsKey('kvdn_seperator_token'))
-                    _token = "${config.getString('kvdn_seperator_token')}"
+        new ServiceBinder(vertx).setAddress("kvdnsvc").register(kvsvc.class, svc as KvdnService)
+        LoggerFactory.getLogger(this.class.name).debug("setup kvdnService complete")
+        eb = vertx.eventBus()
+        def prefix = ""
+        if (config.containsKey('kvdn_prefix'))
+            prefix = "/${config.getString('kvdn_prefix')}"
+        if (config.containsKey('kvdn_seperator_token'))
+            _token = "${config.getString('kvdn_seperator_token')}"
 
-                r.delete("${prefix}/X/:str/:map/:key").handler(this.&handleMapDel)
-                r.post("${prefix}/X/:str/:map").handler(this.&handleMapSubmit)
-                r.post("${prefix}/U/:str/:map").handler(this.&handleMapSubmitUUID)
-                r.get("${prefix}/X/:str/:map/:key").handler(this.&handleMapGet)
-                r.get("${prefix}/KEYS/:str/:map/").handler(this.&handleMapKeys)
-                r.get("${prefix}/SIZE/:str/:map/").handler(this.&handleMapSize)
-                r.put("${prefix}/X/:str/:map/:key").handler(this.&handleMapSet)
-                r.put("${prefix}/R/:str/:map/:key").handler(this.&handleMapSetRaw)
-                r.post("${prefix}/R/:str/:map/:key").handler(this.&handleMapSetRaw)
-                r.get("${prefix}/__VERSION").handler({ RoutingContext rc ->
-                    rc.response().end(this.version)
-                })
-            }
-
-            cb.handle(Future.succeededFuture())
+        r.delete("${prefix}/X/:str/:map/:key").handler(this.&handleMapDel)
+        r.post("${prefix}/X/:str/:map").handler(this.&handleMapSubmit)
+        r.post("${prefix}/U/:str/:map").handler(this.&handleMapSubmitUUID)
+        r.get("${prefix}/X/:str/:map/:key").handler(this.&handleMapGet)
+        r.get("${prefix}/KEYS/:str/:map/").handler(this.&handleMapKeys)
+        r.get("${prefix}/SIZE/:str/:map/").handler(this.&handleMapSize)
+        r.put("${prefix}/X/:str/:map/:key").handler(this.&handleMapSet)
+        r.put("${prefix}/R/:str/:map/:key").handler(this.&handleMapSetRaw)
+        r.post("${prefix}/R/:str/:map/:key").handler(this.&handleMapSetRaw)
+        r.get("${prefix}/__VERSION").handler({ RoutingContext rc ->
+            rc.response().end(this.version)
         })
+        cb.handle(Future.succeededFuture())
 
 
     }
