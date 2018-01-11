@@ -15,6 +15,7 @@ plugins {
     id 'groovy'
     id 'java'
     id 'application'
+
 }
 apply plugin: 'net.ltgt.apt'
 apply plugin: 'groovy'
@@ -46,25 +47,15 @@ dependencies {
 
     compile "io.vertx:vertx-core:$libversion";
     compile "io.vertx:vertx-lang-js:$libversion"
-    //compile "io.vertx:vertx-lang-scala-stack_2.12:$libversion"
-    //compile "io.vertx:vertx-lang-kotlin:$libversion"
-    //compile "io.vertx:vertx-lang-ruby:$libversion
-    //compile "io.vertx:vertx-lang-ceylon:$libversion"
     compile "io.vertx:vertx-lang-groovy:$libversion"
     compile "io.vertx:vertx-service-proxy:$libversion"
     compile "io.vertx:vertx-sockjs-service-proxy:$libversion"
     compile 'io.vertx:vertx-codegen:3.5.0'
     compile "net.iowntheinter:kvdn:$projversion"
+    compile "net.iowntheinter:kvdn-service-proxy:$projversion"
 
-}
-def generateSrcPath = "$projectDir/src/main/generated-src"
-def generatedSrcDir = file(generateSrcPath)
 
-sourceSets {
-    main {
-        java.srcDirs += generatedSrcDir
-        output.dir(builtBy: 'generateServiceProxy', generateSrcPath)
-    }
+
 }
 
 
@@ -76,7 +67,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId 'net.iowntheinter'
-            artifactId 'kvdn-service-proxy'
+            artifactId 'kvdn-server'
             from components.java
         }
     }
@@ -87,25 +78,12 @@ compileGroovy {
     groovyOptions.javaAnnotationProcessing = true
 }
 
-task generateServiceProxy(type: JavaCompile, description: 'Generates EBServiceProxies') {
-    source = sourceSets.main.java
-    classpath = configurations.
-            compile
-    destinationDir = generatedSrcDir
-    options.compilerArgs = [
-
-            "-proc:only",
-            "-processor", "io.vertx.codegen.CodeGenProcessor",
-
-            "-Acodegen.output=$generateSrcPath"
-    ]
-}
 
 
 shadowJar {
     classifier = 'fat'
     manifest {
-        attributes 'Main-Verticle': 'groovy:kvdn-start-service.groovy'
+        attributes 'Main-Verticle': 'groovy:kvdn-start-httpserver.groovy'
     }
     mergeServiceFiles {
         include 'META-INF/services/io.vertx.core.spi.VerticleFactory'

@@ -13,8 +13,8 @@ import net.iowntheinter.kvdn.util.extensionManager.extension
 @TypeChecked
 @CompileStatic
 interface KeyProvider extends extension {
-    void getKeys(String name, Handler<AsyncResult<Set>> cb)
-    void deleteKey(String map, String name, Handler cb)
-    void setKey(String map, String name, Handler cb)
+    void getKeys(String name, Handler<AsyncResult<Set<String>>> cb)
+    void deleteKey(String map, String name, Handler<AsyncResult> cb)
+    void setKey(String map, String name, Handler<AsyncResult> cb)
 
 }

@@ -39,6 +39,7 @@ import io.vertx.serviceproxy.ProxyHelper;
 import io.vertx.serviceproxy.ProxyHandler;
 import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.ServiceExceptionMessageCodec;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
@@ -119,31 +120,31 @@ public class kvsvcVertxProxyHandler extends ProxyHandler {
 
 
         case "set": {
-          service.set((io.vertx.core.json.JsonObject)json.getValue("document"), createHandler(msg));
+          service.set((java.lang.String)json.getValue("straddr"), (java.lang.String)json.getValue("key"), (java.lang.String)json.getValue("value"), (io.vertx.core.json.JsonObject)json.getValue("options"), createHandler(msg));
           break;
         }
         case "submit": {
-          service.submit((io.vertx.core.json.JsonObject)json.getValue("document"), createHandler(msg));
+          service.submit((java.lang.String)json.getValue("straddr"), (java.lang.String)json.getValue("value"), (io.vertx.core.json.JsonObject)json.getValue("options"), createHandler(msg));
           break;
         }
         case "get": {
-          service.get((io.vertx.core.json.JsonObject)json.getValue("document"), createHandler(msg));
+          service.get((java.lang.String)json.getValue("straddr"), (java.lang.String)json.getValue("key"), (io.vertx.core.json.JsonObject)json.getValue("options"), createHandler(msg));
           break;
         }
-        case "getSize": {
-          service.getSize((io.vertx.core.json.JsonObject)json.getValue("document"), createHandler(msg));
+        case "size": {
+          service.size((java.lang.String)json.getValue("straddr"), (io.vertx.core.json.JsonObject)json.getValue("options"), createHandler(msg));
           break;
         }
         case "getKeys": {
-          service.getKeys((io.vertx.core.json.JsonObject)json.getValue("document"), createHandler(msg));
+          service.getKeys((java.lang.String)json.getValue("straddr"), (io.vertx.core.json.JsonObject)json.getValue("options"), createHandler(msg));
           break;
         }
         case "delete": {
-          service.delete((io.vertx.core.json.JsonObject)json.getValue("document"), createHandler(msg));
+          service.delete((java.lang.String)json.getValue("straddr"), (java.lang.String)json.getValue("key"), (io.vertx.core.json.JsonObject)json.getValue("options"), createHandler(msg));
           break;
         }
         case "query": {
-          service.query((io.vertx.core.json.JsonObject)json.getValue("document"), createHandler(msg));
+          service.query((java.lang.String)json.getValue("straddr"), (io.vertx.core.json.JsonObject)json.getValue("query"), (io.vertx.core.json.JsonObject)json.getValue("options"), createHandler(msg));
           break;
         }
         default: {

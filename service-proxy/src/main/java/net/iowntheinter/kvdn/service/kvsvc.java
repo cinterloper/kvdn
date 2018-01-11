@@ -4,10 +4,11 @@ import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
-import io.vertx.core.json.JsonObject;
-import net.iowntheinter.kvdn.service.impl.kvdnService;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ProxyHelper;
+import net.iowntheinter.kvdn.service.impl.KvdnService;
 
 /**
  * Created by g on 9/15/16.
@@ -17,29 +18,29 @@ import io.vertx.serviceproxy.ProxyHelper;
 public interface kvsvc {
     // A couple of factory methods to create an instance and a proxy
     static kvsvc create(Vertx vertx) {
-        return new kvdnService(vertx);
+        return new KvdnService(vertx);
     }
 
     static kvsvc createProxy(Vertx vertx, String address) {
-        return ProxyHelper.createProxy(kvdnService.class, vertx, address);
+        return ProxyHelper.createProxy(KvdnService.class, vertx, address);
         // Alternatively, you can create the proxy directly using:
         // return new ProcessorServiceVertxEBProxy(vertx, address);
         // The name of the class to instantiate is the service interface + `VertxEBProxy`.
         // This class is generated during the compilation
     }
 
-    void set(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler);
+    void set(String straddr, String key, String value, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler);
 
-    void submit(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler);
+    void submit(String straddr, String value, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler);
 
-    void get(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler);
+    void get(String straddr, String key, JsonObject options, Handler<AsyncResult<String>> resultHandler);
 
-    void getSize(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler);
+    void size(String straddr, JsonObject options, Handler<AsyncResult<Integer>> resultHandler);
 
-    void getKeys(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler);
+    void getKeys(String straddr, JsonObject options, Handler<AsyncResult<JsonArray>> resultHandler);
 
-    void delete(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler);
+    void delete(String straddr, String key, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler);
 
-    void query(JsonObject document, Handler<AsyncResult<JsonObject>> resultHandler);
+    void query(String straddr, JsonObject query, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler);
 
 }

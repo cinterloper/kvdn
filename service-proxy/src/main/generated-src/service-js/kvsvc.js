@@ -35,13 +35,16 @@ var kvsvc = function(j_val) {
   /**
 
    @public
-   @param document {Object} 
+   @param straddr {string} 
+   @param key {string} 
+   @param value {string} 
+   @param options {Object} 
    @param resultHandler {function} 
    */
-  this.set = function(document, resultHandler) {
+  this.set = function(straddr, key, value, options, resultHandler) {
     var __args = arguments;
-    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
-      j_kvsvc["set(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(document), function(ar) {
+    if (__args.length === 5 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && typeof __args[2] === 'string' && (typeof __args[3] === 'object' && __args[3] != null) && typeof __args[4] === 'function') {
+      j_kvsvc["set(java.lang.String,java.lang.String,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, key, value, utils.convParamJsonObject(options), function(ar) {
       if (ar.succeeded()) {
         resultHandler(utils.convReturnJson(ar.result()), null);
       } else {
@@ -54,13 +57,15 @@ var kvsvc = function(j_val) {
   /**
 
    @public
-   @param document {Object} 
+   @param straddr {string} 
+   @param value {string} 
+   @param options {Object} 
    @param resultHandler {function} 
    */
-  this.submit = function(document, resultHandler) {
+  this.submit = function(straddr, value, options, resultHandler) {
     var __args = arguments;
-    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
-      j_kvsvc["submit(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(document), function(ar) {
+    if (__args.length === 4 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
+      j_kvsvc["submit(java.lang.String,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, value, utils.convParamJsonObject(options), function(ar) {
       if (ar.succeeded()) {
         resultHandler(utils.convReturnJson(ar.result()), null);
       } else {
@@ -73,13 +78,55 @@ var kvsvc = function(j_val) {
   /**
 
    @public
-   @param document {Object} 
+   @param straddr {string} 
+   @param key {string} 
+   @param options {Object} 
    @param resultHandler {function} 
    */
-  this.get = function(document, resultHandler) {
+  this.get = function(straddr, key, options, resultHandler) {
     var __args = arguments;
-    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
-      j_kvsvc["get(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(document), function(ar) {
+    if (__args.length === 4 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
+      j_kvsvc["get(java.lang.String,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, key, utils.convParamJsonObject(options), function(ar) {
+      if (ar.succeeded()) {
+        resultHandler(ar.result(), null);
+      } else {
+        resultHandler(null, ar.cause());
+      }
+    });
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param straddr {string} 
+   @param options {Object} 
+   @param resultHandler {function} 
+   */
+  this.size = function(straddr, options, resultHandler) {
+    var __args = arguments;
+    if (__args.length === 3 && typeof __args[0] === 'string' && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
+      j_kvsvc["size(java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, utils.convParamJsonObject(options), function(ar) {
+      if (ar.succeeded()) {
+        resultHandler(ar.result(), null);
+      } else {
+        resultHandler(null, ar.cause());
+      }
+    });
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param straddr {string} 
+   @param options {Object} 
+   @param resultHandler {function} 
+   */
+  this.getKeys = function(straddr, options, resultHandler) {
+    var __args = arguments;
+    if (__args.length === 3 && typeof __args[0] === 'string' && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
+      j_kvsvc["getKeys(java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, utils.convParamJsonObject(options), function(ar) {
       if (ar.succeeded()) {
         resultHandler(utils.convReturnJson(ar.result()), null);
       } else {
@@ -92,13 +139,15 @@ var kvsvc = function(j_val) {
   /**
 
    @public
-   @param document {Object} 
+   @param straddr {string} 
+   @param key {string} 
+   @param options {Object} 
    @param resultHandler {function} 
    */
-  this.getSize = function(document, resultHandler) {
+  this.delete = function(straddr, key, options, resultHandler) {
     var __args = arguments;
-    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
-      j_kvsvc["getSize(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(document), function(ar) {
+    if (__args.length === 4 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
+      j_kvsvc["delete(java.lang.String,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, key, utils.convParamJsonObject(options), function(ar) {
       if (ar.succeeded()) {
         resultHandler(utils.convReturnJson(ar.result()), null);
       } else {
@@ -111,51 +160,15 @@ var kvsvc = function(j_val) {
   /**
 
    @public
-   @param document {Object} 
+   @param straddr {string} 
+   @param query {Object} 
+   @param options {Object} 
    @param resultHandler {function} 
    */
-  this.getKeys = function(document, resultHandler) {
+  this.query = function(straddr, query, options, resultHandler) {
     var __args = arguments;
-    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
-      j_kvsvc["getKeys(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(document), function(ar) {
-      if (ar.succeeded()) {
-        resultHandler(utils.convReturnJson(ar.result()), null);
-      } else {
-        resultHandler(null, ar.cause());
-      }
-    });
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
-
-   @public
-   @param document {Object} 
-   @param resultHandler {function} 
-   */
-  this.delete = function(document, resultHandler) {
-    var __args = arguments;
-    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
-      j_kvsvc["delete(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(document), function(ar) {
-      if (ar.succeeded()) {
-        resultHandler(utils.convReturnJson(ar.result()), null);
-      } else {
-        resultHandler(null, ar.cause());
-      }
-    });
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
-
-   @public
-   @param document {Object} 
-   @param resultHandler {function} 
-   */
-  this.query = function(document, resultHandler) {
-    var __args = arguments;
-    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
-      j_kvsvc["query(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(document), function(ar) {
+    if (__args.length === 4 && typeof __args[0] === 'string' && (typeof __args[1] === 'object' && __args[1] != null) && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
+      j_kvsvc["query(java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, utils.convParamJsonObject(query), utils.convParamJsonObject(options), function(ar) {
       if (ar.succeeded()) {
         resultHandler(utils.convReturnJson(ar.result()), null);
       } else {

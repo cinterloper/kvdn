@@ -10,6 +10,6 @@ import org.mapdb.DB
  */
 @TypeChecked
 @CompileStatic
-interface mapdbData extends KVData {
+interface MapdbData extends KVData {
     DB getDB()
 }

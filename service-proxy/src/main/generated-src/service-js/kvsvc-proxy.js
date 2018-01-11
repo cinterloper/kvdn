@@ -49,16 +49,19 @@
     /**
 
      @public
-     @param document {Object} 
+     @param straddr {string} 
+     @param key {string} 
+     @param value {string} 
+     @param options {Object} 
      @param resultHandler {function} 
      */
-    this.set = function(document, resultHandler) {
+    this.set = function(straddr, key, value, options, resultHandler) {
       var __args = arguments;
-      if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
+      if (__args.length === 5 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && typeof __args[2] === 'string' && (typeof __args[3] === 'object' && __args[3] != null) && typeof __args[4] === 'function') {
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {"document":__args[0]}, {"action":"set"}, function(err, result) { __args[1](err, result &&result.body); });
+        j_eb.send(j_address, {"straddr":__args[0], "key":__args[1], "value":__args[2], "options":__args[3]}, {"action":"set"}, function(err, result) { __args[4](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -66,16 +69,18 @@
     /**
 
      @public
-     @param document {Object} 
+     @param straddr {string} 
+     @param value {string} 
+     @param options {Object} 
      @param resultHandler {function} 
      */
-    this.submit = function(document, resultHandler) {
+    this.submit = function(straddr, value, options, resultHandler) {
       var __args = arguments;
-      if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
+      if (__args.length === 4 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {"document":__args[0]}, {"action":"submit"}, function(err, result) { __args[1](err, result &&result.body); });
+        j_eb.send(j_address, {"straddr":__args[0], "value":__args[1], "options":__args[2]}, {"action":"submit"}, function(err, result) { __args[3](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -83,16 +88,18 @@
     /**
 
      @public
-     @param document {Object} 
+     @param straddr {string} 
+     @param key {string} 
+     @param options {Object} 
      @param resultHandler {function} 
      */
-    this.get = function(document, resultHandler) {
+    this.get = function(straddr, key, options, resultHandler) {
       var __args = arguments;
-      if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
+      if (__args.length === 4 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {"document":__args[0]}, {"action":"get"}, function(err, result) { __args[1](err, result &&result.body); });
+        j_eb.send(j_address, {"straddr":__args[0], "key":__args[1], "options":__args[2]}, {"action":"get"}, function(err, result) { __args[3](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -100,16 +107,17 @@
     /**
 
      @public
-     @param document {Object} 
+     @param straddr {string} 
+     @param options {Object} 
      @param resultHandler {function} 
      */
-    this.getSize = function(document, resultHandler) {
+    this.size = function(straddr, options, resultHandler) {
       var __args = arguments;
-      if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
+      if (__args.length === 3 && typeof __args[0] === 'string' && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {"document":__args[0]}, {"action":"getSize"}, function(err, result) { __args[1](err, result &&result.body); });
+        j_eb.send(j_address, {"straddr":__args[0], "options":__args[1]}, {"action":"size"}, function(err, result) { __args[2](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -117,16 +125,17 @@
     /**
 
      @public
-     @param document {Object} 
+     @param straddr {string} 
+     @param options {Object} 
      @param resultHandler {function} 
      */
-    this.getKeys = function(document, resultHandler) {
+    this.getKeys = function(straddr, options, resultHandler) {
       var __args = arguments;
-      if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
+      if (__args.length === 3 && typeof __args[0] === 'string' && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {"document":__args[0]}, {"action":"getKeys"}, function(err, result) { __args[1](err, result &&result.body); });
+        j_eb.send(j_address, {"straddr":__args[0], "options":__args[1]}, {"action":"getKeys"}, function(err, result) { __args[2](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -134,16 +143,18 @@
     /**
 
      @public
-     @param document {Object} 
+     @param straddr {string} 
+     @param key {string} 
+     @param options {Object} 
      @param resultHandler {function} 
      */
-    this.delete = function(document, resultHandler) {
+    this.delete = function(straddr, key, options, resultHandler) {
       var __args = arguments;
-      if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
+      if (__args.length === 4 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {"document":__args[0]}, {"action":"delete"}, function(err, result) { __args[1](err, result &&result.body); });
+        j_eb.send(j_address, {"straddr":__args[0], "key":__args[1], "options":__args[2]}, {"action":"delete"}, function(err, result) { __args[3](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };
@@ -151,16 +162,18 @@
     /**
 
      @public
-     @param document {Object} 
+     @param straddr {string} 
+     @param query {Object} 
+     @param options {Object} 
      @param resultHandler {function} 
      */
-    this.query = function(document, resultHandler) {
+    this.query = function(straddr, query, options, resultHandler) {
       var __args = arguments;
-      if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
+      if (__args.length === 4 && typeof __args[0] === 'string' && (typeof __args[1] === 'object' && __args[1] != null) && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {"document":__args[0]}, {"action":"query"}, function(err, result) { __args[1](err, result &&result.body); });
+        j_eb.send(j_address, {"straddr":__args[0], "query":__args[1], "options":__args[2]}, {"action":"query"}, function(err, result) { __args[3](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };

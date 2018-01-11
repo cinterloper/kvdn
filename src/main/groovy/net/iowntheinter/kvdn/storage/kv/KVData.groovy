@@ -13,7 +13,8 @@ import net.iowntheinter.kvdn.storage.TXNHook
 @TypeChecked
 @CompileStatic
 interface KVData {
+    Object getdb()
     void getMap(String sa, Handler<AsyncResult<AsyncMap>> h)
-    LinkedHashSet<TXNHook> getPreHooks()
-    LinkedHashSet<TXNHook> getPostHooks()
+    ArrayList<TXNHook> getPreHooks()
+    ArrayList<TXNHook> getPostHooks()
 }

@@ -18,6 +18,7 @@ import net.iowntheinter.kvdn.storage.kv.TXKV
 import net.iowntheinter.kvdn.storage.kv.KVData
 import net.iowntheinter.kvdn.storage.KvdnSession
 
+import javax.activation.MimeType
 import java.security.MessageDigest
 
 /**
@@ -29,10 +30,11 @@ class KvTx extends KvdnTX implements TXKV {
     public KVData D
     public KVData M
 
+
     boolean finished
 
 
-    KvTx(String sa, UUID txid, KvdnSession session, Vertx vertx) {
+    KvTx(String sa, String mimeType = "text/plain", UUID txid, KvdnSession session, Vertx vertx) {
         this.vertx = vertx
         this.keyprov = session.keyprov
         this.session = session as KvdnSession
@@ -66,8 +68,10 @@ class KvTx extends KvdnTX implements TXKV {
                     String key = MessageDigest.getInstance("MD5").digest(Buffer.buffer(content.toString()).getBytes()).encodeHex().toString()
                     map.put(key, content, { AsyncResult resSubmit ->
                         if (resSubmit.succeeded()) {
+                            logger.trace("submit transaction internal success with hash ${key} content ${content}")
                             keyprov.setKey(strAddr, key, {
                                 (this.session as KvdnSession).finishTx(this, {
+
                                     eb.publish("_KVDN_+${strAddr}", new JsonObject().put('key', key))
                                     cb.handle(Future.succeededFuture(key))
                                     //cb.handle(Future.succeededFuture(key))
@@ -75,11 +79,11 @@ class KvTx extends KvdnTX implements TXKV {
                             })
 
                         } else {
-                            bailTx(Future.failedFuture(resSubmit.cause()),this,cb)
+                            bailTx(resSubmit, this, cb)
                         }
                     })
                 } else {
-                    bailTx(Future.failedFuture(res.cause()),this,cb)
+                    bailTx(res, this, cb)
                 }
             })
         })
@@ -101,11 +105,11 @@ class KvTx extends KvdnTX implements TXKV {
                                 })
                             })
                         } else {
-                            bailTx(Future.failedFuture(resSet.cause()),this,cb)
+                            bailTx(resSet, this, cb)
                         }
                     })
                 } else {
-                    bailTx(Future.failedFuture(res.cause()),this,cb)
+                    bailTx(res, this, cb)
 
                 }
             })
@@ -123,14 +127,15 @@ class KvTx extends KvdnTX implements TXKV {
                     map.get(key, { AsyncResult<String> resGet ->
                         if (resGet.succeeded()) {
                             (this.session as KvdnSession).finishTx(this, {
+                                logger.trace("get transaction reult internal ${resGet.result()}")
                                 cb.handle(Future.succeededFuture(resGet.result()))
                             })
                         } else {
-                            bailTx(Future.failedFuture(resGet.cause()),this,cb)
+                            bailTx(resGet, this, cb)
                         }
                     })
                 } else {
-                    bailTx(Future.failedFuture(res.cause()),this,cb)
+                    bailTx(res, this, cb)
                 }
             })
         })
@@ -152,11 +157,11 @@ class KvTx extends KvdnTX implements TXKV {
                                 })
                             })
                         } else {
-                            bailTx(Future.failedFuture(resDel.cause()),this,cb)
+                            bailTx(resDel, this, cb)
                         }
                     })
                 } else {
-                    bailTx(Future.failedFuture(res.cause()),this,cb)
+                    bailTx(res, this, cb)
                 }
             })
         })
@@ -164,12 +169,16 @@ class KvTx extends KvdnTX implements TXKV {
 
     @Override
     @TypeChecked
-    void getKeys(Handler cb) {
+    void getKeys(Handler<AsyncResult<Set<String>>> cb) {
         startTX(TXTYPE.KV_KEYS, {
-            keyprov.getKeys(this.strAddr, { AsyncResult asyncResult -> //@FixMe this should be a real AsyncResult
-                (this.session as KvdnSession).finishTx(this, {
-                    cb.handle(asyncResult)
-                })
+            keyprov.getKeys(this.strAddr, { AsyncResult<Set<String>> asyncResult ->
+                if (asyncResult.succeeded())
+                    (this.session as KvdnSession).finishTx(this, {
+                        logger.trace("result of getKeys ${asyncResult.result()}")
+                        cb.handle(asyncResult)
+                    })
+                else
+                    bailTx(asyncResult, this, cb)
             })
         })
     }
@@ -188,11 +197,11 @@ class KvTx extends KvdnTX implements TXKV {
                                 cb.handle(Future.succeededFuture(resSize.result()))
                             })
                         } else {
-                            bailTx(Future.failedFuture(resSize.cause()),this,cb)
+                            bailTx(resSize, this, cb)
                         }
                     })
                 } else {
-                    bailTx(Future.failedFuture(res.cause()),this,cb)
+                    bailTx(res, this, cb)
                 }
             })
         })

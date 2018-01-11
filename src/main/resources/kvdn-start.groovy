@@ -4,26 +4,20 @@
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import io.vertx.core.json.JsonObject
-import io.vertx.ext.auth.AuthProvider
-import io.vertx.ext.auth.shiro.ShiroAuth
 import io.vertx.ext.auth.shiro.ShiroAuthOptions
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType
 import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.BasicAuthHandler
 import io.vertx.ext.web.handler.CookieHandler
 
 import io.vertx.ext.web.handler.BodyHandler
-import io.vertx.ext.web.handler.FormLoginHandler
-import io.vertx.ext.web.handler.RedirectAuthHandler
 import io.vertx.ext.web.handler.SessionHandler
 import io.vertx.ext.web.handler.StaticHandler
-import io.vertx.ext.web.handler.UserSessionHandler
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.ext.web.handler.sockjs.PermittedOptions
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.sstore.LocalSessionStore
-import net.iowntheinter.kvdn.kvserver
+import kvserver
 import io.vertx.core.Vertx
 import io.vertx.groovy.core.Vertx as GVertx
 (org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) as Logger).

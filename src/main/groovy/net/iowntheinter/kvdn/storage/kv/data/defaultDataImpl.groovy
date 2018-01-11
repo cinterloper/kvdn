@@ -42,12 +42,17 @@ class defaultDataImpl implements KVData {
     }
 
     @Override
-    LinkedHashSet<TXNHook> getPreHooks() {
-        return new LinkedHashSet<TXNHook>()
+    Object getdb() {
+        return null
     }
 
     @Override
-    LinkedHashSet<TXNHook> getPostHooks() {
-        return new LinkedHashSet<TXNHook>()
+    ArrayList<TXNHook> getPreHooks() {
+        return new ArrayList<TXNHook>()
+    }
+
+    @Override
+    ArrayList<TXNHook> getPostHooks() {
+        return new ArrayList<TXNHook>()
     }
 }

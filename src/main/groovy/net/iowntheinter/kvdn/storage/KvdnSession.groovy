@@ -16,13 +16,14 @@ import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.Counter
 import io.vertx.core.shareddata.LocalMap
 import net.iowntheinter.kvdn.KvdnTX
-import net.iowntheinter.kvdn.storage.counter.impl.CtrTx
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
 import net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider
 import net.iowntheinter.kvdn.storage.kv.key.KeyProvider
 import net.iowntheinter.kvdn.storage.kv.KVData
-import net.iowntheinter.kvdn.storage.lock.impl.LTx
 import net.iowntheinter.kvdn.util.KvdnSessionInterface
+
+//import net.iowntheinter.kvdn.storage.counter.impl.CtrTx
+//import net.iowntheinter.kvdn.storage.lock.impl.LTx
 
 @TypeChecked
 @CompileStatic
@@ -31,15 +32,15 @@ class KvdnSession implements KvdnSessionInterface {
     private String cname = this.getClass().getName()
     private Logger logger
 
-    enum sessionType {
+    enum SESSIONTYPE {
         NATIVE_SESSION, PROTOCOL_SERVER, PROXY_SERVER
     }
 
-    enum txFlags {
+    enum TXFLAGS {
         READ_ONLY
     }
 
-    enum dataType {
+    enum DATATYPE {
         KV, CTR, LCK
     }
     boolean initalized = false
@@ -85,7 +86,7 @@ class KvdnSession implements KvdnSessionInterface {
         logger.trace("inside hook caller ptr: $ptr hooks: $hooks")
         if (ptr != hooks.size()) {
 
-            def nxt = hooks[ptr] as TXNHook
+            TXNHook nxt = hooks[ptr] as TXNHook
             logger.trace("calling hook")
 
             ptr++
@@ -108,7 +109,14 @@ class KvdnSession implements KvdnSessionInterface {
 
     }
 
-    KvdnSession(Vertx vertx, stype = sessionType.NATIVE_SESSION) {
+    KvdnSession(Vertx vertx, stype = SESSIONTYPE.NATIVE_SESSION) {
+        vertx.sharedData().getCounter("sessions", { AsyncResult<Counter> ar ->
+            Counter c = ar.result()
+            c.incrementAndGet({ AsyncResult<Long> igr ->
+                LoggerFactory.getLogger(this.class.getName()).error("SESSION NUMBER:" + igr.result())
+            })
+        })
+
         sessionid = UUID.randomUUID().toString()
         String loggerName = cname + ":" + sessionid.toString()
         logger = new LoggerFactory().getLogger(loggerName)
@@ -144,7 +152,7 @@ class KvdnSession implements KvdnSessionInterface {
                     'net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider'
             //  'net.iowntheinter.kvdn.storage.kv.key.impl.CRDTKeyProvider' // not working right now
             try {
-                this.keyprov = this.class.classLoader.loadClass(configured_provider)?.newInstance(this.vertx, this.D) as KeyProvider
+                this.keyprov = this.class.classLoader.loadClass(configured_provider)?.newInstance(this.vertx, this.D as KVData) as KeyProvider
             } catch (e) {
                 e.printStackTrace()
                 logger.fatal("could not load key provider $configured_provider : ${e.getMessage()}")
@@ -155,7 +163,7 @@ class KvdnSession implements KvdnSessionInterface {
             logger.trace("Defaulting to LocalKeyProvider because of ${e.message}")
         }
         if (this.keyprov == null)
-            this.keyprov = new LocalKeyProvider(this.vertx, D)
+            this.keyprov = new LocalKeyProvider(this.vertx, D as KVData)
 
         logger.info("CONFIGURED PROVIDER: " + this.keyprov)
 
@@ -176,21 +184,27 @@ class KvdnSession implements KvdnSessionInterface {
      * @return KvdnTX your transaction
      */
 
-    def newTx(String strAddr, datatype = dataType.KV) {
+    KvdnTX newTx(String strAddr, datatype = DATATYPE.KV, String mimeType = null) {
+        if (mimeType != null && DATATYPE != DATATYPE.KV)
+            throw new Exception("CANNOT DECLARE A MIMETYPE ON ${DATATYPE.toString()}")
+
+        if (datatype == DATATYPE.KV && mimeType == null)
+            mimeType = "text/plain"
+
         if (!initalized) {
             throw new Exception("kvdn session needs to be init(cb,ecb) before you use it")
         } else {
-            def txid = UUID.randomUUID()
+            UUID txid = UUID.randomUUID()
             outstandingTX.add(txid)
             switch (datatype) {
-                case dataType.KV:
-                    return (new KvTx(strAddr, txid, this, vertx))
+                case DATATYPE.KV:
+                    return (new KvTx(strAddr, mimeType, txid, this, vertx))
                     break
-                case dataType.CTR:
-                    return (new CtrTx(strAddr, txid, this, vertx))
+                case DATATYPE.CTR:
+                    return null //(new CtrTx(strAddr, txid, this, vertx))
                     break
-                case dataType.LCK:
-                    return (new LTx(strAddr, txid, this, vertx))
+                case DATATYPE.LCK:
+                    return null //(new LTx(strAddr, txid, this, vertx))
                     break
                 default:
                     return (null)
@@ -213,7 +227,7 @@ class KvdnSession implements KvdnSessionInterface {
     }
 
 
-    def onWrite_f(String strAddr, String key = null, Handler cb) {
+    KvdnSession onWrite_f(String strAddr, String key = null, Handler cb) {
         eb.consumer("_KVDN_+${strAddr}", { Message message -> //listen for updates on this key
             if ((key == null) || (message.body() == key))
                 cb.handle(message.body())
@@ -221,7 +235,7 @@ class KvdnSession implements KvdnSessionInterface {
         return this
     }
 
-    def onDelete_f(String strAddr, String key = null, Handler cb) {
+    KvdnSession onDelete_f(String strAddr, String key = null, Handler cb) {
         eb.consumer("_KVDN_-${strAddr}", { Message message -> //listen for deletes on this keyset
             if ((key == null) || (message.body() == key))
                 cb.handle(message.body())
@@ -256,7 +270,7 @@ class KvdnSession implements KvdnSessionInterface {
 
     private void zeroState(Vertx vertx, Handler cb, Handler error_cb) {
         boolean goodstate = false
-        assert (!txflags.contains(txFlags.READ_ONLY) && !roMode && !transition)
+        assert (!txflags.contains(TXFLAGS.READ_ONLY) && !roMode && !transition)
         //when initializing a session, there should be no outstanding admin operations
         vertx.sharedData().getCounter("_KVDN_ADMIN_OPERATIONS", { AsyncResult<Counter> ar ->
             try {

@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentMap
  */
 @CompileStatic
 @TypeChecked
-class shimAsyncMapDB implements AsyncMap {
+class ShimAsyncMapDB implements AsyncMap {
     final ConcurrentMap sham
     final DB db
     final Vertx vertx
@@ -26,7 +26,7 @@ class shimAsyncMapDB implements AsyncMap {
     Logger logger = LoggerFactory.getLogger(this.class.name)
 
 
-    shimAsyncMapDB(Vertx vertx, DB db, String name) {
+    ShimAsyncMapDB(Vertx vertx, DB db, String name) {
         this.db = db
         this.sham = this.db.hashMap(name).createOrOpen()
         this.vertx = vertx
