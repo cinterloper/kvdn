@@ -16,13 +16,14 @@ import io.vertx.core.logging.LoggerFactory
 import io.vertx.core.shareddata.Counter
 import io.vertx.core.shareddata.LocalMap
 import net.iowntheinter.kvdn.KvdnTX
-import net.iowntheinter.kvdn.storage.counter.impl.CtrTx
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
 import net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider
 import net.iowntheinter.kvdn.storage.kv.key.KeyProvider
 import net.iowntheinter.kvdn.storage.kv.KVData
-import net.iowntheinter.kvdn.storage.lock.impl.LTx
 import net.iowntheinter.kvdn.util.KvdnSessionInterface
+
+//import net.iowntheinter.kvdn.storage.counter.impl.CtrTx
+//import net.iowntheinter.kvdn.storage.lock.impl.LTx
 
 @TypeChecked
 @CompileStatic
@@ -109,6 +110,13 @@ class KvdnSession implements KvdnSessionInterface {
     }
 
     KvdnSession(Vertx vertx, stype = SESSIONTYPE.NATIVE_SESSION) {
+        vertx.sharedData().getCounter("sessions", { AsyncResult<Counter> ar ->
+            Counter c = ar.result()
+            c.incrementAndGet({ AsyncResult<Long> igr ->
+                LoggerFactory.getLogger(this.class.getName()).error("SESSION NUMBER:" + igr.result())
+            })
+        })
+
         sessionid = UUID.randomUUID().toString()
         String loggerName = cname + ":" + sessionid.toString()
         logger = new LoggerFactory().getLogger(loggerName)
@@ -144,7 +152,7 @@ class KvdnSession implements KvdnSessionInterface {
                     'net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider'
             //  'net.iowntheinter.kvdn.storage.kv.key.impl.CRDTKeyProvider' // not working right now
             try {
-                this.keyprov = this.class.classLoader.loadClass(configured_provider)?.newInstance(this.vertx, this.D) as KeyProvider
+                this.keyprov = this.class.classLoader.loadClass(configured_provider)?.newInstance(this.vertx, this.D as KVData) as KeyProvider
             } catch (e) {
                 e.printStackTrace()
                 logger.fatal("could not load key provider $configured_provider : ${e.getMessage()}")
@@ -155,7 +163,7 @@ class KvdnSession implements KvdnSessionInterface {
             logger.trace("Defaulting to LocalKeyProvider because of ${e.message}")
         }
         if (this.keyprov == null)
-            this.keyprov = new LocalKeyProvider(this.vertx, D)
+            this.keyprov = new LocalKeyProvider(this.vertx, D as KVData)
 
         logger.info("CONFIGURED PROVIDER: " + this.keyprov)
 
@@ -193,10 +201,10 @@ class KvdnSession implements KvdnSessionInterface {
                     return (new KvTx(strAddr, mimeType, txid, this, vertx))
                     break
                 case DATATYPE.CTR:
-                    return (new CtrTx(strAddr, txid, this, vertx))
+                    return null //(new CtrTx(strAddr, txid, this, vertx))
                     break
                 case DATATYPE.LCK:
-                    return (new LTx(strAddr, txid, this, vertx))
+                    return null //(new LTx(strAddr, txid, this, vertx))
                     break
                 default:
                     return (null)

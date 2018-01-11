@@ -12,7 +12,7 @@ import net.iowntheinter.kvdn.util.extensionManager.extension
  */
 @TypeChecked
 @CompileStatic
-abstract class mapdbExtension implements extension {
+abstract class MapdbExtension implements extension {
     @Override
     void load(Vertx vertx, Handler cb) {
 
