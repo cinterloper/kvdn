@@ -24,9 +24,10 @@ plugins {
     id "net.ltgt.apt" version "0.6"
 }
 def strict = false
-if(System.getenv("STRICT_TYPECHECKING") != null)
+if(System.getenv("STRICT_TYPECHECKING") != null) {
     strict = true
-
+    println "COMPILE STATIC & TYPECHECKED"
+}
 compileGroovy {
     groovyOptions.javaAnnotationProcessing = true
     if(strict)
@@ -38,11 +39,22 @@ compileGroovy {
 apply plugin: "co.riiid.gradle"
 apply plugin: 'distribution'
 apply plugin: 'idea'
-
+apply plugin: 'java'
+apply plugin: 'groovy'
 
 def libversion = '3.5.0'
 if(System.getenv("VERTX_VERSION") != null)
     libversion = System.getenv("VERTX_VERSION")
+sourceSets{
+    main{
+        groovy{
+            exclude "net/iowntheinter/kvdn/storage/lock/*"
+            exclude "net/iowntheinter/kvdn/storage/queue/*"
+            exclude "net/iowntheinter/kvdn/storage/counter/*"
+
+        }
+    }
+}
 
 version =  "$libversion-${new File('src/main/resources/_KVDN_VERSION.txt').text.trim()}"
 println("version $version")
