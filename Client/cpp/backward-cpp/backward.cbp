@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="backward"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\backward-cpp\;CMake Files\cmake\;CMake Files\cmake\Modules\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/g/CLionProjects/basicFileTraverse/backward-cpp"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="backward">
+				<Option output="/home/g/CLionProjects/basicFileTraverse/backward-cpp/libbackward.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/g/CLionProjects/basicFileTraverse/backward-cpp"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DBACKWARD_HAS_UNWIND=1"/>
+					<Add option="-DBACKWARD_HAS_BACKTRACE=0"/>
+					<Add option="-DBACKWARD_HAS_BACKTRACE_SYMBOL=1"/>
+					<Add option="-DBACKWARD_HAS_DW=0"/>
+					<Add option="-DBACKWARD_HAS_BFD=0"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/."/>
+					<Add directory="/usr/include/uuid"/>
+					<Add directory="/core/software/libs/cxx_args/include"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/asio/include"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/websocketpp"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/json"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/backward-cpp"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 backward"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="backward/fast">
+				<Option output="/home/g/CLionProjects/basicFileTraverse/backward-cpp/libbackward.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/g/CLionProjects/basicFileTraverse/backward-cpp"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DBACKWARD_HAS_UNWIND=1"/>
+					<Add option="-DBACKWARD_HAS_BACKTRACE=0"/>
+					<Add option="-DBACKWARD_HAS_BACKTRACE_SYMBOL=1"/>
+					<Add option="-DBACKWARD_HAS_DW=0"/>
+					<Add option="-DBACKWARD_HAS_BFD=0"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/."/>
+					<Add directory="/usr/include/uuid"/>
+					<Add directory="/core/software/libs/cxx_args/include"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/asio/include"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/websocketpp"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/json"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/backward-cpp"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 backward/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="backward_object">
+				<Option output="/home/g/CLionProjects/basicFileTraverse/backward-cpp/CMakeFiles/backward_object.dir/backward_object.objlib" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/g/CLionProjects/basicFileTraverse/backward-cpp"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DBACKWARD_HAS_UNWIND=1"/>
+					<Add option="-DBACKWARD_HAS_BACKTRACE=0"/>
+					<Add option="-DBACKWARD_HAS_BACKTRACE_SYMBOL=1"/>
+					<Add option="-DBACKWARD_HAS_DW=0"/>
+					<Add option="-DBACKWARD_HAS_BFD=0"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/."/>
+					<Add directory="/usr/include/uuid"/>
+					<Add directory="/core/software/libs/cxx_args/include"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/asio/include"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/websocketpp"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/json"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/backward-cpp"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 backward_object"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="backward_object/fast">
+				<Option output="/home/g/CLionProjects/basicFileTraverse/backward-cpp/CMakeFiles/backward_object.dir/backward_object.objlib" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/g/CLionProjects/basicFileTraverse/backward-cpp"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DBACKWARD_HAS_UNWIND=1"/>
+					<Add option="-DBACKWARD_HAS_BACKTRACE=0"/>
+					<Add option="-DBACKWARD_HAS_BACKTRACE_SYMBOL=1"/>
+					<Add option="-DBACKWARD_HAS_DW=0"/>
+					<Add option="-DBACKWARD_HAS_BFD=0"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/."/>
+					<Add directory="/usr/include/uuid"/>
+					<Add directory="/core/software/libs/cxx_args/include"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/asio/include"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/websocketpp"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/json"/>
+					<Add directory="/home/g/CLionProjects/basicFileTraverse/backward-cpp"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 backward_object/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/g/CLionProjects/basicFileTraverse/backward-cpp/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/g/CLionProjects/basicFileTraverse/backward-cpp/backward.cpp">
+			<Option target="backward"/>
+			<Option target="backward_object"/>
+		</Unit>
+		<Unit filename="/home/g/CLionProjects/basicFileTraverse/backward-cpp/backward.hpp">
+			<Option target="backward"/>
+			<Option target="backward_object"/>
+		</Unit>
+		<Unit filename="/home/g/CLionProjects/basicFileTraverse/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/g/CLionProjects/basicFileTraverse/backward-cpp/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\backward-cpp\"/>
+		</Unit>
+		<Unit filename="/home/g/CLionProjects/basicFileTraverse/backward-cpp/BackwardConfig.cmake">
+			<Option virtualFolder="CMake Files\backward-cpp\"/>
+		</Unit>
+		<Unit filename="/home/g/CLionProjects/basicFileTraverse/backward-cpp/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\backward-cpp\"/>
+		</Unit>
+		<Unit filename="/home/g/CLionProjects/basicFileTraverse/backward-cpp/BackwardConfig.cmake">
+			<Option virtualFolder="CMake Files\backward-cpp\"/>
+		</Unit>
+		<Unit filename="/home/g/CLionProjects/basicFileTraverse/cmake/Modules/FindLibUuid.cmake">
+			<Option virtualFolder="CMake Files\cmake\Modules\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

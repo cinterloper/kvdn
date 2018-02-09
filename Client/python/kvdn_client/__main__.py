@@ -9,7 +9,8 @@ def main(args=None):
     parser = argparse.ArgumentParser(description='KVDN PYCLIENT')
     parser.add_argument('--verify', type=str, default=True, help='True, False, or path to ca')
     parser.add_argument('--noverify', action='store_true', help='do not verify host certificate')
-    parser.add_argument('--cert', type=str, default='', help='path to certificate')
+    parser.add_argument('--version', action='store_true', default=False, help='get server version')
+    parser.add_argument('--cert', type=str, default='', help='pa./th to certificate')
     parser.add_argument('--type', type=str, default='text/plain', help='MIME type')
     parser.add_argument('--debug', action='store_true', help='debug')
     parser.add_argument('--set', action='store_true', help='set a value', )
@@ -62,6 +63,8 @@ def main(args=None):
 
     if (args.set):
         print k.set(args.straddr, args.key, s)
+    elif(args.version):
+        print k.version()
     elif (args.submit):
         print k.submit_cas(args.straddr, s)
     else:

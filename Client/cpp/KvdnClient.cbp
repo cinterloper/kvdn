@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="KvdnClient"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\cmake\;CMake Files\cmake\Modules\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/g/CLionProjects/libKvdn"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/g/CLionProjects/libKvdn"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/g/CLionProjects/libKvdn"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="KvdnClient">
+				<Option output="/home/g/CLionProjects/libKvdn/KvdnClient" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/g/CLionProjects/libKvdn"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/g/CLionProjects/libKvdn/."/>
+					<Add directory="/usr/include/uuid"/>
+					<Add directory="/core/software/libs/cxx_args/include"/>
+					<Add directory="/home/g/CLionProjects/libKvdn/asio/include"/>
+					<Add directory="/home/g/CLionProjects/libKvdn/websocketpp"/>
+					<Add directory="/home/g/CLionProjects/libKvdn/json"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 KvdnClient"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="KvdnClient/fast">
+				<Option output="/home/g/CLionProjects/libKvdn/KvdnClient" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/g/CLionProjects/libKvdn"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/g/CLionProjects/libKvdn/."/>
+					<Add directory="/usr/include/uuid"/>
+					<Add directory="/core/software/libs/cxx_args/include"/>
+					<Add directory="/home/g/CLionProjects/libKvdn/asio/include"/>
+					<Add directory="/home/g/CLionProjects/libKvdn/websocketpp"/>
+					<Add directory="/home/g/CLionProjects/libKvdn/json"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 KvdnClient/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Kvdn">
+				<Option output="/home/g/CLionProjects/libKvdn/libKvdn.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/g/CLionProjects/libKvdn"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/g/CLionProjects/libKvdn/."/>
+					<Add directory="/usr/include/uuid"/>
+					<Add directory="/core/software/libs/cxx_args/include"/>
+					<Add directory="/home/g/CLionProjects/libKvdn/asio/include"/>
+					<Add directory="/home/g/CLionProjects/libKvdn/websocketpp"/>
+					<Add directory="/home/g/CLionProjects/libKvdn/json"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 Kvdn"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Kvdn/fast">
+				<Option output="/home/g/CLionProjects/libKvdn/libKvdn.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/g/CLionProjects/libKvdn"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/g/CLionProjects/libKvdn/."/>
+					<Add directory="/usr/include/uuid"/>
+					<Add directory="/core/software/libs/cxx_args/include"/>
+					<Add directory="/home/g/CLionProjects/libKvdn/asio/include"/>
+					<Add directory="/home/g/CLionProjects/libKvdn/websocketpp"/>
+					<Add directory="/home/g/CLionProjects/libKvdn/json"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 Kvdn/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/g/CLionProjects/libKvdn/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/g/CLionProjects/libKvdn/KvdnClient.cpp">
+			<Option target="KvdnClient"/>
+			<Option target="Kvdn"/>
+		</Unit>
+		<Unit filename="/home/g/CLionProjects/libKvdn/KvdnClient.h">
+			<Option target="KvdnClient"/>
+		</Unit>
+		<Unit filename="/home/g/CLionProjects/libKvdn/VertxBus.cpp">
+			<Option target="KvdnClient"/>
+		</Unit>
+		<Unit filename="/home/g/CLionProjects/libKvdn/VertxBus.h">
+			<Option target="KvdnClient"/>
+		</Unit>
+		<Unit filename="/home/g/CLionProjects/libKvdn/json/jsoncpp.cpp">
+			<Option target="KvdnClient"/>
+		</Unit>
+		<Unit filename="/home/g/CLionProjects/libKvdn/test.cpp">
+			<Option target="KvdnClient"/>
+		</Unit>
+		<Unit filename="/home/g/CLionProjects/libKvdn/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/g/CLionProjects/libKvdn/cmake/Modules/FindLibUuid.cmake">
+			<Option virtualFolder="CMake Files\cmake\Modules\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

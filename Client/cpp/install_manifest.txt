@@ -1,0 +1,5 @@
+/usr/local/lib/libKvdn.so.1.0.1
+/usr/local/lib/libKvdn.so.1
+/usr/local/lib/libKvdn.so
+/usr/local/include/KvdnClient.h
+/usr/local/share/pkgconfig/kvdn.pc

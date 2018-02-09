@@ -30,7 +30,7 @@ CONF = {
 
 
 class kvdn_client:
-    kvdn_py_version = '1.6.10'
+    kvdn_py_version = '2.0.3'
 
     def __init__(self, **kwargs):
         for key, value in kwargs.iteritems():
@@ -39,7 +39,8 @@ class kvdn_client:
             CONF['headers'].update({'Authorization': 'Bearer %s' % CONF['token']})
         self.session = requests.Session()
         self.SVER = self.session.get(CONF['baseurl'] + CONF['prefix'] + '/__VERSION', verify=CONF['verify'],
-                                     timeout=CONF['timeout'], cert=CONF['cert'], headers=CONF['headers']).text
+                                     timeout=CONF['timeout'], cert=CONF['cert'], headers=CONF['headers'])
+
 
     def set(self, straddr, key, data, **kwargs):
         if CONF['set_mode'] == 'raw':
@@ -48,7 +49,7 @@ class kvdn_client:
             return self.setJson(straddr, key, data, **kwargs)
 
     def version(self):
-        return self.SVER
+        return self.SVER.text
 
     def get(self, straddr, key, **kwargs):
         resp, content = kvdn_req(self.session, CONF['baseurl'] + CONF['prefix'] + '/X/' + straddr + '/' + key,
