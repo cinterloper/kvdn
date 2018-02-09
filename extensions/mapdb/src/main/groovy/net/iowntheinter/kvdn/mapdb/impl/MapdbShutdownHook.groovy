@@ -22,6 +22,10 @@ class MapdbShutdownHook extends MapdbExtension implements TXNHook {
     KVData DataImpl
     DB db
 
+    @Override
+    TXNHook.HookType getType() {
+        return TXNHook.HookType.PLUGIN_HOOK
+    }
 
     @Override
     void call(KvdnTX KvdnTX, KvdnSession kvs, Handler cb) {

@@ -33,7 +33,6 @@ v = vertx as Vertx //get the instance of the java class
 logger = new LoggerFactory().getLogger("kvdn")
 
 router = Router.router(v)
-router.route().handler(BodyHandler.create())
 JsonObject config = new JsonObject().put("properties_path", "classpath:test-auth.properties")
 
 def opts = new ShiroAuthOptions().setConfig(config).setType(ShiroAuthRealmType.PROPERTIES)
@@ -51,6 +50,8 @@ sjsh.bridge(options)
 
 
 router.route("/eb/*").handler(sjsh)
+router.route().handler(BodyHandler.create())
+
 //router.route("/KVDN/*").handler(BasicAuthHandler.create(provider))
 //router.route("/loginhandler").handler(FormLoginHandler.create(provider));
 def svc = new KvdnService(v)

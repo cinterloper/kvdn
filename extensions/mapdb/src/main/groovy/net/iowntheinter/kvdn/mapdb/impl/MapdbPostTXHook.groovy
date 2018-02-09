@@ -26,6 +26,11 @@ class MapdbPostTXHook extends MapdbExtension implements TXNHook {
     Set TXTYPES = ["W", "RW", "D"].toSet()
 
     @Override
+    TXNHook.HookType getType() {
+        return TXNHook.HookType.PLUGIN_HOOK
+    }
+
+    @Override
     void call(KvdnTX KvdnTX, KvdnSession session, Handler cb) {
         logger.trace("calling db.commit() hook for mapdb")
         this.DataImpl = session.D
