@@ -22,19 +22,19 @@ KvdnClient::~KvdnClient() {
 };
 
 
-void KvdnClient::set(const string &straddr, const string &key, const string &value, const string &options,   VertxBus::ReplyHandler handler) {
+void KvdnClient::set(const string &options, const string &value, const string &key, const string &straddr,   VertxBus::ReplyHandler handler) {
     Json::Value hdrs;
     hdrs["action"] = "set";
 
     Json::Value jval;
     
-    jval["straddr"] = straddr;
+    jval["options"] = options
     
-    jval["key"] = key;
+    jval["value"] = value
     
-    jval["value"] = value;
+    jval["key"] = key
     
-    jval["options"] = options;
+    jval["straddr"] = straddr
     
     Json::Value opts;
     opts["NOT"] = "EMPTY";
@@ -48,17 +48,17 @@ void KvdnClient::set(const string &straddr, const string &key, const string &val
     this->kvdnOP(straddr, opdata, handler);
 }
 
-void KvdnClient::get(const string &straddr, const string &key, const string &options,   VertxBus::ReplyHandler handler) {
+void KvdnClient::get(const string &options, const string &key, const string &straddr,   VertxBus::ReplyHandler handler) {
     Json::Value hdrs;
     hdrs["action"] = "get";
 
     Json::Value jval;
     
-    jval["straddr"] = straddr;
+    jval["options"] = options
     
-    jval["key"] = key;
+    jval["key"] = key
     
-    jval["options"] = options;
+    jval["straddr"] = straddr
     
     Json::Value opts;
     opts["NOT"] = "EMPTY";
@@ -72,17 +72,17 @@ void KvdnClient::get(const string &straddr, const string &key, const string &opt
     this->kvdnOP(straddr, opdata, handler);
 }
 
-void KvdnClient::submit(const string &straddr, const string &value, const string &options,   VertxBus::ReplyHandler handler) {
+void KvdnClient::submit(const string &options, const string &value, const string &straddr,   VertxBus::ReplyHandler handler) {
     Json::Value hdrs;
     hdrs["action"] = "submit";
 
     Json::Value jval;
     
-    jval["straddr"] = straddr;
+    jval["options"] = options
     
-    jval["value"] = value;
+    jval["value"] = value
     
-    jval["options"] = options;
+    jval["straddr"] = straddr
     
     Json::Value opts;
     opts["NOT"] = "EMPTY";
@@ -96,39 +96,15 @@ void KvdnClient::submit(const string &straddr, const string &value, const string
     this->kvdnOP(straddr, opdata, handler);
 }
 
-void KvdnClient::getKeys(const string &straddr, const string &options,   VertxBus::ReplyHandler handler) {
+void KvdnClient::getKeys(const string &options, const string &straddr,   VertxBus::ReplyHandler handler) {
     Json::Value hdrs;
     hdrs["action"] = "getKeys";
 
     Json::Value jval;
     
-    jval["straddr"] = straddr;
+    jval["options"] = options
     
-    jval["options"] = options;
-    
-    Json::Value opts;
-    opts["NOT"] = "EMPTY";
-    jval["options"] = opts;
-
-    Json::Value opdata;
-    opdata["hdrs"] = hdrs;
-    opdata["jval"] = jval;
-
-
-    this->kvdnOP(straddr, opdata, handler);
-}
-
-void KvdnClient::del(const string &straddr, const string &key, const string &options,   VertxBus::ReplyHandler handler) {
-    Json::Value hdrs;
-    hdrs["action"] = "del";
-
-    Json::Value jval;
-    
-    jval["straddr"] = straddr;
-    
-    jval["key"] = key;
-    
-    jval["options"] = options;
+    jval["straddr"] = straddr
     
     Json::Value opts;
     opts["NOT"] = "EMPTY";
@@ -142,17 +118,17 @@ void KvdnClient::del(const string &straddr, const string &key, const string &opt
     this->kvdnOP(straddr, opdata, handler);
 }
 
-void KvdnClient::query(const string &straddr, const string &query, const string &options,   VertxBus::ReplyHandler handler) {
+void KvdnClient::query(const string &query, const string &options, const string &straddr,   VertxBus::ReplyHandler handler) {
     Json::Value hdrs;
     hdrs["action"] = "query";
 
     Json::Value jval;
     
-    jval["straddr"] = straddr;
+    jval["query"] = query
     
-    jval["query"] = query;
+    jval["options"] = options
     
-    jval["options"] = options;
+    jval["straddr"] = straddr
     
     Json::Value opts;
     opts["NOT"] = "EMPTY";
@@ -166,15 +142,39 @@ void KvdnClient::query(const string &straddr, const string &query, const string 
     this->kvdnOP(straddr, opdata, handler);
 }
 
-void KvdnClient::size(const string &straddr, const string &options,   VertxBus::ReplyHandler handler) {
+void KvdnClient::size(const string &options, const string &straddr,   VertxBus::ReplyHandler handler) {
     Json::Value hdrs;
     hdrs["action"] = "size";
 
     Json::Value jval;
     
-    jval["straddr"] = straddr;
+    jval["options"] = options
     
-    jval["options"] = options;
+    jval["straddr"] = straddr
+    
+    Json::Value opts;
+    opts["NOT"] = "EMPTY";
+    jval["options"] = opts;
+
+    Json::Value opdata;
+    opdata["hdrs"] = hdrs;
+    opdata["jval"] = jval;
+
+
+    this->kvdnOP(straddr, opdata, handler);
+}
+
+void KvdnClient::delete(const string &options, const string &key, const string &straddr,   VertxBus::ReplyHandler handler) {
+    Json::Value hdrs;
+    hdrs["action"] = "delete";
+
+    Json::Value jval;
+    
+    jval["options"] = options
+    
+    jval["key"] = key
+    
+    jval["straddr"] = straddr
     
     Json::Value opts;
     opts["NOT"] = "EMPTY";

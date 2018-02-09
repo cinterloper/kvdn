@@ -49,8 +49,8 @@ public class kvsvc_GroovyExtension {
       }
     } : null);
   }
-  public static void delete(net.iowntheinter.kvdn.service.kvsvc j_receiver, java.lang.String straddr, java.lang.String key, java.util.Map<String, Object> options, io.vertx.core.Handler<io.vertx.core.AsyncResult<java.util.Map<String, Object>>> resultHandler) {
-    j_receiver.delete(straddr,
+  public static void del(net.iowntheinter.kvdn.service.kvsvc j_receiver, java.lang.String straddr, java.lang.String key, java.util.Map<String, Object> options, io.vertx.core.Handler<io.vertx.core.AsyncResult<java.util.Map<String, Object>>> resultHandler) {
+    j_receiver.del(straddr,
       key,
       options != null ? io.vertx.core.impl.ConversionHelper.toJsonObject(options) : null,
       resultHandler != null ? new io.vertx.core.Handler<io.vertx.core.AsyncResult<io.vertx.core.json.JsonObject>>() {

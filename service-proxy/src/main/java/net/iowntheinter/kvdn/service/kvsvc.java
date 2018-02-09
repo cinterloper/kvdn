@@ -39,7 +39,7 @@ public interface kvsvc {
 
     void getKeys(String straddr, JsonObject options, Handler<AsyncResult<JsonArray>> resultHandler);
 
-    void delete(String straddr, String key, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler);
+    void del(String straddr, String key, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler);
 
     void query(String straddr, JsonObject query, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler);
 

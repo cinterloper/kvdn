@@ -1,0 +1,58 @@
+//
+// Created by g on 2/6/18.
+//
+
+#include <iostream>
+#include <args.hxx>
+#include <fstream>
+#include <VertxBus.h>
+#include <json/json.h>
+#include "KvdnClient.hpp"
+#include <functional>
+
+using namespace std;
+
+
+KvdnClient::KvdnClient(VertxBus *eb)
+        : eb{eb} {}
+
+
+KvdnClient::~KvdnClient() {
+    delete eb;
+};
+
+{% for name, args in (INTERFACE | from_json).iteritems() %}
+void KvdnClient::{{ name }}({% for arg in args %}const string &{{ arg }}, {% endfor %}  VertxBus::ReplyHandler handler) {
+    Json::Value hdrs;
+    hdrs["action"] = "{{ name }}";
+
+    Json::Value jval;
+    {% for arg in args  %}
+    jval["{{ arg }}"] = {{ arg }};
+    {% endfor %}
+    Json::Value opts;
+    opts["NOT"] = "EMPTY";
+    jval["options"] = opts;
+
+    Json::Value opdata;
+    opdata["hdrs"] = hdrs;
+    opdata["jval"] = jval;
+
+
+    this->kvdnOP(straddr, opdata, handler);
+}
+{% endfor %}
+
+
+void KvdnClient::kvdnOP(const string &straddr, Json::Value opdata, VertxBus::ReplyHandler handler) {
+    Json::FastWriter fastWriter;
+
+    //std::cout << "fireing kvdn op with data " << fastWriter.write(opdata.asString()) << std::endl;
+
+    std::cout << "issuing kvdn operation";
+    std::string data = opdata.toStyledString();
+    std::cout << data;
+
+    eb->Send("kvdnsvc", opdata["jval"], opdata["hdrs"], handler);
+}
+

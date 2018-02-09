@@ -148,13 +148,13 @@
      @param options {Object} 
      @param resultHandler {function} 
      */
-    this.delete = function(straddr, key, options, resultHandler) {
+    this.del = function(straddr, key, options, resultHandler) {
       var __args = arguments;
       if (__args.length === 4 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
         if (closed) {
           throw new Error('Proxy is closed');
         }
-        j_eb.send(j_address, {"straddr":__args[0], "key":__args[1], "options":__args[2]}, {"action":"delete"}, function(err, result) { __args[3](err, result &&result.body); });
+        j_eb.send(j_address, {"straddr":__args[0], "key":__args[1], "options":__args[2]}, {"action":"del"}, function(err, result) { __args[3](err, result &&result.body); });
         return;
       } else throw new TypeError('function invoked with invalid arguments');
     };

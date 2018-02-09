@@ -144,10 +144,10 @@ var kvsvc = function(j_val) {
    @param options {Object} 
    @param resultHandler {function} 
    */
-  this.delete = function(straddr, key, options, resultHandler) {
+  this.del = function(straddr, key, options, resultHandler) {
     var __args = arguments;
     if (__args.length === 4 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
-      j_kvsvc["delete(java.lang.String,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, key, utils.convParamJsonObject(options), function(ar) {
+      j_kvsvc["del(java.lang.String,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, key, utils.convParamJsonObject(options), function(ar) {
       if (ar.succeeded()) {
         resultHandler(utils.convReturnJson(ar.result()), null);
       } else {

@@ -164,7 +164,7 @@ public class kvsvcVertxEBProxy implements kvsvc {
     });
   }
 
-  public void delete(String straddr, String key, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
+  public void del(String straddr, String key, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return;
@@ -174,7 +174,7 @@ public class kvsvcVertxEBProxy implements kvsvc {
     _json.put("key", key);
     _json.put("options", options);
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
-    _deliveryOptions.addHeader("action", "delete");
+    _deliveryOptions.addHeader("action", "del");
     _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));

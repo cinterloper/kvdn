@@ -275,7 +275,7 @@ class HTTPServer implements AbstractServer {
         } else {
             String straddr = "${sName}${_token}${mName}"
 
-            svc.delete(straddr, kName, new JsonObject(), { AsyncResult resDel ->
+            svc.del(straddr, kName, new JsonObject(), { AsyncResult resDel ->
                 if (resDel.succeeded()) {
                     if (!response.ended()) //why ?
                         response.end(mName + ":" + kName)

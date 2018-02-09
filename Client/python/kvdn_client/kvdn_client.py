@@ -58,12 +58,12 @@ class kvdn_client:
 
     def setRaw(self, straddr, key, data, type='text/plain', **kwargs):
         resp, content = kvdn_req(self.session, CONF['baseurl'] + CONF['prefix'] + '/R/' + straddr + '/' + key,
-                                 method='PUT', data=data, headers=CONF['headers'] + {'Content-Type': type})
+                                 method='PUT', data=data, headers=CONF['headers'].update({'Content-Type': type}))
         return content
 
     def setJson(self, straddr, key, data, type='application/json', **kwargs):
         resp, content = kvdn_req(self.session, CONF['baseurl'] + CONF['prefix'] + '/X/' + straddr + '/' + key,
-                                 method='PUT', data=data, headers=CONF['headers'] + {'Content-Type': type})
+                                 method='PUT', data=data, headers=CONF['headers'].update({'Content-Type': type}))
         return content
 
     def getKeys(self, straddr, **kwargs):
@@ -78,12 +78,12 @@ class kvdn_client:
 
     def submit_cas(self, straddr, data, type='text/plain', **kwargs):
         resp, content = kvdn_req(self.session, CONF['baseurl'] + CONF['prefix'] + '/X/' + straddr, method='POST',
-                                 data=data, headers=CONF['headers'] + {'Content-Type': type})
+                                 data=data, headers=CONF['headers'].update({'Content-Type': type}))
         return content  # the returned content should be the hash of data as a key
 
     def submit_uuid(self, straddr, data, type='text/plain', **kwargs):
         resp, content = kvdn_req(self.session, CONF['baseurl'] + CONF['prefix'] + '/U/' + straddr, method='POST',
-                                 data=data, headers=CONF['headers'] + {'Content-Type': type})
+                                 data=data, headers=CONF['headers'].update({'Content-Type': type}))
         return content  # the returned content should be a uuid key
 
 

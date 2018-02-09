@@ -65,11 +65,11 @@ export class kvsvc {
     this.eb.send(this.address, {"straddr": straddr, "options": options}, {"action":"getKeys"}, function(err, result) { resultHandler(err, result &&result.body); });
   }
 
-  delete(straddr: string, key: string, options: Object, resultHandler: (err: any, result: any) => any) : void {
+  del(straddr: string, key: string, options: Object, resultHandler: (err: any, result: any) => any) : void {
     if (closed) {
       throw new Error('Proxy is closed');
     }
-    this.eb.send(this.address, {"straddr": straddr, "key": key, "options": options}, {"action":"delete"}, function(err, result) { resultHandler(err, result &&result.body); });
+    this.eb.send(this.address, {"straddr": straddr, "key": key, "options": options}, {"action":"del"}, function(err, result) { resultHandler(err, result &&result.body); });
   }
 
   query(straddr: string, query: Object, options: Object, resultHandler: (err: any, result: any) => any) : void {

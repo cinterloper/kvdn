@@ -90,7 +90,7 @@ public class KvdnService implements kvsvc {
     }
 
     @Override
-    public void delete(String straddr, String key, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
+    public void del(String straddr, String key, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
         // mapjsonintercepter mji = new mapjsonintercepter().setCb(resultHandler);
         KvTx tx = (KvTx) this.session.newTx(straddr, KvdnSession.DATATYPE.KV);
         tx.del(key, resultHandler);

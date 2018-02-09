@@ -5,7 +5,7 @@ project(KvdnClient VERSION 1.0.1)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_CXX_STANDARD 11)
 include_directories(./ /usr/include/uuid/ /usr/include/ /core/software/libs/cxx_args/include asio/include websocketpp json)
-set(SOURCE_FILES test.cpp VertxBus.cpp json/jsoncpp.cpp KvdnClient.cpp KvdnClient.h)
+set(SOURCE_FILES test.cpp VertxBus.cpp json/jsoncpp.cpp KvdnClient.cpp KvdnClient.hpp)
 #add_subdirectory(backward-cpp)
 
 add_library(Kvdn SHARED KvdnClient.cpp)
@@ -14,7 +14,7 @@ add_executable(KvdnClient ${SOURCE_FILES} )# ${BACKWARD_ENABLE})
 set_target_properties(Kvdn PROPERTIES
         VERSION ${PROJECT_VERSION}
         SOVERSION 1
-        PUBLIC_HEADER KvdnClient.h)
+        PUBLIC_HEADER KvdnClient.hpp)
 
 find_package(PkgConfig REQUIRED)
 include(GNUInstallDirs)

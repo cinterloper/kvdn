@@ -139,8 +139,8 @@ public class kvsvcVertxProxyHandler extends ProxyHandler {
           service.getKeys((java.lang.String)json.getValue("straddr"), (io.vertx.core.json.JsonObject)json.getValue("options"), createHandler(msg));
           break;
         }
-        case "delete": {
-          service.delete((java.lang.String)json.getValue("straddr"), (java.lang.String)json.getValue("key"), (io.vertx.core.json.JsonObject)json.getValue("options"), createHandler(msg));
+        case "del": {
+          service.del((java.lang.String)json.getValue("straddr"), (java.lang.String)json.getValue("key"), (io.vertx.core.json.JsonObject)json.getValue("options"), createHandler(msg));
           break;
         }
         case "query": {

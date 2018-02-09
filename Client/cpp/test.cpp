@@ -3,7 +3,7 @@
 #include <fstream>
 #include <VertxBus.h>
 #include <json/json.h>
-#include "KvdnClient.h"
+#include "KvdnClient.hpp"
 #define BACKWARD_HAS_BFD 1
 
 //#include "backward.hpp"
@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
                                     std::cout << "after assignment of heaers" << std::endl;
                                     Json::FastWriter fastWriter;
 
-                                    kvc.Set("something_else", (jmsg["body"]["key"].asString()), fastWriter.write(jmsg),
+                                    kvc.set("something_else","{}", (jmsg["body"]["key"].asString()), fastWriter.write(jmsg),
                                             VertxBus::ReplyHandler(
 
 
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
                                                         //std::cout << "Received:\n" << writer.write(rjmsg["body"]) << std::endl;
                                                         // vertxeb.Close();
                                                     }));
-                                    kvc.GetKeys("something_else", VertxBus::ReplyHandler(
+                                    kvc.getKeys("something_else","{}", VertxBus::ReplyHandler(
 
 
                                             [&](const Json::Value &rjmsg,
