@@ -14,6 +14,11 @@ import net.iowntheinter.kvdn.storage.TXNHook
  */
 class storeMetaKVHookChain implements TXNHook {
     @Override
+    TXNHook.HookType getType() {
+        return TXNHook.HookType.META_HOOK
+    }
+
+    @Override
     void call(KvdnTX tx, KvdnSession session, Handler cb) {
         Map elems = tx.metabuffer
         LocalMap state = session.vertx.sharedData().getLocalMap(tx.txid.toString())

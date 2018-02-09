@@ -20,6 +20,7 @@ import net.iowntheinter.kvdn.storage.kv.impl.KvTx
 import net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider
 import net.iowntheinter.kvdn.storage.kv.key.KeyProvider
 import net.iowntheinter.kvdn.storage.kv.KVData
+import net.iowntheinter.kvdn.storage.meta.impl.storeMetaKVHook
 import net.iowntheinter.kvdn.util.KvdnSessionInterface
 
 //import net.iowntheinter.kvdn.storage.counter.impl.CtrTx
@@ -83,16 +84,25 @@ class KvdnSession implements KvdnSessionInterface {
     }
 
     void _hookCaller(KvdnTX tx, ArrayList<TXNHook> hooks, int ptr, Handler cb) {
-        logger.trace("inside hook caller ptr: $ptr hooks: $hooks")
+        logger.debug("inside hook caller ptr: $ptr hooks: $hooks")
         if (ptr != hooks.size()) {
 
             TXNHook nxt = hooks[ptr] as TXNHook
-            logger.trace("calling hook")
+            logger.debug("calling hook ptr $ptr size ${hooks.size()} ${nxt.class}")
 
             ptr++
-            nxt.call(tx, this, { AsyncResult res ->
+            //skip calling metadata hook on metadata map
+            if ((nxt.type == TXNHook.HookType.META_HOOK) && tx.strAddr == '__METADATA_MAP') {
+                logger.debug("Skipping meta hook to next hook ptr $ptr size ${hooks.size()} ${nxt.class}")
                 _hookCaller(tx, hooks, ptr, cb) //trampoline
-            })
+            } else {
+                logger.debug("calling next hook ptr $ptr size ${hooks.size()} ${nxt.class}")
+                nxt.call(tx, this, { AsyncResult res ->
+                    logger.debug("called next hook ptr $ptr size ${hooks.size()} ${nxt.class}")
+                    _hookCaller(tx, hooks, ptr, cb) //trampoline
+                })
+            }
+
         } else
             cb.handle(Future.succeededFuture())
     }
@@ -103,10 +113,10 @@ class KvdnSession implements KvdnSessionInterface {
         configuredPreHooks.each { name ->
             preHooks.add(txHookLoader(name as String))
         }
+        postHooks.add(new storeMetaKVHook())
         configuredPostHooks.each { name ->
             postHooks.add(txHookLoader(name as String))
         }
-
     }
 
     KvdnSession(Vertx vertx, stype = SESSIONTYPE.NATIVE_SESSION) {
@@ -165,7 +175,7 @@ class KvdnSession implements KvdnSessionInterface {
         if (this.keyprov == null)
             this.keyprov = new LocalKeyProvider(this.vertx, D as KVData)
 
-        logger.info("CONFIGURED PROVIDER: " + this.keyprov)
+        logger.debug("CONFIGURED PROVIDER: " + this.keyprov)
 
         logger.trace("starting new kvdn session with clustered = ${this.vertx.isClustered()} keyprovider = ${this.keyprov}")
 

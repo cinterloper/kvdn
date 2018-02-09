@@ -33,6 +33,7 @@ abstract class KvdnTX {
         KV_KEYS,
         KV_SIZE,
         KV_DEL,
+        KV_CLEAR,
         CTR_GET,
         CTR_ADDNGET,
         CTR_GETNADD,

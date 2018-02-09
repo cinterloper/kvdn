@@ -1,5 +1,6 @@
 package net.iowntheinter.kvdn
 
+import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
@@ -90,7 +91,11 @@ class Tdwg {
             tokens.each { token ->
                 def t = s.newTx('this/that') as KvTx
                 println("setting ${token}")
-                t.set(token,token,{})
+                t.set(token,token,{AsyncResult ar ->
+                    logger.info("set ${token}")
+                    if(!ar.succeeded())
+                        throw ar.cause()
+                })
 
             }
 

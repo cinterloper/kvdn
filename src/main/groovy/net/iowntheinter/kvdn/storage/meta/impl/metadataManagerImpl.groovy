@@ -25,11 +25,21 @@ class metadataManagerImpl implements metadataManager {
         def meta
 
         @Override
+        TXNHook.HookType getType() {
+            return TXNHook.HookType.META_HOOK
+        }
+
+        @Override
         void call(KvdnTX tx, KvdnSession session, Handler cb) {
 
         }
     }
     class endHook implements TXNHook{
+
+        @Override
+        TXNHook.HookType getType() {
+            return TXNHook.HookType.META_HOOK
+        }
 
         @Override
         void call(KvdnTX tx, KvdnSession session, Handler cb) {

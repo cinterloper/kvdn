@@ -140,7 +140,29 @@ class KvTx extends KvdnTX implements TXKV {
             })
         })
     }
-
+    @Override
+    @TypeChecked
+    void clear(Handler cb) {
+        startTX(TXTYPE.KV_DEL, {
+            D.getMap(this.strAddr, { AsyncResult<AsyncMap> res ->
+                if (res.succeeded() && checkFlags(TXMODE.MODE_WRITE)) {
+                    AsyncMap map = res.result()
+                    map.clear({ AsyncResult resClear ->
+                        if (resClear.succeeded()) {
+                                (this.session as KvdnSession).finishTx(this, {
+                                    eb.publish("_KVDN_X${strAddr}", new JsonObject())
+                                    cb.handle(Future.succeededFuture())
+                                })
+                        } else {
+                            bailTx(resClear, this, cb)
+                        }
+                    })
+                } else {
+                    bailTx(res, this, cb)
+                }
+            })
+        })
+    }
     @Override
     @TypeChecked
     void del(String key, Handler cb) {

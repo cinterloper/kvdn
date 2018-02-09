@@ -11,5 +11,11 @@ import net.iowntheinter.kvdn.KvdnTX
 @TypeChecked
 @CompileStatic
 interface TXNHook {
+    enum HookType {
+        HOOK,
+        META_HOOK,
+        PLUGIN_HOOK
+    }
+    HookType getType()
     void call(KvdnTX tx, KvdnSession session, Handler cb)
 }
