@@ -18,21 +18,26 @@ repositories {
 }
 
 
-def libversion = '3.5.0'
 def projversion = rootProject.getVersion()
+def libversion = projversion.toString().tokenize('-')[0]
 if (System.getenv("VERTX_VERSION"))
     libversion = System.getenv("VERTX_VERSION")
-if (System.getenv("CUSTOM_PROJVER") && System.getenv("PROJVER"))
+if (System.getenv("PROJVER"))
     projversion = System.getenv("PROJVER")
-mainClassName = 'io.vertx.core.Launcher'
+
 version = projversion
+
+mainClassName = 'io.vertx.core.Launcher'
+
 println("util version: $version")
 sourceCompatibility = '1.8'
 
 dependencies {
     compile "io.vertx:vertx-core:$libversion"
-    compile "io.vertx:vertx-lang-groovy:3.5.0"
-    compile 'io.github.lukehutch:fast-classpath-scanner:2.0.10'
+    compile "io.vertx:vertx-web-client:$libversion"
+    compile "io.vertx:vertx-lang-groovy:$libversion"
+    compile 'io.github.lukehutch:fast-classpath-scanner:2.18.1'
+    compile 'com.mashape.unirest:unirest-java:1.4.9'
 }
 
 

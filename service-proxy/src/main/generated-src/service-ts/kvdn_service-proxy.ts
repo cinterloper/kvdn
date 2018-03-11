@@ -15,7 +15,7 @@
  */
 
 
-export class kvsvc {
+export class KvdnService {
 
   private closed = false;
 

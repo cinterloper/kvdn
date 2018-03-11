@@ -31,9 +31,8 @@ repositories {
     jcenter()
 }
 
-
-def libversion = '3.5.0'
 def projversion = rootProject.getVersion()
+def libversion = projversion.toString().tokenize('-')[0]
 if (System.getenv("VERTX_VERSION"))
     libversion = System.getenv("VERTX_VERSION")
 if (System.getenv("PROJVER"))
@@ -42,7 +41,7 @@ if (System.getenv("PROJVER"))
 version = projversion
 
 sourceCompatibility = '1.8'
-
+println projversion
 dependencies {
 
     compile "io.vertx:vertx-core:$libversion";

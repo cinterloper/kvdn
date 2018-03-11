@@ -14,16 +14,16 @@
  * under the License.
  */
 
-/** @module service-js/kvsvc */
+/** @module service-js/kvdn_service */
 !function (factory) {
   if (typeof require === 'function' && typeof module !== 'undefined') {
     factory();
   } else if (typeof define === 'function' && define.amd) {
     // AMD loader
-    define('service-js/kvsvc-proxy', [], factory);
+    define('service-js/kvdn_service-proxy', [], factory);
   } else {
     // plain old include
-    kvsvc = factory();
+    KvdnService = factory();
   }
 }(function () {
 
@@ -32,7 +32,7 @@
 
  @class
   */
-  var kvsvc = function(eb, address) {
+  var KvdnService = function(eb, address) {
 
     var j_eb = eb;
     var j_address = address;
@@ -182,11 +182,11 @@
 
   /**
 
-   @memberof module:service-js/kvsvc
+   @memberof module:service-js/kvdn_service
    @param vertx {Vertx} 
-   @return {kvsvc}
+   @return {KvdnService}
    */
-  kvsvc.create = function(vertx) {
+  KvdnService.create = function(vertx) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
       if (closed) {
@@ -199,12 +199,12 @@
 
   /**
 
-   @memberof module:service-js/kvsvc
+   @memberof module:service-js/kvdn_service
    @param vertx {Vertx} 
    @param address {string} 
-   @return {kvsvc}
+   @return {KvdnService}
    */
-  kvsvc.createProxy = function(vertx, address) {
+  KvdnService.createProxy = function(vertx, address) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string') {
       if (closed) {
@@ -217,11 +217,11 @@
 
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = kvsvc;
+      exports = module.exports = KvdnService;
     } else {
-      exports.kvsvc = kvsvc;
+      exports.KvdnService = KvdnService;
     }
   } else {
-    return kvsvc;
+    return KvdnService;
   }
 });

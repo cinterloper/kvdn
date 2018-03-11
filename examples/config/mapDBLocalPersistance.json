@@ -1,7 +1,7 @@
 {
   "kvdn":{
-    "data_implementation":"net.iowntheinter.kvdn.mapdb.impl.mapdbDataImpl",
-    "key_provider":"net.iowntheinter.kvdn.mapdb.impl.mapdbKeyProvider",
+    "data_implementation":"net.iowntheinter.kvdn.mapdb.impl.MapdbDataImpl",
+    "key_provider":"net.iowntheinter.kvdn.mapdb.impl.MapdbKeyProvider",
     "mapdb":{
       "dbPath":"/tmp/mapdb.db"
     }

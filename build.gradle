@@ -42,7 +42,13 @@ apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'groovy'
 
-def libversion = '3.5.0'
+
+def libversion = '3.5.1'
+subprojects {
+    ext {
+        libversion = '3.5.1'
+    }
+}
 if(System.getenv("VERTX_VERSION") != null)
     libversion = System.getenv("VERTX_VERSION")
 sourceSets{
@@ -55,8 +61,9 @@ sourceSets{
         }
     }
 }
-
 version =  "$libversion-${new File('src/main/resources/_KVDN_VERSION.txt').text.trim()}"
+
+
 println("version $version")
 def GH_TOKEN = System.getenv("GH_TOKEN")
 def AWS_MVN_BUCKET = System.getenv("AWS_MVN_BUCKET")

@@ -8,20 +8,20 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ProxyHelper;
-import net.iowntheinter.kvdn.service.impl.KvdnService;
+import net.iowntheinter.kvdn.service.impl.KvdnServiceImpl;
 
 /**
  * Created by g on 9/15/16.
  */
 @ProxyGen
 @VertxGen
-public interface kvsvc {
+public interface KvdnService {
     // A couple of factory methods to create an instance and a proxy
-    static kvsvc create(Vertx vertx) {
-        return new KvdnService(vertx);
+    static KvdnService create(Vertx vertx) {
+        return new KvdnServiceImpl(vertx);
     }
 
-    static kvsvc createProxy(Vertx vertx, String address) {
+    static KvdnService createProxy(Vertx vertx, String address) {
         return ProxyHelper.createProxy(KvdnService.class, vertx, address);
         // Alternatively, you can create the proxy directly using:
         // return new ProcessorServiceVertxEBProxy(vertx, address);

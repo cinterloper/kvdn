@@ -14,8 +14,8 @@ repositories {
 }
 
 
-def libversion = '3.5.0'
 def projversion = rootProject.getVersion()
+def libversion = projversion.toString().tokenize('-')[0]
 if (System.getenv("VERTX_VERSION"))
     libversion = System.getenv("VERTX_VERSION")
 if (System.getenv("PROJVER"))

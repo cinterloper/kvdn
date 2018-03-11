@@ -16,9 +16,8 @@ import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.PermittedOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.serviceproxy.ServiceBinder
-
-import net.iowntheinter.kvdn.service.impl.KvdnService
-import net.iowntheinter.kvdn.service.kvsvc
+import net.iowntheinter.kvdn.service.impl.KvdnServiceImpl
+import net.iowntheinter.kvdn.service.KvdnService
 //import net.iowntheinter.kvdn.service.kvsvcVertxProxyHandler;
 
 (org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) as Logger).
@@ -77,12 +76,12 @@ s.init(router as Router, { AsyncResult result ->
         logger.error "could not setup http server:" + e.getMessage()
     }
 
-    def svc = new KvdnService(v)
+    def svc = new KvdnServiceImpl(v)
     svc.setup(new Handler() {
         @Override
         void handle(Object event) {
-            LoggerFactory.getLogger(this.class.name).debug("setup KvdnService complete")
-            new ServiceBinder(vertx).setAddress("kvdnsvc").register(kvsvc.class,svc as KvdnService)
+            LoggerFactory.getLogger(this.class.name).debug("setup KvdnServiceImpl complete")
+            new ServiceBinder(vertx).setAddress("kvdnsvc").register(KvdnService.class,svc as KvdnServiceImpl)
 
         }
     })//possiable race condition

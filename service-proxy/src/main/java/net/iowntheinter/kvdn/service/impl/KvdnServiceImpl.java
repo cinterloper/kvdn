@@ -8,21 +8,20 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import net.iowntheinter.kvdn.service.kvsvc;
+import net.iowntheinter.kvdn.service.KvdnService;
 import net.iowntheinter.kvdn.storage.KvdnSession;
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class KvdnService implements kvsvc {
+public class KvdnServiceImpl implements KvdnService {
     private Vertx vertx;
     private KvdnSession session;
-    private static final Logger logger = LoggerFactory.getLogger(KvdnService.class);
+    private static final Logger logger = LoggerFactory.getLogger(KvdnServiceImpl.class);
 
-    public KvdnService(Vertx vertx) {
+    public KvdnServiceImpl(Vertx vertx) {
         this.vertx = vertx;
         logger.info("started kvdnservice");
     }

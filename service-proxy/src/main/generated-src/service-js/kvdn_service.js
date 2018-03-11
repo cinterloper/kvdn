@@ -14,22 +14,22 @@
  * under the License.
  */
 
-/** @module service-js/kvsvc */
+/** @module service-js/kvdn_service */
 var utils = require('vertx-js/util/utils');
 var Vertx = require('vertx-js/vertx');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var Jkvsvc = Java.type('net.iowntheinter.kvdn.service.kvsvc');
+var JKvdnService = Java.type('net.iowntheinter.kvdn.service.KvdnService');
 
 /**
  Created by g on 9/15/16.
 
  @class
 */
-var kvsvc = function(j_val) {
+var KvdnService = function(j_val) {
 
-  var j_kvsvc = j_val;
+  var j_kvdnService = j_val;
   var that = this;
 
   /**
@@ -44,7 +44,7 @@ var kvsvc = function(j_val) {
   this.set = function(straddr, key, value, options, resultHandler) {
     var __args = arguments;
     if (__args.length === 5 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && typeof __args[2] === 'string' && (typeof __args[3] === 'object' && __args[3] != null) && typeof __args[4] === 'function') {
-      j_kvsvc["set(java.lang.String,java.lang.String,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, key, value, utils.convParamJsonObject(options), function(ar) {
+      j_kvdnService["set(java.lang.String,java.lang.String,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, key, value, utils.convParamJsonObject(options), function(ar) {
       if (ar.succeeded()) {
         resultHandler(utils.convReturnJson(ar.result()), null);
       } else {
@@ -65,7 +65,7 @@ var kvsvc = function(j_val) {
   this.submit = function(straddr, value, options, resultHandler) {
     var __args = arguments;
     if (__args.length === 4 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
-      j_kvsvc["submit(java.lang.String,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, value, utils.convParamJsonObject(options), function(ar) {
+      j_kvdnService["submit(java.lang.String,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, value, utils.convParamJsonObject(options), function(ar) {
       if (ar.succeeded()) {
         resultHandler(utils.convReturnJson(ar.result()), null);
       } else {
@@ -86,7 +86,7 @@ var kvsvc = function(j_val) {
   this.get = function(straddr, key, options, resultHandler) {
     var __args = arguments;
     if (__args.length === 4 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
-      j_kvsvc["get(java.lang.String,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, key, utils.convParamJsonObject(options), function(ar) {
+      j_kvdnService["get(java.lang.String,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, key, utils.convParamJsonObject(options), function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -106,7 +106,7 @@ var kvsvc = function(j_val) {
   this.size = function(straddr, options, resultHandler) {
     var __args = arguments;
     if (__args.length === 3 && typeof __args[0] === 'string' && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
-      j_kvsvc["size(java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, utils.convParamJsonObject(options), function(ar) {
+      j_kvdnService["size(java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, utils.convParamJsonObject(options), function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {
@@ -126,7 +126,7 @@ var kvsvc = function(j_val) {
   this.getKeys = function(straddr, options, resultHandler) {
     var __args = arguments;
     if (__args.length === 3 && typeof __args[0] === 'string' && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
-      j_kvsvc["getKeys(java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, utils.convParamJsonObject(options), function(ar) {
+      j_kvdnService["getKeys(java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, utils.convParamJsonObject(options), function(ar) {
       if (ar.succeeded()) {
         resultHandler(utils.convReturnJson(ar.result()), null);
       } else {
@@ -147,7 +147,7 @@ var kvsvc = function(j_val) {
   this.del = function(straddr, key, options, resultHandler) {
     var __args = arguments;
     if (__args.length === 4 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
-      j_kvsvc["del(java.lang.String,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, key, utils.convParamJsonObject(options), function(ar) {
+      j_kvdnService["del(java.lang.String,java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, key, utils.convParamJsonObject(options), function(ar) {
       if (ar.succeeded()) {
         resultHandler(utils.convReturnJson(ar.result()), null);
       } else {
@@ -168,7 +168,7 @@ var kvsvc = function(j_val) {
   this.query = function(straddr, query, options, resultHandler) {
     var __args = arguments;
     if (__args.length === 4 && typeof __args[0] === 'string' && (typeof __args[1] === 'object' && __args[1] != null) && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
-      j_kvsvc["query(java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, utils.convParamJsonObject(query), utils.convParamJsonObject(options), function(ar) {
+      j_kvdnService["query(java.lang.String,io.vertx.core.json.JsonObject,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](straddr, utils.convParamJsonObject(query), utils.convParamJsonObject(options), function(ar) {
       if (ar.succeeded()) {
         resultHandler(utils.convReturnJson(ar.result()), null);
       } else {
@@ -181,53 +181,53 @@ var kvsvc = function(j_val) {
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
-  this._jdel = j_kvsvc;
+  this._jdel = j_kvdnService;
 };
 
-kvsvc._jclass = utils.getJavaClass("net.iowntheinter.kvdn.service.kvsvc");
-kvsvc._jtype = {
+KvdnService._jclass = utils.getJavaClass("net.iowntheinter.kvdn.service.KvdnService");
+KvdnService._jtype = {
   accept: function(obj) {
-    return kvsvc._jclass.isInstance(obj._jdel);
+    return KvdnService._jclass.isInstance(obj._jdel);
   },
   wrap: function(jdel) {
-    var obj = Object.create(kvsvc.prototype, {});
-    kvsvc.apply(obj, arguments);
+    var obj = Object.create(KvdnService.prototype, {});
+    KvdnService.apply(obj, arguments);
     return obj;
   },
   unwrap: function(obj) {
     return obj._jdel;
   }
 };
-kvsvc._create = function(jdel) {
-  var obj = Object.create(kvsvc.prototype, {});
-  kvsvc.apply(obj, arguments);
+KvdnService._create = function(jdel) {
+  var obj = Object.create(KvdnService.prototype, {});
+  KvdnService.apply(obj, arguments);
   return obj;
 }
 /**
 
- @memberof module:service-js/kvsvc
+ @memberof module:service-js/kvdn_service
  @param vertx {Vertx} 
- @return {kvsvc}
+ @return {KvdnService}
  */
-kvsvc.create = function(vertx) {
+KvdnService.create = function(vertx) {
   var __args = arguments;
   if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-    return utils.convReturnVertxGen(kvsvc, Jkvsvc["create(io.vertx.core.Vertx)"](vertx._jdel));
+    return utils.convReturnVertxGen(KvdnService, JKvdnService["create(io.vertx.core.Vertx)"](vertx._jdel));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
 /**
 
- @memberof module:service-js/kvsvc
+ @memberof module:service-js/kvdn_service
  @param vertx {Vertx} 
  @param address {string} 
- @return {kvsvc}
+ @return {KvdnService}
  */
-kvsvc.createProxy = function(vertx, address) {
+KvdnService.createProxy = function(vertx, address) {
   var __args = arguments;
   if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string') {
-    return utils.convReturnVertxGen(kvsvc, Jkvsvc["createProxy(io.vertx.core.Vertx,java.lang.String)"](vertx._jdel, address));
+    return utils.convReturnVertxGen(KvdnService, JKvdnService["createProxy(io.vertx.core.Vertx,java.lang.String)"](vertx._jdel, address));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
-module.exports = kvsvc;
+module.exports = KvdnService;

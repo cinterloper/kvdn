@@ -16,7 +16,7 @@
 
 package net.iowntheinter.kvdn.service;
 
-import net.iowntheinter.kvdn.service.kvsvc;
+import net.iowntheinter.kvdn.service.KvdnService;
 import io.vertx.core.Vertx;
 import io.vertx.core.Handler;
 import io.vertx.core.AsyncResult;
@@ -44,32 +44,32 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
-import net.iowntheinter.kvdn.service.kvsvc;
+import net.iowntheinter.kvdn.service.KvdnService;
 
 /*
   Generated Proxy code - DO NOT EDIT
   @author Roger the Robot
 */
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class kvsvcVertxProxyHandler extends ProxyHandler {
+public class KvdnServiceVertxProxyHandler extends ProxyHandler {
 
   public static final long DEFAULT_CONNECTION_TIMEOUT = 5 * 60; // 5 minutes 
 
   private final Vertx vertx;
-  private final kvsvc service;
+  private final KvdnService service;
   private final long timerID;
   private long lastAccessed;
   private final long timeoutSeconds;
 
-  public kvsvcVertxProxyHandler(Vertx vertx, kvsvc service) {
+  public KvdnServiceVertxProxyHandler(Vertx vertx, KvdnService service) {
     this(vertx, service, DEFAULT_CONNECTION_TIMEOUT);
   }
 
-  public kvsvcVertxProxyHandler(Vertx vertx, kvsvc service, long timeoutInSecond) {
+  public KvdnServiceVertxProxyHandler(Vertx vertx, KvdnService service, long timeoutInSecond) {
     this(vertx, service, true, timeoutInSecond);
   }
 
-  public kvsvcVertxProxyHandler(Vertx vertx, kvsvc service, boolean topLevel, long timeoutSeconds) {
+  public KvdnServiceVertxProxyHandler(Vertx vertx, KvdnService service, boolean topLevel, long timeoutSeconds) {
     this.vertx = vertx;
     this.service = service;
     this.timeoutSeconds = timeoutSeconds;

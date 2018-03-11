@@ -16,7 +16,7 @@
 
 package net.iowntheinter.kvdn.service;
 
-import net.iowntheinter.kvdn.service.kvsvc;
+import net.iowntheinter.kvdn.service.KvdnService;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.Future;
@@ -37,25 +37,25 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
-import net.iowntheinter.kvdn.service.kvsvc;
+import net.iowntheinter.kvdn.service.KvdnService;
 
 /*
   Generated Proxy code - DO NOT EDIT
   @author Roger the Robot
 */
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class kvsvcVertxEBProxy implements kvsvc {
+public class KvdnServiceVertxEBProxy implements KvdnService {
 
   private Vertx _vertx;
   private String _address;
   private DeliveryOptions _options;
   private boolean closed;
 
-  public kvsvcVertxEBProxy(Vertx vertx, String address) {
+  public KvdnServiceVertxEBProxy(Vertx vertx, String address) {
     this(vertx, address, null);
   }
 
-  public kvsvcVertxEBProxy(Vertx vertx, String address, DeliveryOptions options) {
+  public KvdnServiceVertxEBProxy(Vertx vertx, String address, DeliveryOptions options) {
     this._vertx = vertx;
     this._address = address;
     this._options = options;
@@ -65,6 +65,7 @@ public class kvsvcVertxEBProxy implements kvsvc {
     } catch (IllegalStateException ex) {}
   }
 
+  @Override
   public void set(String straddr, String key, String value, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -86,6 +87,7 @@ public class kvsvcVertxEBProxy implements kvsvc {
     });
   }
 
+  @Override
   public void submit(String straddr, String value, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -106,6 +108,7 @@ public class kvsvcVertxEBProxy implements kvsvc {
     });
   }
 
+  @Override
   public void get(String straddr, String key, JsonObject options, Handler<AsyncResult<String>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -126,6 +129,7 @@ public class kvsvcVertxEBProxy implements kvsvc {
     });
   }
 
+  @Override
   public void size(String straddr, JsonObject options, Handler<AsyncResult<Integer>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -145,6 +149,7 @@ public class kvsvcVertxEBProxy implements kvsvc {
     });
   }
 
+  @Override
   public void getKeys(String straddr, JsonObject options, Handler<AsyncResult<JsonArray>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -164,6 +169,7 @@ public class kvsvcVertxEBProxy implements kvsvc {
     });
   }
 
+  @Override
   public void del(String straddr, String key, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
@@ -184,6 +190,7 @@ public class kvsvcVertxEBProxy implements kvsvc {
     });
   }
 
+  @Override
   public void query(String straddr, JsonObject query, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
     if (closed) {
     resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));

@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 public class VertxExtensionModule extends ExtensionModule {
-  private static final String extensionClasses = "net.iowntheinter.kvdn.groovy.service.kvsvc_GroovyExtension";
+  private static final String extensionClasses = "net.iowntheinter.kvdn.groovy.service.KvdnService_GroovyExtension";
   private static final String staticExtensionClasses = "";
   private final ExtensionModule delegate;  public VertxExtensionModule() {
     super("net.iowntheinter.kvdn.service", "3.5.0");

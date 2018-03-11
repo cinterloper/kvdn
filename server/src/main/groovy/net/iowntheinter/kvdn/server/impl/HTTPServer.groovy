@@ -13,8 +13,8 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.serviceproxy.ServiceBinder
 import net.iowntheinter.kvdn.server.AbstractServer
-import net.iowntheinter.kvdn.service.impl.KvdnService
-import net.iowntheinter.kvdn.service.kvsvc
+import net.iowntheinter.kvdn.service.impl.KvdnServiceImpl
+import net.iowntheinter.kvdn.service.KvdnService
 
 @CompileStatic
 @TypeChecked
@@ -27,12 +27,12 @@ class HTTPServer implements AbstractServer {
     Router router
     Context ctx
     String _token = '_'
-    KvdnService svc //used in a vertx program, or standalone
+    KvdnServiceImpl svc //used in a vertx program, or standalone
     HTTPServer(Vertx vertx) {
-        this(vertx, new KvdnService(vertx))
+        this(vertx, new KvdnServiceImpl(vertx))
     }
 
-    HTTPServer(Vertx vertx, KvdnService svc) {
+    HTTPServer(Vertx vertx, KvdnServiceImpl svc) {
         this.svc = svc;
         logger = new LoggerFactory().getLogger("kvdn")
         this.vertx = vertx
@@ -47,18 +47,18 @@ class HTTPServer implements AbstractServer {
     }
 
     void init(Router r, Handler cb) {
-        LoggerFactory.getLogger(this.class.name).debug("setup KvdnService inside HTTPServer")
-        new ServiceBinder(vertx).setAddress("kvdnsvc").register(kvsvc.class, svc as KvdnService)
+        LoggerFactory.getLogger(this.class.name).debug("setup KvdnServiceImpl inside HTTPServer")
+        new ServiceBinder(vertx).setAddress("kvdnsvc").register(KvdnService.class, svc as KvdnServiceImpl)
         init(r, svc, cb)
     }
 
-    void init(Router r, KvdnService svc, Handler cb) {
+    void init(Router r, KvdnServiceImpl svc, Handler cb) {
         router = r
 
         this.svc = svc
 
-        new ServiceBinder(vertx).setAddress("kvdnsvc").register(kvsvc.class, svc as KvdnService)
-        LoggerFactory.getLogger(this.class.name).debug("setup kvdnService complete")
+        new ServiceBinder(vertx).setAddress("kvdnsvc").register(KvdnService.class, svc as KvdnServiceImpl)
+        LoggerFactory.getLogger(this.class.name).debug("setup KvdnServiceImpl complete")
         eb = vertx.eventBus()
         def prefix = ""
         if (config.containsKey('kvdn_prefix'))
@@ -180,7 +180,7 @@ class HTTPServer implements AbstractServer {
                     //    svc.putMeta("Content-Type",ctype)
                     svc.set(straddr, kName as String, content, new JsonObject(), { AsyncResult resPut ->
                         if (resPut.succeeded()) {
-                            response.end(mName + ":" + kName)
+                            response.end(new JsonObject().put(mName ,kName).toString())
                         } else {
                             response.setStatusCode(501).end(resPut.cause().toString())
                         }
@@ -215,7 +215,7 @@ class HTTPServer implements AbstractServer {
                 //   svc.putMeta("Content-Type",ctype)
                 svc.set(straddr, kName as String, content, new JsonObject(), { AsyncResult resPut ->
                     if (resPut.succeeded()) {
-                        response.end(mName + ":" + kName)
+                        response.end(new JsonObject().put(mName,kName).toString())
                     } else {
                         response.setStatusCode(501).end(resPut.cause().toString())
                     }
@@ -249,8 +249,8 @@ class HTTPServer implements AbstractServer {
                     //    svc.putMeta("Content-Type",ctype)
                     svc.submit(straddr, content, new JsonObject(), { AsyncResult resPut ->
                         if (resPut.succeeded()) {
-                            logger.trace "transaction sucussful "
-                            response.end(mName + ":" + resPut.result())
+                            logger.trace " transaction sucussful "
+                            response.end(new JsonObject().put(mName,resPut.result()).toString())
                         } else {
                             logger.trace " transaction failed"
                             response.setStatusCode(501).end(resPut.cause().toString())
@@ -265,9 +265,9 @@ class HTTPServer implements AbstractServer {
     }
 
     def handleMapDel(RoutingContext routingContext) {
-        def mName = filterAddr(routingContext.request().getParam("map"))
-        def kName = routingContext.request().getParam("key")
-        def sName = filterAddr(routingContext.request().getParam("str"))
+        String mName = filterAddr(routingContext.request().getParam("map"))
+        String kName = routingContext.request().getParam("key")
+        String sName = filterAddr(routingContext.request().getParam("str"))
         logger.info("full uri on delete: " + routingContext.request().absoluteURI())
         def response = routingContext.response()
         if (mName == null || kName == null) {
@@ -278,7 +278,7 @@ class HTTPServer implements AbstractServer {
             svc.del(straddr, kName, new JsonObject(), { AsyncResult resDel ->
                 if (resDel.succeeded()) {
                     if (!response.ended()) //why ?
-                        response.end(mName + ":" + kName)
+                        response.end(new JsonObject().put(mName,kName).toString())
                 } else {
                     response.setStatusCode(501).end(resDel.cause().toString())
                 }
