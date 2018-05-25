@@ -5,14 +5,14 @@ import groovy.transform.TypeChecked
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
-import net.iowntheinter.kvdn.util.extensionManager.extension
+import net.iowntheinter.kvdn.util.extensionManager.Extension
 
 /**
  * Created by g on 1/28/17.
  */
 @TypeChecked
 @CompileStatic
-abstract class MapdbExtension implements extension {
+abstract class MapdbExtension implements Extension {
     @Override
     void load(Vertx vertx, Handler cb) {
 

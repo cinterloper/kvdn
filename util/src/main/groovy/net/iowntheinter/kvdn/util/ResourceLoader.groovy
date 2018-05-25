@@ -8,7 +8,7 @@ import groovy.transform.TypeChecked
  */
 @CompileStatic
 @TypeChecked
-class resourceLoader {
+class ResourceLoader {
     static String getResourceAsString(String name) {
         return getResource(name)
     }

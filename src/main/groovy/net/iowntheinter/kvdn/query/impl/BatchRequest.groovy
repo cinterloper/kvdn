@@ -5,9 +5,9 @@ import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.json.JsonObject
-import net.iowntheinter.kvdn.query.queryProvider
+import net.iowntheinter.kvdn.query.QueryProvider
 
-class batchRequest implements queryProvider {
+class BatchRequest implements QueryProvider {
     EventBus eb
     @Override
     void query(String addr, JsonObject query, Handler<AsyncResult<JsonObject>> cb) {

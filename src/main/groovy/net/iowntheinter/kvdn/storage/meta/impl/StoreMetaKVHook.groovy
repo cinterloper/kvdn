@@ -10,7 +10,6 @@ import io.vertx.core.logging.LoggerFactory
 import net.iowntheinter.kvdn.KvdnTX
 import net.iowntheinter.kvdn.storage.KvdnSession
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
-import net.iowntheinter.kvdn.storage.meta.metadataStore
 import net.iowntheinter.kvdn.storage.TXNHook
 
 
@@ -19,13 +18,13 @@ import net.iowntheinter.kvdn.storage.TXNHook
  */
 @CompileStatic
 @TypeChecked
-class storeMetaKVHook implements TXNHook {
+class StoreMetaKVHook implements TXNHook {
 
     ArrayList straddrCache
 
     Logger logger
 
-    storeMetaKVHook() {
+    StoreMetaKVHook() {
         logger = LoggerFactory.getLogger(this.class.name)
         straddrCache = new ArrayList()
         logger.info("constructed hook")

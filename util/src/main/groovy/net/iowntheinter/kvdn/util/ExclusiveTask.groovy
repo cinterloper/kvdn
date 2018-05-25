@@ -16,15 +16,15 @@ import java.util.function.LongFunction
  */
 @TypeChecked
 @CompileStatic
-class exclusiveTask {
+class ExclusiveTask {
     Vertx vertx
     String name
     Logger logger
     Handler cb
 
-    exclusiveTask(Vertx vertx, String name, Handler cb) {
+    ExclusiveTask(Vertx vertx, String name, Handler cb) {
         this.logger = LoggerFactory.getLogger(this.class.name)
-        logger.debug("created new exclusiveTask : $name")
+        logger.debug("created new ExclusiveTask : $name")
         this.name = name
         this.vertx = vertx
         this.cb = cb

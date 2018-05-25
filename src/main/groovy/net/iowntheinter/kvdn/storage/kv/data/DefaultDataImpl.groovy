@@ -18,12 +18,12 @@ import net.iowntheinter.kvdn.storage.TXNHook
  */
 @TypeChecked
 @CompileStatic
-class defaultDataImpl implements KVData {
+class DefaultDataImpl implements KVData {
     SharedData sd
     Vertx vertx
     Logger logger
 
-    defaultDataImpl(Vertx v, KvdnSession s) {
+    DefaultDataImpl(Vertx v, KvdnSession s) {
         this.vertx = v
 
         this.logger = new LoggerFactory().getLogger(this.class.getName())

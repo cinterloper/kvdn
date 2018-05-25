@@ -1,5 +1,7 @@
 package net.iowntheinter.kvdn.ignite.util
 
+import groovy.transform.CompileStatic
+import groovy.transform.TypeChecked
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.logging.Logger
@@ -11,13 +13,15 @@ import org.apache.ignite.lang.IgniteFuture
 /**
  * Created by g on 2/20/17.
  */
-class shimAsyncIgniteMap implements AsyncMap {
+@TypeChecked
+@CompileStatic
+class ShimAsyncIgniteMap implements AsyncMap {
     Vertx vertx
     IgniteCache ic
     def iv
     Logger l = LoggerFactory.getLogger(this.class)
 
-    shimAsyncIgniteMap(Vertx vertx, IgniteCache db){
+    ShimAsyncIgniteMap(Vertx vertx, IgniteCache db){
         this.vertx = vertx
         this.ic = db
         this.iv = new IgVxAsyncCoupler()
@@ -98,5 +102,20 @@ class shimAsyncIgniteMap implements AsyncMap {
         ic.size()
         IgniteFuture f = ic.future()
         (iv as IgVxAsyncCoupler).couple(f,h)
+    }
+
+    @Override
+    void keys(Handler handler) {
+
+    }
+
+    @Override
+    void values(Handler handler) {
+
+    }
+
+    @Override
+    void entries(Handler handler) {
+
     }
 }

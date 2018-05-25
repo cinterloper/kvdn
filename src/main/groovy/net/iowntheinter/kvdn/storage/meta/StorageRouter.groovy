@@ -7,7 +7,7 @@ import io.vertx.core.json.JsonObject
 /**
  * Created by g on 2/20/17.
  */
-interface storageRouter {
+interface StorageRouter {
     /*
     the result should contain:
     [

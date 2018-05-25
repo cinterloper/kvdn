@@ -20,7 +20,7 @@ import net.iowntheinter.kvdn.storage.kv.impl.KvTx
 import net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider
 import net.iowntheinter.kvdn.storage.kv.key.KeyProvider
 import net.iowntheinter.kvdn.storage.kv.KVData
-import net.iowntheinter.kvdn.storage.meta.impl.storeMetaKVHook
+import net.iowntheinter.kvdn.storage.meta.impl.StoreMetaKVHook
 import net.iowntheinter.kvdn.util.KvdnSessionInterface
 
 //import net.iowntheinter.kvdn.storage.counter.impl.CtrTx
@@ -113,7 +113,7 @@ class KvdnSession implements KvdnSessionInterface {
         configuredPreHooks.each { name ->
             preHooks.add(txHookLoader(name as String))
         }
-        postHooks.add(new storeMetaKVHook())
+        postHooks.add(new StoreMetaKVHook())
         configuredPostHooks.each { name ->
             postHooks.add(txHookLoader(name as String))
         }
@@ -144,7 +144,7 @@ class KvdnSession implements KvdnSessionInterface {
         accessCache = this.vertx.sharedData().getLocalMap(ACCESS_CACHE_LOC)
 
         String configured_data = config.getString('data_implementation') ?:
-                'net.iowntheinter.kvdn.storage.kv.data.defaultDataImpl'
+                'net.iowntheinter.kvdn.storage.kv.data.DefaultDataImpl'
         try {
             this.D = txHookLoader(configured_data) as KVData
             this.preHooks.addAll((D as KVData).getPreHooks())

@@ -9,10 +9,10 @@ package net.iowntheinter.kvdn.storage.kv.impl
 // -- if no dat available for that keyname, just skip over it and remove it from the key set
 // -- store this erratum somewhere
 
-class kvSnapshot implements Map{
+class KvSnapshot implements Map{
     public final long txId
 
-   kvSnapshot(String mapId, int snapTxCtrId){
+    KvSnapshot(String mapId, int snapTxCtrId){
        txId=snapTxCtrId
    }
     void ImmutableError(){

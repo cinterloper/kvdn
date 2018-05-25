@@ -9,7 +9,7 @@ import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
 import net.iowntheinter.kvdn.storage.kv.impl.KvTx
 import net.iowntheinter.kvdn.storage.KvdnSession
-import net.iowntheinter.kvdn.util.distributedWaitGroup
+import net.iowntheinter.kvdn.util.DistributedWaitGroup
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -48,7 +48,7 @@ class Tdwg {
         Async async = context.async()
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
-        def d = new distributedWaitGroup(['1','2','3'].toSet(),{
+        def d = new DistributedWaitGroup(['1','2','3'].toSet(),{
             async.complete()
         },vertx)
         d.ack('1')
@@ -62,7 +62,7 @@ class Tdwg {
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
         def tokens=['1','2','3']
-        def d = new distributedWaitGroup(tokens.toSet(),{
+        def d = new DistributedWaitGroup(tokens.toSet(),{
             async.complete()
         },vertx)
         def c = 'achannel'
@@ -83,7 +83,7 @@ class Tdwg {
         s.init({
 
             def tokens=['1','2','3']
-            def d = new distributedWaitGroup(tokens.toSet(),{
+            def d = new DistributedWaitGroup(tokens.toSet(),{
                 async.complete()
             },vertx)
             def m = 'this/that'

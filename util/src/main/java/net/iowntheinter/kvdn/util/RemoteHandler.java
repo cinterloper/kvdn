@@ -4,12 +4,11 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageCodec;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
 
-public class remoteHandler implements Handler {
+public class RemoteHandler implements Handler {
     final String channel;
     Vertx vertx;
     EventBus eb;
@@ -17,11 +16,11 @@ public class remoteHandler implements Handler {
     final Class customType;
     MessageCodec m;
 
-    remoteHandler(Vertx vertx, String channel) {
+    RemoteHandler(Vertx vertx, String channel) {
         this(vertx, channel, null, null);
     }
 
-    remoteHandler(Vertx vertx, String channel, MessageCodec m, Class<Object> customType) {
+    RemoteHandler(Vertx vertx, String channel, MessageCodec m, Class<Object> customType) {
         logger = LoggerFactory.getLogger(this.getClass().getName());
         this.channel = channel;
         this.vertx = vertx;

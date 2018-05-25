@@ -21,7 +21,7 @@ import java.util.function.Function
 @TypeChecked
 @CompileStatic
 //@FixMe need an interface for KvdnSessionInterface available here
-class distributedWaitGroup {
+class DistributedWaitGroup {
     Vertx vertx
     long timeout
     Handler abortcb, triggercb
@@ -30,9 +30,9 @@ class distributedWaitGroup {
     EventBus eb
     Logger logger
 
-    distributedWaitGroup(Set tokens, long timeout = 0, Handler triggercb, Handler abortcb = {}, Vertx v) {
+    DistributedWaitGroup(Set tokens, long timeout = 0, Handler triggercb, Handler abortcb = {}, Vertx v) {
         this.logger = LoggerFactory.getLogger(this.class.getName())
-        logger.debug("initalized new distributedWaitGroup with tokens: $tokens ")
+        logger.debug("initalized new DistributedWaitGroup with tokens: $tokens ")
         ran = false
         this.vertx = v
         this.triggercb = triggercb

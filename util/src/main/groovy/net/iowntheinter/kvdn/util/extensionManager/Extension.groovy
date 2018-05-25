@@ -7,7 +7,7 @@ import io.vertx.core.json.JsonObject
 /**
  * Created by g on 1/8/17.
  */
-interface extension {
+interface Extension {
     void load(Vertx v, Handler cb)
 
     JsonObject register(Vertx v)

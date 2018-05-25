@@ -4,7 +4,7 @@ import io.vertx.core.Handler
 import io.vertx.core.shareddata.LocalMap
 import net.iowntheinter.kvdn.KvdnTX
 import net.iowntheinter.kvdn.storage.KvdnSession
-import net.iowntheinter.kvdn.storage.meta.metadataStore
+import net.iowntheinter.kvdn.storage.meta.MetadataStore
 import net.iowntheinter.kvdn.storage.TXNHook
 
 
@@ -12,7 +12,7 @@ import net.iowntheinter.kvdn.storage.TXNHook
  * Created by g on 2/20/17.
  * here as an idea/example of chaining/seralizing async hooks ... probably not what we actually want to do
  */
-class storeMetaKVHookChain implements TXNHook {
+class StoreMetaKVHookChain implements TXNHook {
     @Override
     TXNHook.HookType getType() {
         return TXNHook.HookType.META_HOOK
@@ -29,7 +29,7 @@ class storeMetaKVHookChain implements TXNHook {
         if (!state.get('metaElemPtr'))
             state.put('metaElemPtr', 0)
         String k = (state.get('keys') as List)[state.get('metaElemPtr') as Integer]
-        (tx.metaData as metadataStore).setAttr(tx.strAddr, k, elems[k].toString(), cb)
+        (tx.metaData as MetadataStore).setAttr(tx.strAddr, k, elems[k].toString(), cb)
 
     }
 }

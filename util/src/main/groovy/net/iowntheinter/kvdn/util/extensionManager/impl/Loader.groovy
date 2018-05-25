@@ -8,28 +8,24 @@ import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.logging.Logger
-import net.iowntheinter.kvdn.util.distributedWaitGroup
-import net.iowntheinter.kvdn.util.extensionManager.extension
-
-import java.util.function.BiFunction
-import java.util.function.Function
-
+import net.iowntheinter.kvdn.util.DistributedWaitGroup
+import net.iowntheinter.kvdn.util.extensionManager.Extension
 
 /**
  * Created by g on 1/8/17.
  */
 @CompileStatic
 @TypeChecked
-class loader {
+class Loader {
     Vertx vertx
     Logger logger
     Set<String> extensions = []
 
-    loader(Vertx vertx) {
+    Loader(Vertx vertx) {
         this.vertx = vertx
 
     }
-//load classes that subclass the extension type
+//load classes that subclass the Extension type
 
 
     void init(Class extensionType, Handler cb) {
@@ -55,10 +51,10 @@ class loader {
 
     void load(Closure extensionProcessor, Handler cb) {
 
-        def dwg = new distributedWaitGroup(extensions, cb, vertx)
+        def dwg = new DistributedWaitGroup(extensions, cb, vertx)
         extensions.each { String c ->
-            logger.info("loading extension $c")
-            def E = this.class.classLoader.loadClass(c as String)?.newInstance() as extension
+            logger.info("loading Extension $c")
+            def E = this.class.classLoader.loadClass(c as String)?.newInstance() as Extension
             E.load(vertx, { //do initalization
                 extensionProcessor(E, { dwg.ack(c) }) //allow user to call specalized methods
             })

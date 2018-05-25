@@ -1,7 +1,7 @@
 package net.iowntheinter.kvdn.storage.kv.data
 
 import net.iowntheinter.kvdn.storage.kv.KVData
-import net.iowntheinter.kvdn.storage.meta.metadataStore
+import net.iowntheinter.kvdn.storage.meta.MetadataStore
 
 /**
  * Created by g on 2/9/17.
@@ -15,8 +15,8 @@ import net.iowntheinter.kvdn.storage.meta.metadataStore
  * */
 
 
-class defaultMetaImpl implements metadataStore {
-    defaultMetaImpl(KVData DataImpl){
+class DefaultMetaImpl implements MetadataStore {
+    DefaultMetaImpl(KVData DataImpl){
 
     }
 

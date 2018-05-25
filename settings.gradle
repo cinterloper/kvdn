@@ -1,8 +1,8 @@
 rootProject.name = 'kvdn'
 if (!System.getenv("DISABLE_EXTENSIONS")) {
-//    include "extensions/hazelcast"
+ //   include "extensions/hazelcast"
     include 'service-proxy'
- //   include 'extensions/ignite'
+    include 'extensions/ignite'
     include 'util'
     include 'service-proxy-server'
     include 'extensions/mapdb'

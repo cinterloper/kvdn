@@ -1,6 +1,6 @@
 plugins {
-  id 'java'
-  id 'application'
+    id 'java'
+    id 'application'
 
 }
 apply plugin: 'groovy'
@@ -8,9 +8,9 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 repositories {
-  mavenCentral()
-  mavenLocal()
-  jcenter()
+    mavenCentral()
+    mavenLocal()
+    jcenter()
 }
 
 def projversion = rootProject.getVersion()
@@ -25,13 +25,19 @@ version = projversion
 sourceCompatibility = '1.8'
 
 dependencies {
-  compile "io.vertx:vertx-core:$libversion"
-  compile "io.vertx:vertx-ignite:$libversion"
-  compile "net.iowntheinter:kvdn:$projversion"
-  compile 'com.h2database:h2:1.4.193'
+    compile "io.vertx:vertx-core:$libversion"
+    compile "io.vertx:vertx-ignite:$libversion"
+    compile "net.iowntheinter:kvdn:$projversion"
+    testCompile "io.vertx:vertx-unit:$libversion"
+    testCompile group: 'junit', name: 'junit', version: '4.+'
 }
 
-
+test {
+    testLogging {
+        // Show that tests are run in the command-line output
+        events 'started', 'passed'
+    }
+}
 publishing {
     repositories {
         mavenLocal()
@@ -58,5 +64,5 @@ shadowJar {
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.8'
+    gradleVersion = '2.8'
 }
