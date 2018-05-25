@@ -29,7 +29,7 @@ dependencies {
     compile "io.vertx:vertx-core:$libversion"
     compile "io.vertx:vertx-sql-common:$libversion"
     compile "io.vertx:vertx-jdbc-client:$libversion"
-    compile 'com.hazelcast:hazelcast-client:3.6.3'
+    compile 'com.hazelcast:hazelcast-client:3.8.2'
     compile "io.vertx:vertx-hazelcast:$libversion"
     compile 'com.google.code.gson:gson:2.6.2'
     compile 'org.apache.commons:commons-lang3:3.4'

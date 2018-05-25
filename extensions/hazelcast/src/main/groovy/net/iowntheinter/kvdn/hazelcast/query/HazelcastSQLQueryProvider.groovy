@@ -2,17 +2,20 @@ package net.iowntheinter.kvdn.hazelcast.query
 
 import com.hazelcast.core.IMap
 import com.hazelcast.query.SqlPredicate
+import io.vertx.core.AsyncResult
+import io.vertx.core.Future
+import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
-import net.iowntheinter.kvdn.hazelcast.hzExtension
-import net.iowntheinter.kvdn.storage.queryProvider
+import net.iowntheinter.kvdn.hazelcast.HzExtension
+import net.iowntheinter.kvdn.query.QueryProvider
 
 /**
  * Created by g on 1/8/17.
  */
-class hazelcastSQLQueryProvider extends hzExtension implements queryProvider {
+class HazelcastSQLQueryProvider extends HzExtension implements QueryProvider {
 
-    void query(String hzstraddr, String query, cb) {
+    void query(String s, JsonObject jsonObject, Handler<AsyncResult<JsonObject>> handler) {
         vertx.executeBlocking({ future ->
             try {
                 IMap map = client.getMap(hzstraddr)
@@ -32,12 +35,14 @@ class hazelcastSQLQueryProvider extends hzExtension implements queryProvider {
     }
 
     @Override
-    void load(Vertx vertx, Object o) {
+    void load(Vertx vertx, Handler handler) {
 
+        handler.handle(Future.succeededFuture())
     }
 
     @Override
     JsonObject register(Vertx vertx) {
         return null
     }
+
 }

@@ -1,22 +1,24 @@
 package net.iowntheinter.kvdn.hooks.jdbcMapstore
 
 import groovy.text.SimpleTemplateEngine
+import io.vertx.core.Future
+import io.vertx.core.Handler
 import io.vertx.core.Vertx
-import net.iowntheinter.kvdn.hazelcast.hzExtension
+import net.iowntheinter.kvdn.KvdnTX
+import net.iowntheinter.kvdn.hazelcast.HzExtension
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.jdbc.JDBCClient
-import net.iowntheinter.kvdn.kvdnTX
-import net.iowntheinter.kvdn.storage.kvdnSession
-import net.iowntheinter.kvdn.storage.txnHook
-import net.iowntheinter.kvdn.util.resourceLoader
+import net.iowntheinter.kvdn.storage.KvdnSession
+import net.iowntheinter.kvdn.storage.TXNHook
+import net.iowntheinter.kvdn.util.ResourceLoader
 
 /**
  * Created by g on 1/9/17.
  */
-class tableAutocreateHook extends hzExtension implements txnHook {
+class TableAutocreateHook extends HzExtension implements TXNHook {
     final JDBCClient client
 
-    tableAutocreateHook() {
+    TableAutocreateHook() {
         client = JDBCClient.createShared(vertx, new JsonObject()
                 .put("url", System.getenv("HZ_MAPSTORE_JDBC_DBURL"))
                 .put("driver_class", "org.postgresql.Driver")
@@ -25,8 +27,9 @@ class tableAutocreateHook extends hzExtension implements txnHook {
     }
 
     @Override
-    void load(Vertx vertx, cb) {
-        cb()
+    void load(Vertx vertx, Handler handler) {
+
+        handler.handle(Future.succeededFuture())
     }
 
     @Override
@@ -35,12 +38,12 @@ class tableAutocreateHook extends hzExtension implements txnHook {
     }
 
     @Override
-    void call(kvdnTX kvdnTX, kvdnSession kvdnSession, cb) {
+    void call(KvdnTX kvdnTX, KvdnSession kvdnSession, Handler handler) {
         def strAddr = kvdnTX.strAddr
         def binding = [TABLE_NAME: strAddr]
         def e = new SimpleTemplateEngine()
 
-        def r = new resourceLoader()
+        def r = new ResourceLoader()
 
 
 
@@ -56,9 +59,6 @@ class tableAutocreateHook extends hzExtension implements txnHook {
 
                     def conn = ar.result()
 
-                    conn.
-
-
                     conn.query(query, { queryResult ->
                         cb(queryResult)
                     })
@@ -67,5 +67,10 @@ class tableAutocreateHook extends hzExtension implements txnHook {
             })
 
         }
+    }
+
+    @Override
+    HookType getType() {
+        return null
     }
 }
