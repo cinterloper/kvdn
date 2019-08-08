@@ -1,0 +1,83 @@
+import groovy.json.JsonSlurper
+
+plugins {
+    id 'java'
+    id 'application'
+
+}
+apply plugin: 'groovy'
+apply plugin: 'maven-publish'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    jcenter()
+    maven{
+        url "http://www.gridgainsystems.com/nexus/content/repositories/external"
+    }
+}
+Map versionTable = (new JsonSlurper()).parse(new File('src/main/resources/_KVDN_VERSION.json').text.trim().bytes )
+
+def projversion = rootProject.getVersion()
+def libversion = projversion.toString().tokenize('-')[0]
+if (System.getenv("VERTX_VERSION"))
+    libversion = System.getenv("VERTX_VERSION")
+if (System.getenv("PROJVER"))
+    projversion = System.getenv("PROJVER")
+
+version = projversion
+
+sourceCompatibility = '1.8'
+
+dependencies {
+    compile "io.vertx:vertx-ignite:$libversion"
+    compile "io.vertx:vertx-core:$libversion"
+    compile "org.apache.ignite:ignite-indexing:2.3.0"// vertx-ignite 3.5.2 includes ignite 2.3
+ //   compile "org.apache.ignite:ignite-geospatial:2.3.4"// this has to come from the gridgain repo due to apache license issues
+    compile 'org.apache.ignite:ignite-spring:2.3.0'
+    compile "net.iowntheinter:kvdn-util:$projversion"
+    compile "net.iowntheinter:kvdn:$projversion"
+    compile "net.iowntheinter:kvdn-server:$projversion"
+    compile "org.codehaus.groovy:groovy:${versionTable.groovy}"
+    testCompile "io.vertx:vertx-unit:$libversion"
+
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+test {
+    testLogging {
+        // Show that tests are run in the command-line output
+        events 'started', 'passed'
+    }
+}
+publishing {
+    repositories {
+        mavenLocal()
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'net.iowntheinter'
+            artifactId 'kvdn-ignite-extensions'
+            from components.java
+        }
+    }
+}
+mainClassName = 'example.PersistantIgniteServer'
+
+shadowJar {
+    classifier = 'fat'
+    manifest {
+        attributes 'Main-Verticle': 'net.iowntheinter.kvdn.server.DefaultHTTPServer'
+    }
+    mergeServiceFiles {
+        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+        include 'META-INF/spring.*' //this is a fix for the strange ignite error
+        //https://github.com/vert-x3/vertx-ignite/issues/57
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.8'
+}

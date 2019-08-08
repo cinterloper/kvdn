@@ -6,7 +6,7 @@ import net.iowntheinter.kvdn.server.AbstractServer
 
 class TCPServer implements AbstractServer {
     @Override
-    void init(Handler<AsyncResult> cb) {
+    void init(Map<String,Object> config, Handler<AsyncResult> cb) {
 
     }
 }

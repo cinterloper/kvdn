@@ -1,7 +1,7 @@
 package net.iowntheinter.kvdn.storage.meta.impl
 
 import io.vertx.core.Handler
-import net.iowntheinter.kvdn.KvdnTX
+import net.iowntheinter.kvdn.KvdnOperation
 import net.iowntheinter.kvdn.storage.KvdnSession
 import net.iowntheinter.kvdn.storage.meta.MetadataStore
 import net.iowntheinter.kvdn.storage.MetadataManager
@@ -25,24 +25,24 @@ class MetadataManagerImpl implements MetadataManager {
         def meta
 
         @Override
-        TXNHook.HookType getType() {
-            return TXNHook.HookType.META_HOOK
+        HookType getType() {
+            return HookType.META_HOOK
         }
 
         @Override
-        void call(KvdnTX tx, KvdnSession session, Handler cb) {
+        void call(KvdnOperation tx, KvdnSession session, Handler cb) {
 
         }
     }
     class endHook implements TXNHook{
 
         @Override
-        TXNHook.HookType getType() {
-            return TXNHook.HookType.META_HOOK
+        HookType getType() {
+            return HookType.META_HOOK
         }
 
         @Override
-        void call(KvdnTX tx, KvdnSession session, Handler cb) {
+        void call(KvdnOperation tx, KvdnSession session, Handler cb) {
 
         }
     }

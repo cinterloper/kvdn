@@ -1,4 +1,4 @@
-# Install script for directory: /home/g/ext_code/kvdn/Client/cpp
+# Install script for directory: /home/g/kvdn/Client/cpp
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -32,7 +32,12 @@ if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
   set(CMAKE_INSTALL_SO_NO_EXE "1")
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
+# Is this installation the result of a crosscompile?
+if(NOT DEFINED CMAKE_CROSSCOMPILING)
+  set(CMAKE_CROSSCOMPILING "FALSE")
+endif()
+
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   foreach(file
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libKvdn.so.1.0.1"
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libKvdn.so.1"
@@ -46,9 +51,9 @@ if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMP
     endif()
   endforeach()
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE SHARED_LIBRARY FILES
-    "/home/g/ext_code/kvdn/Client/cpp/libKvdn.so.1.0.1"
-    "/home/g/ext_code/kvdn/Client/cpp/libKvdn.so.1"
-    "/home/g/ext_code/kvdn/Client/cpp/libKvdn.so"
+    "/home/g/kvdn/Client/cpp/libKvdn.so.1.0.1"
+    "/home/g/kvdn/Client/cpp/libKvdn.so.1"
+    "/home/g/kvdn/Client/cpp/libKvdn.so"
     )
   foreach(file
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libKvdn.so.1.0.1"
@@ -64,12 +69,12 @@ if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMP
   endforeach()
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE FILE FILES "/home/g/ext_code/kvdn/Client/cpp/KvdnClient.hpp")
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE FILE FILES "/home/g/kvdn/Client/cpp/KvdnClient.hpp")
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/pkgconfig" TYPE FILE FILES "/home/g/ext_code/kvdn/Client/cpp/kvdn.pc")
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/pkgconfig" TYPE FILE FILES "/home/g/kvdn/Client/cpp/kvdn.pc")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -80,5 +85,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/g/ext_code/kvdn/Client/cpp/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/g/kvdn/Client/cpp/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

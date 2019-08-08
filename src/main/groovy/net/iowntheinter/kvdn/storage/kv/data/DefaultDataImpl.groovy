@@ -31,7 +31,7 @@ class DefaultDataImpl implements KVData {
     }
 
     @Override
-    void getMap(String sa,Handler cb) {
+    void getMap(String sa, Handler cb) {
         if (vertx.isClustered()) {  //vertx cluster mode
             sd.getClusterWideMap("${sa}", cb)
             logger.trace("starting clustered kvdn operation with vertx.isClustered() == ${vertx.isClustered()}")

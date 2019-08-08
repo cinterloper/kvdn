@@ -1,0 +1,51 @@
+rest_cherrypy:
+  # can be any port
+  port: 8000
+  debug: True
+  disable_ssl: True
+  #ssl_crt: /etc/salt/api-server.crt
+  #ssl_key: /etc/salt/api-server.key
+  expire_responses: False
+  
+file_recv: True
+
+ext_pillar:
+  - file_tree:
+      root_dir: /srv/pillar/tree
+      follow_dir_links: False
+      raw_data: False
+  - kvdn:
+      url: http://172.17.0.1:6500
+      config: /srv/salt/kvdn.yml
+      token: None
+      unset_if_missing: False
+
+
+file_roots:
+  base:
+    - /srv/salt
+
+client_acl:
+  user:
+    - test.ping
+
+external_auth:
+  pam:
+    user:
+      - .*
+      - '@runner'
+      - '@wheel'
+      - '@jobs'
+
+log_level: debug
+
+include: cloud.providers.d/*
+include: cloud.profiles.d/*
+include: master.d/*
+
+reactor:
+  - salt/netapi/hook/cloud/create:
+    - /srv/salt/saltmaster/resources/vxreactor.sls
+
+module_dirs:
+  - /etc/salt/modules

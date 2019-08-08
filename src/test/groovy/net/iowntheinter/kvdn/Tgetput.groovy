@@ -4,7 +4,7 @@ import io.vertx.core.AsyncResult
 import io.vertx.core.logging.Logger
 import io.vertx.core.Vertx
 import io.vertx.core.logging.LoggerFactory
-import net.iowntheinter.kvdn.storage.kv.impl.KvTx
+import net.iowntheinter.kvdn.storage.kv.impl.KvOp
 import net.iowntheinter.kvdn.storage.KvdnSession
 import io.vertx.ext.unit.Async
 import io.vertx.ext.unit.TestContext
@@ -21,7 +21,8 @@ class Tgetput {
 
     Vertx vertx = Vertx.vertx()
     KvdnSession kvs
-    String addr, key, data
+    String addr, key
+    String data
     Logger logger = LoggerFactory.getLogger(this.class.getName())
 
     @Before
@@ -41,16 +42,16 @@ class Tgetput {
     @Test
     void test1(TestContext context) {
         Async async = context.async()
-        data = UUID.randomUUID().toString()
+        data = (UUID.randomUUID().toString())
         key = UUID.randomUUID().toString()
         (kvs as KvdnSession).init({
-            KvTx tx = kvs.newTx(addr, KvdnSession.DATATYPE.KV) as KvTx
+            KvOp tx = kvs.newOp(addr, KvdnSession.DATATYPE.KV) as KvOp
             tx.set(key, data, { AsyncResult<String> result ->
                 if (result.failed()) {
                     context.fail(result.cause().toString())
                     async.complete()
                 }
-                KvTx tx2 = kvs.newTx(addr) as KvTx
+                KvOp tx2 = kvs.newOp(addr) as KvOp
                 tx2.get(key, { AsyncResult<String> gresult ->
                     if (!gresult.succeeded()) {
                         context.fail(result.cause().toString())
@@ -72,16 +73,16 @@ class Tgetput {
     void test2(TestContext context) {
         Async async = context.async()
 
-        data = UUID.randomUUID().toString()
+        data = (UUID.randomUUID().toString())
         key = UUID.randomUUID().toString()
         (kvs as KvdnSession).init({
-            KvTx tx = kvs.newTx(addr, KvdnSession.DATATYPE.KV) as KvTx
+            KvOp tx = kvs.newOp(addr, KvdnSession.DATATYPE.KV) as KvOp
             tx.set(key, data, { AsyncResult result ->
                 if (result.failed()) {
                     context.fail(result.cause().toString())
                     async.complete()
                 }
-                KvTx tx3 = kvs.newTx(addr) as KvTx
+                KvOp tx3 = kvs.newOp(addr) as KvOp
                 tx3.getKeys({ AsyncResult xresult ->
                     if (!xresult.succeeded()) {
                         context.fail(xresult.cause().toString())

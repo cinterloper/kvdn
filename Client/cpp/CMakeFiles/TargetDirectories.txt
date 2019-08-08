@@ -1,0 +1,8 @@
+/home/g/kvdn/Client/cpp/CMakeFiles/install/strip.dir
+/home/g/kvdn/Client/cpp/CMakeFiles/install/local.dir
+/home/g/kvdn/Client/cpp/CMakeFiles/KvdnClient.dir
+/home/g/kvdn/Client/cpp/CMakeFiles/rebuild_cache.dir
+/home/g/kvdn/Client/cpp/CMakeFiles/edit_cache.dir
+/home/g/kvdn/Client/cpp/CMakeFiles/list_install_components.dir
+/home/g/kvdn/Client/cpp/CMakeFiles/Kvdn.dir
+/home/g/kvdn/Client/cpp/CMakeFiles/install.dir

@@ -1,0 +1,77 @@
+{
+  "name": "example-project",
+  "env_vars": [
+    "JCEKS_KEYSTORE_PASS"
+  ],
+  "output_type": "json",
+  "default_launch_strategy": "waiting",
+  "kvdn_port": 6500,
+  "kvdn_route_providers": [
+    "net.iowntheinter.util.http.example.helloWorldRouteProvider"
+  ],
+  "reflectors": {
+    "_KVDN_+cornerstone:registration": "_cornerstone:registration"
+  },
+  "injectors": {
+    "JWTInjector": "net.iowntheinter.util.crypto.JWTInjector"
+  },
+  "crypto": {
+    "jwt": {
+      "passvar": "JCEKS_KEYSTORE_PASS",
+      "path": "keystore.jceks",
+      "type": "jceks"
+    }
+  },
+  "startup": {
+    "vx": {
+      "net.iowntheinter.util.ebReflector": {
+        "deps": [],
+        "enabled": true
+      },
+      "groovy:example.groovy": {
+        "deps": [],
+        "enabled": true
+      }
+    },
+    "ext": {
+      "docker": {
+        "salt": {
+          "ifExists": "recreate",
+          "dkrOptsRef": "saltOpts",
+          "image": "kvdn-example-pillar",
+          "tag": "latest",
+          "deps": [],
+          "enabled": true
+        }
+      }
+    }
+  },
+  "optionBlocks": {
+    "saltOpts": {
+      "ExposedPorts": {
+        "8000/tcp": {},
+        "4505/tcp": {},
+        "4506/tcp": {}
+      },
+      "HostConfig": {
+        "PortBindings": {
+          "8000/tcp": [
+            {
+              "HostPort": "8000"
+            }
+          ],
+          "4505/tcp": [
+            {
+              "HostPort": "4505"
+            }
+          ],
+          "4506/tcp": [
+            {
+              "HostPort": "4506"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

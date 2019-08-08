@@ -32,7 +32,7 @@ class LocalKeyProvider implements KeyProvider {
     @Override
     void getKeys(String name, Handler<AsyncResult<Set<String>>> cb) {
         logger.trace("Name: $name keyset: ${sd.getLocalMap(name).keySet()} ")
-        cb.handle(Future.succeededFuture((Set<String>)sd.getLocalMap(name).keySet()))
+        cb.handle(Future.succeededFuture(sd.getLocalMap(name).keySet() as Set<String>))
     }
 
     @Override

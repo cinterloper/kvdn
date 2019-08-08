@@ -1,3 +1,0 @@
-/home/g/CLionProjects/basicFileTraverse/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/g/CLionProjects/basicFileTraverse/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/g/CLionProjects/basicFileTraverse/cmake-build-debug/CMakeFiles/basicFileTraverse.dir

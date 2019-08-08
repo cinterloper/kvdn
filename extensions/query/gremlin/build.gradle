@@ -1,0 +1,116 @@
+import groovy.json.JsonSlurper
+
+plugins {
+    id 'groovy'
+    id 'java'
+    id 'application'
+
+    
+}
+apply plugin: 'groovy'
+apply plugin: 'maven-publish'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+repositories {
+    mavenLocal()
+
+    mavenCentral()
+    jcenter()
+}
+
+
+sourceSets {
+    main {
+        java {
+            srcDirs = [] // don't compile Java code twice
+        }
+        groovy {
+            srcDirs = [ 'src/main/groovy', 'src/main/java' ]
+        }
+    }
+}
+Map versionTable = (new JsonSlurper()).parse(new File('src/main/resources/_KVDN_VERSION.json').text.trim().bytes )
+
+def projversion = rootProject.getVersion()
+def libversion = projversion.toString().tokenize('-')[0]
+if (System.getenv("VERTX_VERSION"))
+    libversion = System.getenv("VERTX_VERSION")
+if (System.getenv("PROJVER"))
+    projversion = System.getenv("PROJVER")
+
+version = projversion
+
+sourceCompatibility = '1.8'
+def libnd4jOS = System.getenv("OS")
+switch(libnd4jOS) {
+    case 'windows':
+        libnd4jOS = 'windows-x86_64'
+        break
+    case 'linux':
+        libnd4jOS = 'linux-x86_64'
+        break
+    case 'linux-ppc64':
+        libnd4jOS = 'linux-ppc64'
+        break
+    case 'linux-ppc64le':
+        libnd4jOS = 'linux-ppc64le'
+        break
+    case 'macosx':
+        libnd4jOS = 'macosx-x86_64'
+        break
+    default:
+        libnd4jOS = 'linux-x86_64'
+}
+
+
+dependencies {
+    compile "io.vertx:vertx-core:$libversion"
+    compile "net.iowntheinter:kvdn:$projversion"
+    compile "net.iowntheinter:kvdn-server:$projversion"
+    compile "net.iowntheinter:kvdn-util:$projversion"
+    compile "net.iowntheinter:kvdn-service-proxy:$projversion"
+    compile 'org.apache.tinkerpop:tinkerpop:3.4.1'
+    compile 'org.apache.tinkerpop:gremlin-core:3.4.1'
+    compile 'me.escoffier.vertx:vertx-completable-future:0.1.3-SNAPSHOT'
+//    compile 'org.nd4j:nd4j:1.0.0-beta'
+//    compile 'org.nd4j:nd4j-native:1.0.0-beta'
+//    compile 'org.nd4j:nd4j-native:1.0.0-beta:'+libnd4jOS
+    compile "org.codehaus.groovy:groovy:${versionTable.groovy}"
+    compile 'org.bytedeco.javacpp-presets:openblas:0.2.20-1.4.1'
+    compile 'org.bytedeco.javacpp-presets:openblas:0.2.20-1.4.1:'+libnd4jOS
+    compile 'org.apache.ignite:ignite-indexing:2.3.0' // vertx-ignite 3.5.2 includes ignite 2.3
+    compile 'org.apache.ignite:ignite-core:2.3.0' // vertx-ignite 3.5.2 includes ignite 2.3
+    testCompile "io.vertx:vertx-unit:$libversion"
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+
+}
+
+publishing {
+    repositories {
+        mavenLocal()
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'net.iowntheinter'
+            artifactId 'kvdn-gremlin-extensions'
+            from components.java
+        }
+    }
+}
+
+mainClassName = 'io.vertx.core.Launcher'
+
+shadowJar {
+    classifier = 'fat'
+    manifest {
+        attributes 'Main-Verticle': 'groovy:kvdn-start-service-gremlin.groovy'
+    }
+    mergeServiceFiles {
+        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.8'
+}

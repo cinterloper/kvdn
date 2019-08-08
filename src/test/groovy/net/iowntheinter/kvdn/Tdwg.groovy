@@ -2,12 +2,13 @@ package net.iowntheinter.kvdn
 
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
+import io.vertx.core.buffer.Buffer
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.unit.Async
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
-import net.iowntheinter.kvdn.storage.kv.impl.KvTx
+import net.iowntheinter.kvdn.storage.kv.impl.KvOp
 import net.iowntheinter.kvdn.storage.KvdnSession
 import net.iowntheinter.kvdn.util.DistributedWaitGroup
 import org.junit.After
@@ -48,32 +49,34 @@ class Tdwg {
         Async async = context.async()
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
-        def d = new DistributedWaitGroup(['1','2','3'].toSet(),{
+        def d = new DistributedWaitGroup(['1', '2', '3'].toSet(), {
             async.complete()
-        },vertx)
+        }, vertx)
         d.ack('1')
         d.ack('2')
         d.ack('3')
 
     }
+
     @Test
     void test2(TestContext context) {
         Async async = context.async()
         data = UUID.randomUUID().toString()
         key = UUID.randomUUID().toString()
-        def tokens=['1','2','3']
-        def d = new DistributedWaitGroup(tokens.toSet(),{
+        def tokens = ['1', '2', '3']
+        def d = new DistributedWaitGroup(tokens.toSet(), {
             async.complete()
-        },vertx)
+        }, vertx)
         def c = 'achannel'
         d.onChannel(c)
         def eb = vertx.eventBus()
         tokens.each { token ->
 
-            eb.send(c,token)
+            eb.send(c, token)
 
         }
     }
+
     @Test
     void test3(TestContext context) {
         Async async = context.async()
@@ -82,25 +85,25 @@ class Tdwg {
         def s = new KvdnSession(vertx)
         s.init({
 
-            def tokens=['1','2','3']
-            def d = new DistributedWaitGroup(tokens.toSet(),{
+            def tokens = ['1', '2', '3']
+            def d = new DistributedWaitGroup(tokens.toSet(), {
                 async.complete()
-            },vertx)
+            }, vertx)
             def m = 'this/that'
-            d.onKeys(m,s)
-            tokens.each { token ->
-                def t = s.newTx('this/that') as KvTx
+            d.onKeys(m, s)
+            tokens.each { String token ->
+                def t = s.newOp('this/that') as KvOp
                 println("setting ${token}")
-                t.set(token,token,{AsyncResult ar ->
+                t.set(token, (token), { AsyncResult ar ->
                     logger.info("set ${token}")
-                    if(!ar.succeeded())
+                    if (!ar.succeeded())
                         throw ar.cause()
                 })
 
             }
 
-        },{
+        }, {
             context.fail()
         })
-        }
+    }
 }

@@ -7,10 +7,12 @@ import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
-import net.iowntheinter.kvdn.KvdnTX
+import net.iowntheinter.kvdn.KvdnOperation
 import net.iowntheinter.kvdn.storage.KvdnSession
-import net.iowntheinter.kvdn.storage.kv.impl.KvTx
+import net.iowntheinter.kvdn.storage.kv.KVData
+import net.iowntheinter.kvdn.storage.kv.impl.KvOp
 import net.iowntheinter.kvdn.storage.TXNHook
+import net.iowntheinter.kvdn.util.DistributedWaitGroup
 
 
 /**
@@ -18,7 +20,7 @@ import net.iowntheinter.kvdn.storage.TXNHook
  */
 @CompileStatic
 @TypeChecked
-class StoreMetaKVHook implements TXNHook {
+class StoreMetaKVHook extends MetadataHook implements TXNHook {
 
     ArrayList straddrCache
 
@@ -30,28 +32,64 @@ class StoreMetaKVHook implements TXNHook {
         logger.info("constructed hook")
     }
 
-    void storeMeta(KvdnTX tx, KvdnSession session, Handler cb) {
+    String metaKey(KvdnOperation tx) {
+        return tx.strAddr + '?' + tx.opKeys[0]//@fixme
+        //are composite-keyd operations a real thing? these are txns....
+    }
+
+    void storeMeta(KvdnOperation tx, KvdnSession session, Handler cb) {
+        /*
+        __METADATA_MAP stores maps that have been used, and their declared types
+        by default, they are untyped and mutable
+        _DATATYPE_MAP stores keys type information
+
+        creating an object involves checking all the necessarys keys are present and of types that match an archatype
+        then the map is stamped with an object type, and becomes immutable
+
+         */
+
+
+
         logger.info("running storeMeta for ${tx.type}")
         if (!straddrCache.contains(tx.strAddr)) {
-            KvTx mtx = session.newTx('__METADATA_MAP') as KvTx
-            mtx.set(tx.strAddr, 1.toString(), { AsyncResult ar ->
+            KvOp mtx = session.newOp('__METADATA_MAP') as KvOp
+            KvOp typeUpdate = session.newOp('__DATATYPE_MAP') as KvOp
+            DistributedWaitGroup wg = new DistributedWaitGroup(["useMap", "typeMap"] as Set, cb, session.vertx)
+
+            assert tx.valueType != null
+            typeUpdate.set(metaKey(tx), tx.valueType.name(),
+                    [valueType: KvdnOperation.VALUETYPE.TYPEINFO] as Map<String, Object>,
+                    { AsyncResult r ->
+                        if (r.succeeded()) {
+                            wg.ack("typeMap")
+                        } else {
+                            wg.abort("typeMstap", r.cause())
+                        }
+                    })
+
+            mtx.set(tx.strAddr, KvdnOperation.DATATYPE.STRING_MAP.toString(), { AsyncResult ar ->
                 if (ar.succeeded()) {
                     straddrCache.add(tx.strAddr)
+
                     logger.info("set meta data for ${tx.strAddr}")
-                    cb.handle(Future.succeededFuture())
+//                    cb.call(Future.succeededFuture())
+                    wg.ack("useMap")
                 } else {
                     logger.error("failed to set meta data for ${tx.strAddr}")
-                    cb.handle(ar)
+                    wg.abort("useMap", ar.cause())
+
                 }
             })
-        }else{
+
+
+        } else {
             cb.handle(Future.succeededFuture())
         }
     }
 
-    void remove(KvdnTX tx, KvdnSession session, Handler cb) {
+    void remove(KvdnOperation tx, KvdnSession session, Handler cb) {
         logger.info("remove")
-        KvTx mtx = session.newTx('__METADATA_MAP') as KvTx
+        KvOp mtx = session.newOp('__METADATA_MAP') as KvOp
         mtx.del(tx.strAddr, { AsyncResult dar ->
             if (dar.succeeded()) {
                 straddrCache.remove(tx.strAddr)
@@ -64,10 +102,10 @@ class StoreMetaKVHook implements TXNHook {
         })
     }
 
-    void checkIfEmpty(KvdnTX tx, KvdnSession session, Handler cb) {
+    void checkIfEmpty(KvdnOperation tx, KvdnSession session, Handler cb) {
         logger.info("checkIfEmpty")
         if (straddrCache.contains(tx.strAddr)) {
-            KvTx ktx = session.newTx(tx.strAddr) as KvTx
+            KvOp ktx = session.newOp(tx.strAddr) as KvOp
             ktx.size({ AsyncResult ar ->
                 if (ar.succeeded()) {
                     if (ar.result() == 0) {
@@ -79,41 +117,41 @@ class StoreMetaKVHook implements TXNHook {
                         cb.handle(Future.succeededFuture())
                     }
                 } else {
-                    logger.error("failed to get size of ${tx.strAddr}: ${ar.cause()}")
+                    logger.error("failed to take size of ${tx.strAddr}: ${ar.cause()}")
 
                     cb.handle(ar)
                 }
             })
-        }else{
+        } else {
             cb.handle(Future.succeededFuture())
         }
     }
 
     @Override
-    TXNHook.HookType getType() {
-        return TXNHook.HookType.META_HOOK
+    HookType getType() {
+        return HookType.META_HOOK
     }
 
     @Override
-    void call(KvdnTX tx, KvdnSession session, Handler cb) {
+    void call(KvdnOperation tx, KvdnSession session, Handler cb) {
         logger.info("TYPE: ${tx.type}")
         switch (tx.type) {
-            case KvdnTX.TXTYPE.KV_SET:
+            case KvdnOperation.TXTYPE.KV_SET:
                 storeMeta(tx, session, cb)
                 break
-            case KvdnTX.TXTYPE.KV_SUBMIT:
+            case KvdnOperation.TXTYPE.KV_SUBMIT:
                 storeMeta(tx, session, cb)
                 break
-            case KvdnTX.TXTYPE.KV_KEYS:
+            case KvdnOperation.TXTYPE.KV_KEYS:
                 cb.handle(Future.succeededFuture())
                 break
-            case KvdnTX.TXTYPE.KV_DEL:
+            case KvdnOperation.TXTYPE.KV_DEL:
                 checkIfEmpty(tx, session, cb)
                 break
-            case KvdnTX.TXTYPE.KV_SIZE:
+            case KvdnOperation.TXTYPE.KV_SIZE:
                 cb.handle(Future.succeededFuture())
                 break
-            case KvdnTX.TXTYPE.KV_GET:
+            case KvdnOperation.TXTYPE.KV_GET:
                 cb.handle(Future.succeededFuture())
                 break
             default:

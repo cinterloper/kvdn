@@ -2,7 +2,7 @@ package net.iowntheinter.kvdn.storage.meta.impl
 
 import io.vertx.core.Handler
 import io.vertx.core.shareddata.LocalMap
-import net.iowntheinter.kvdn.KvdnTX
+import net.iowntheinter.kvdn.KvdnOperation
 import net.iowntheinter.kvdn.storage.KvdnSession
 import net.iowntheinter.kvdn.storage.meta.MetadataStore
 import net.iowntheinter.kvdn.storage.TXNHook
@@ -14,12 +14,12 @@ import net.iowntheinter.kvdn.storage.TXNHook
  */
 class StoreMetaKVHookChain implements TXNHook {
     @Override
-    TXNHook.HookType getType() {
-        return TXNHook.HookType.META_HOOK
+    HookType getType() {
+        return HookType.META_HOOK
     }
 
     @Override
-    void call(KvdnTX tx, KvdnSession session, Handler cb) {
+    void call(KvdnOperation tx, KvdnSession session, Handler cb) {
         Map elems = tx.metabuffer
         LocalMap state = session.vertx.sharedData().getLocalMap(tx.txid.toString())
         if (!state.get('keys'))

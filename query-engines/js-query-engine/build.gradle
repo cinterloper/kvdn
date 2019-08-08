@@ -1,0 +1,107 @@
+import groovy.json.JsonSlurper
+
+
+buildscript {
+    
+    def projversion = rootProject.getVersion()
+    def libversion = projversion.toString().tokenize('-')[0]
+    if (System.getenv("VERTX_VERSION"))
+        libversion = System.getenv("VERTX_VERSION")
+    if (System.getenv("PROJVER"))
+        projversion = System.getenv("PROJVER")
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    Map versionTable = (new JsonSlurper()).parse(new File('src/main/resources/_KVDN_VERSION.json').text.trim().bytes )
+
+    dependencies {
+        classpath "io.vertx:vertx-codegen:$libversion"
+        classpath "io.vertx:vertx-service-proxy:$libversion"
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.6"
+        classpath "org.codehaus.groovy:groovy:${versionTable.groovy}"
+
+    }
+}
+plugins {
+    id 'groovy'
+    id 'java'
+    id 'application'
+
+}
+apply plugin: 'net.ltgt.apt'
+apply plugin: 'groovy'
+apply plugin: 'maven-publish'
+apply plugin: 'idea'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    jcenter()
+}
+Map versionTable = (new JsonSlurper()).parse(new File('src/main/resources/_KVDN_VERSION.json').text.trim().bytes )
+
+def projversion = rootProject.getVersion()
+def libversion = projversion.toString().tokenize('-')[0]
+if (System.getenv("VERTX_VERSION"))
+    libversion = System.getenv("VERTX_VERSION")
+if (System.getenv("PROJVER"))
+    projversion = System.getenv("PROJVER")
+
+version = projversion
+
+sourceCompatibility = '1.8'
+println projversion
+dependencies {
+
+    compile "io.vertx:vertx-core:$libversion";
+    compile "io.vertx:vertx-lang-js:$libversion"
+    compile "io.vertx:vertx-lang-groovy:$libversion"
+    compile "io.vertx:vertx-service-proxy:$libversion"
+    compile "io.vertx:vertx-sockjs-service-proxy:$libversion"
+    compile "io.vertx:vertx-codegen:$libversion"
+    compile "net.iowntheinter:kvdn:$projversion"
+    compile "net.iowntheinter:kvdn-service-proxy:$projversion"
+    compile 'org.javadelight:delight-nashorn-sandbox:0.1.14'
+
+
+}
+
+
+publishing {
+    repositories {
+        mavenLocal()
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            groupId 'net.iowntheinter'
+            artifactId 'kvdn-js-query-engine'
+            from components.java
+        }
+    }
+}
+
+mainClassName = 'io.vertx.core.Launcher'
+compileGroovy {
+    groovyOptions.javaAnnotationProcessing = true
+}
+
+
+
+shadowJar {
+    classifier = 'fat'
+    manifest {
+        attributes 'Main-Verticle': 'groovy:kvdn-start-httpserver.groovy'
+    }
+    mergeServiceFiles {
+        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+    }
+}
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.8'
+}

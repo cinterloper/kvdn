@@ -1,0 +1,1 @@
+/usr/bin/c++    -g -O0 -luuid -pthread -lbfd -ldl     CMakeFiles/KvdnClient.dir/test.cpp.o CMakeFiles/KvdnClient.dir/VertxBus.cpp.o CMakeFiles/KvdnClient.dir/json/jsoncpp.cpp.o CMakeFiles/KvdnClient.dir/KvdnClient.cpp.o  -o KvdnClient -lpthread -luuid 

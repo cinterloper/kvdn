@@ -1,4 +1,3 @@
-
 buildscript {
     repositories {
         mavenLocal()
@@ -7,30 +6,44 @@ buildscript {
         }
     }
     dependencies {
+
         classpath "gradle.plugin.co.riiid:gradle-github-plugin:0.4.2"
         classpath "net.ltgt.gradle:gradle-apt-plugin:0.6"
 
     }
 }
 
-
 plugins {
-    id 'groovy'
     id 'java'
+    id 'groovy'
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '1.2.3'
+    id 'com.github.johnrengelman.shadow' version '2.0.4'
     //id "com.linkedin.python-sdist" version "0.3.9"
     id 'maven-publish'
     id "net.ltgt.apt" version "0.6"
+    id 'codenarc'
+
+}
+
+
+sourceSets {
+    main {
+        java {
+            srcDirs = [] // don't compile Java code twice
+        }
+        groovy {
+            srcDirs = ['src/main/groovy', 'src/main/java']
+        }
+    }
 }
 def strict = false
-if(System.getenv("STRICT_TYPECHECKING") != null) {
+if (System.getenv("STRICT_TYPECHECKING") != null) {
     strict = true
     println "COMPILE STATIC & TYPECHECKED"
 }
 compileGroovy {
     groovyOptions.javaAnnotationProcessing = true
-    if(strict)
+    if (strict)
         groovyOptions.configurationScript = file("gradle/config.groovy")
 }
 compileGroovy {
@@ -39,30 +52,33 @@ compileGroovy {
 apply plugin: "co.riiid.gradle"
 apply plugin: 'distribution'
 apply plugin: 'idea'
-apply plugin: 'java'
 apply plugin: 'groovy'
+apply plugin: 'java'
 
 
-def libversion = '3.5.1'
-subprojects {
-    ext {
-        libversion = '3.5.1'
-    }
-}
-if(System.getenv("VERTX_VERSION") != null)
+if (System.getenv("VERTX_VERSION") != null)
     libversion = System.getenv("VERTX_VERSION")
-sourceSets{
-    main{
-        groovy{
-            exclude "net/iowntheinter/kvdn/storage/lock/*"
-            exclude "net/iowntheinter/kvdn/storage/queue/*"
-            exclude "net/iowntheinter/kvdn/storage/counter/*"
+sourceSets {
+    main {
+        groovy {
+
+         //   exclude "net/iowntheinter/kvdn/storage/lock/"
+       //     exclude "net/iowntheinter/kvdn/storage/queue/*"
+     //       exclude "net/iowntheinter/kvdn/storage/counter/*"
 
         }
     }
 }
-version =  "$libversion-${new File('src/main/resources/_KVDN_VERSION.txt').text.trim()}"
+//
+import groovy.json.JsonSlurper
 
+JsonSlurper js = new JsonSlurper()
+
+Map versionTable = js.parse(new File('src/main/resources/_KVDN_VERSION.json').text.trim().bytes) as Map
+
+//version = "$libversion-${new File('src/main/resources/_KVDN_VERSION.txt').text.trim()}"
+String libversion = versionTable.vertx
+version = "${versionTable.vertx}-${versionTable.project}-${versionTable.point}"
 
 println("version $version")
 def GH_TOKEN = System.getenv("GH_TOKEN")
@@ -82,7 +98,7 @@ distributions {
     }
 }
 
-if(System.getenv("GH_TOKEN") != null) {
+if (System.getenv("GH_TOKEN") != null) {
     github {
         owner = 'cinterloper'
         repo = 'kvdn'
@@ -92,7 +108,7 @@ if(System.getenv("GH_TOKEN") != null) {
         name = "v$version"
         body = """# KVDN
 release $version
-${System.getenv('RELEASE_NOTES')?:""}
+${System.getenv('RELEASE_NOTES') ?: ""}
 """
 
         assets = [
@@ -104,14 +120,18 @@ ${System.getenv('RELEASE_NOTES')?:""}
     }
 }
 repositories {
-    mavenCentral()
+
     mavenLocal()
+    mavenCentral()
+
     jcenter()
-   // pyGradlePyPi()
+    // pyGradlePyPi()
     maven { url 'http://dl.bintray.com/gesellix/docker-utils' }
     flatDir { dirs '/usr/share/java' }
     flatDir { dirs 'lib/' }
-
+    maven{
+        url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/'
+    }
     if (AWS_MVN_BUCKET && !AWS_MVN_BUCKET.allWhitespace) {
         maven {
             url "s3://$AWS_MVN_BUCKET/maven2"
@@ -124,7 +144,7 @@ repositories {
 }
 publishing {
     repositories {
-	mavenLocal()
+        mavenLocal()
         if (AWS_MVN_BUCKET && !AWS_MVN_BUCKET.allWhitespace) {
             maven {
                 url "s3://$AWS_MVN_BUCKET/maven2"
@@ -146,21 +166,27 @@ publishing {
 }
 
 sourceCompatibility = '1.8'
-mainClassName = 'io.vertx.core.Launcher';
+mainClassName = 'io.vertx.core.Launcher'
 dependencies {
     compile "io.vertx:vertx-web:$libversion"
     compile "io.vertx:vertx-core:$libversion"
-    compile "com.google.guava:guava:19.0"
-    compile "io.vertx:vertx-lang-groovy:$libversion"
+    //  compile "com.google.guava:guava:19.0"
     compile "io.vertx:vertx-auth-common:$libversion"
     compile "io.vertx:vertx-auth-jwt:$libversion"
     compile "io.vertx:vertx-auth-shiro:$libversion"
     compile "io.vertx:vertx-service-proxy:$libversion"
-    compile 'ch.qos.logback:logback-classic:1.1.7'
-    compile 'ch.qos.logback:logback-core:1.1.7'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
     compile "net.iowntheinter:kvdn-util:$version"
+    compile "org.codehaus.groovy:groovy:${versionTable.groovy}"
+    compile "org.codehaus.groovy:groovy-json:${versionTable.groovy}"
+//    compile "org.codehaus.groovy:groovy-json:3.0.0-20190525.183916-1086"
+    compile "io.vertx:vertx-shell:$libversion"
     testCompile "io.vertx:vertx-unit:$libversion"
     testCompile group: 'junit', name: 'junit', version: '4.+'
+    implementation 'com.esotericsoftware:kryo:5.0.0-RC4'
+    implementation 'com.arakelian:java-jq:0.10.1'
+
 }
 test {
     testLogging {
@@ -177,11 +203,11 @@ shadowJar {
     manifest {
         attributes 'Main-Verticle': 'groovy:kvdn-start.groovy'
     }
-    mergeServiceFiles{
+    mergeServiceFiles {
         include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
     }
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.8'
+    gradleVersion = '4.8'
 }

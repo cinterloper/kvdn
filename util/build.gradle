@@ -1,3 +1,4 @@
+import groovy.json.JsonSlurper
 
 plugins {
     id 'groovy'
@@ -10,20 +11,40 @@ apply plugin: 'maven-publish'
 apply plugin: 'idea'
 
 
-
 repositories {
+
     mavenCentral()
     mavenLocal()
     jcenter()
+    maven{
+        url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/'
+    }
 }
 
-
+sourceSets { //use the groovy compiler to build both java and groovy
+    main {
+        java {
+            srcDirs = [] // don't compile Java code twice
+        }
+        groovy {
+            srcDirs = [ 'src/main/groovy', 'src/main/java' ]
+        }
+    }
+}
 def projversion = rootProject.getVersion()
-def libversion = projversion.toString().tokenize('-')[0]
 if (System.getenv("VERTX_VERSION"))
     libversion = System.getenv("VERTX_VERSION")
 if (System.getenv("PROJVER"))
     projversion = System.getenv("PROJVER")
+import groovy.json.JsonSlurper
+
+JsonSlurper js = new JsonSlurper()
+
+Map versionTable = js.parse(new File('src/main/resources/_KVDN_VERSION.json').text.trim().bytes) as Map
+
+//version = "$libversion-${new File('src/main/resources/_KVDN_VERSION.txt').text.trim()}"
+String libversion = versionTable.vertx
+version = "${versionTable.vertx}-${versionTable.project}-${versionTable.point}"
 
 version = projversion
 
@@ -35,9 +56,12 @@ sourceCompatibility = '1.8'
 dependencies {
     compile "io.vertx:vertx-core:$libversion"
     compile "io.vertx:vertx-web-client:$libversion"
-    compile "io.vertx:vertx-lang-groovy:$libversion"
     compile 'io.github.lukehutch:fast-classpath-scanner:2.18.1'
     compile 'com.mashape.unirest:unirest-java:1.4.9'
+    compile "org.codehaus.groovy:groovy:${versionTable.groovy}"
+    compile 'me.escoffier.vertx:vertx-completable-future:0.1.2'
+    implementation 'com.esotericsoftware:kryo:5.0.0-RC4'
+
 }
 
 
@@ -54,7 +78,6 @@ publishing {
         }
     }
 }
-
 
 
 task wrapper(type: Wrapper) {

@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC   -g -O0 -luuid -pthread -lbfd -ldl    -shared -Wl,-soname,libKvdn.so.1 -o libKvdn.so.1.0.1 CMakeFiles/Kvdn.dir/KvdnClient.cpp.o 

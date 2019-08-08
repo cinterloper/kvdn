@@ -1,13 +1,23 @@
-buildscript {
+import groovy.json.JsonSlurper
 
+
+buildscript {
+    def projversion = rootProject.getVersion()
+    def libversion = projversion.toString().tokenize('-')[0]
+    if (System.getenv("VERTX_VERSION"))
+        libversion = System.getenv("VERTX_VERSION")
+    if (System.getenv("PROJVER"))
+        projversion = System.getenv("PROJVER")
+
+    version = projversion
     repositories {
         maven {
             url "https://plugins.gradle.org/m2/"
         }
     }
     dependencies {
-        classpath 'io.vertx:vertx-codegen:3.5.0'
-        classpath "io.vertx:vertx-service-proxy:3.5.0"
+        classpath "io.vertx:vertx-codegen:$libversion"
+        classpath "io.vertx:vertx-service-proxy:$libversion"
         classpath "net.ltgt.gradle:gradle-apt-plugin:0.6"
 
     }
@@ -35,6 +45,8 @@ repositories {
     jcenter()
 }
 
+Map versionTable = (new JsonSlurper()).parse(new File('src/main/resources/_KVDN_VERSION.json').text.trim().bytes )
+
 def projversion = rootProject.getVersion()
 def libversion = projversion.toString().tokenize('-')[0]
 if (System.getenv("VERTX_VERSION"))
@@ -42,23 +54,22 @@ if (System.getenv("VERTX_VERSION"))
 if (System.getenv("PROJVER"))
     projversion = System.getenv("PROJVER")
 
+
+
 version = projversion
 
 sourceCompatibility = '1.8'
 
 dependencies {
 
-    compile "io.vertx:vertx-core:$libversion";
+    compile "io.vertx:vertx-core:$libversion"
     compile "io.vertx:vertx-lang-js:$libversion"
-    //compile "io.vertx:vertx-lang-scala-stack_2.12:$libversion"
-    //compile "io.vertx:vertx-lang-kotlin:$libversion"
-    //compile "io.vertx:vertx-lang-ruby:$libversion
-    //compile "io.vertx:vertx-lang-ceylon:$libversion"
-    compile "io.vertx:vertx-lang-groovy:$libversion"
     compile "io.vertx:vertx-service-proxy:$libversion"
     compile "io.vertx:vertx-sockjs-service-proxy:$libversion"
     compile "io.vertx:vertx-codegen:$libversion"
     compile "net.iowntheinter:kvdn:$projversion"
+    compile "net.iowntheinter:kvdn-util:$projversion"
+    compile "org.codehaus.groovy:groovy:${versionTable.groovy}"
 
 }
 def generateSrcPath = "$projectDir/src/main/generated-src"

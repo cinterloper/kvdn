@@ -9,22 +9,29 @@ import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
 import io.vertx.core.eventbus.Message
 import io.vertx.core.eventbus.MessageConsumer
+import io.vertx.core.impl.VertxInternal
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
-import io.vertx.core.shareddata.Counter
 import io.vertx.core.shareddata.LocalMap
-import net.iowntheinter.kvdn.KvdnTX
-import net.iowntheinter.kvdn.storage.kv.impl.KvTx
+import io.vertx.core.shareddata.impl.SharedDataImpl
+import net.iowntheinter.kvdn.KvdnOperation
+import net.iowntheinter.kvdn.query.QueryProvider
+import net.iowntheinter.kvdn.storage.counter.impl.CtrOp
+import net.iowntheinter.kvdn.storage.kv.impl.KVIterator
+import net.iowntheinter.kvdn.storage.kv.impl.KvOp
 import net.iowntheinter.kvdn.storage.kv.key.impl.LocalKeyProvider
 import net.iowntheinter.kvdn.storage.kv.key.KeyProvider
 import net.iowntheinter.kvdn.storage.kv.KVData
 import net.iowntheinter.kvdn.storage.meta.impl.StoreMetaKVHook
-import net.iowntheinter.kvdn.util.KvdnSessionInterface
+import net.iowntheinter.kvdn.def.KvdnSessionInterface
+import net.iowntheinter.kvdn.storage.queue.impl.QueOp
 
-//import net.iowntheinter.kvdn.storage.counter.impl.CtrTx
-//import net.iowntheinter.kvdn.storage.lock.impl.LTx
+import java.lang.reflect.Array
+
+//import net.iowntheinter.kvdn.storage.counter.impl.CtrOp
+//import net.iowntheinter.kvdn.storage.lock.impl.LOperation
 
 @TypeChecked
 @CompileStatic
@@ -33,6 +40,7 @@ class KvdnSession implements KvdnSessionInterface {
     private String cname = this.getClass().getName()
     private Logger logger
 
+    Map<String, QueryProvider> queryEngines = [:]
     enum SESSIONTYPE {
         NATIVE_SESSION, PROTOCOL_SERVER, PROXY_SERVER
     }
@@ -42,13 +50,13 @@ class KvdnSession implements KvdnSessionInterface {
     }
 
     enum DATATYPE {
-        KV, CTR, LCK
+        KV, CTR, LCK, QUE
     }
     boolean initalized = false
     boolean tracking = false
-    private Vertx vertx
+    Vertx vertx
     Set outstandingTX
-    //roMode should not issue new sessions, new kvdnTX's on existing sessions will get the ROFLAG
+    //roMode should not issue new sessions, new kvdnTX's on existing sessions will take the ROFLAG
     boolean roMode = false
     boolean transition = false
     Set txflags
@@ -58,19 +66,25 @@ class KvdnSession implements KvdnSessionInterface {
     final JsonObject config
     public KVData D, M
 
-    ArrayList<TXNHook> preHooks = []
-    ArrayList<TXNHook> postHooks = []
+    ArrayList<TXNHook> preHooks = new ArrayList<>()
+    ArrayList<TXNHook> postHooks = new ArrayList<>()
     LocalMap accessCache
+    Map<String, JsonObject> featureMap = [:]
 
-    void sessionPreTxHooks(KvdnTX tx, Handler cb) {
-        _hookCaller(tx as KvdnTX, this.preHooks, 0, cb)
+    void registerFeature(String featureKey, JsonObject featureData) {
+        featureMap[featureKey] = featureData
     }
 
-    void sessionPostTxHooks(KvdnTX tx, Handler cb) {
-        _hookCaller(tx as KvdnTX, this.postHooks, 0, cb)
+    void sessionPreOpHooks(KvdnOperation tx, Handler cb) {
+        _hookCaller(tx as KvdnOperation, this.preHooks, 0, cb)
     }
-    Closure txEndHandler = { KvTx tx, Handler cb ->
-        sessionPostTxHooks(tx, cb)
+
+    void sessionPostOpHooks(KvdnOperation tx, Handler cb) {
+        _hookCaller(tx as KvdnOperation, this.postHooks, 0, cb)
+    }
+
+    void opCompletionHandler(KvdnOperation tx, Handler<AsyncResult> cb) {
+        sessionPostOpHooks(tx, cb)
     }
 /*
  * this is a recursive traversal of the hooks array
@@ -79,26 +93,50 @@ class KvdnSession implements KvdnSessionInterface {
  *
  */
 
-    private TXNHook txHookLoader(String it) {
-        return this.class.classLoader.loadClass(it)?.newInstance(vertx as Vertx, this) as TXNHook
+    private QueryProvider QueryProviderLoader(String it) {
+        QueryProvider result = this.class.classLoader.loadClass(it)?.newInstance([vertx as Vertx, this].toArray()) as QueryProvider
+        if (result == null)
+            throw new Exception("could not load $it")
+        return result
     }
 
-    void _hookCaller(KvdnTX tx, ArrayList<TXNHook> hooks, int ptr, Handler cb) {
+    private KVData DataImplLoader(String it) {
+        KVData result = this.class.classLoader.loadClass(it)?.newInstance([vertx as Vertx, this].toArray()) as KVData
+        if (result == null)
+            throw new Exception("could not load $it")
+        return result
+    }
+
+    private TXNHook txHookLoader(String it) {
+        TXNHook result = this.class.classLoader.loadClass(it)?.newInstance([vertx as Vertx, this].toArray()) as TXNHook
+        if (result == null)
+            throw new Exception("could not load $it")
+        return result
+    }
+
+    interface AsyncIterOp {
+        void call(MapEntry data, Handler<AsyncResult> cb)
+    }
+
+
+    KVIterator newIterator(String straddr, Handler<AsyncResult> fin) {
+        return new KVIterator(straddr, this, fin)
+    }
+
+    void _hookCaller(KvdnOperation tx, ArrayList<TXNHook> hooks, int ptr, Handler cb) {
         logger.debug("inside hook caller ptr: $ptr hooks: $hooks")
         if (ptr != hooks.size()) {
-
             TXNHook nxt = hooks[ptr] as TXNHook
             logger.debug("calling hook ptr $ptr size ${hooks.size()} ${nxt.class}")
-
             ptr++
             //skip calling metadata hook on metadata map
-            if ((nxt.type == TXNHook.HookType.META_HOOK) && tx.strAddr == '__METADATA_MAP') {
-                logger.debug("Skipping meta hook to next hook ptr $ptr size ${hooks.size()} ${nxt.class}")
+            if ((nxt.type == TXNHook.HookType.META_HOOK) && (tx.strAddr == '__METADATA_MAP' || tx.strAddr == '__DATATYPE_MAP')) {
+                logger.trace("Skipping meta hook to next hook ptr $ptr size ${hooks.size()} ${nxt.class}")
                 _hookCaller(tx, hooks, ptr, cb) //trampoline
             } else {
-                logger.debug("calling next hook ptr $ptr size ${hooks.size()} ${nxt.class}")
+                logger.trace("calling next hook ptr $ptr size ${hooks.size()} ${nxt.class}")
                 nxt.call(tx, this, { AsyncResult res ->
-                    logger.debug("called next hook ptr $ptr size ${hooks.size()} ${nxt.class}")
+                    logger.trace("called next hook ptr $ptr size ${hooks.size()} ${nxt.class}")
                     _hookCaller(tx, hooks, ptr, cb) //trampoline
                 })
             }
@@ -120,23 +158,44 @@ class KvdnSession implements KvdnSessionInterface {
     }
 
     KvdnSession(Vertx vertx, stype = SESSIONTYPE.NATIVE_SESSION) {
-        vertx.sharedData().getCounter("sessions", { AsyncResult<Counter> ar ->
-            Counter c = ar.result()
-            c.incrementAndGet({ AsyncResult<Long> igr ->
-                LoggerFactory.getLogger(this.class.getName()).error("SESSION NUMBER:" + igr.result())
-            })
-        })
 
         sessionid = UUID.randomUUID().toString()
-        String loggerName = cname + ":" + sessionid.toString()
+        String loggerName = "${cname} :  ${sessionid.toString()}"
         logger = new LoggerFactory().getLogger(loggerName)
+        logger.info("creating KvdnSession")
+
+        //@fixme hack?
+        // in memory shared data
+
+        /*@todo we need a new way to check to make sure we are a singleton session per jvm
+        if this is required by the cluster manager
+        Maybe the data implementation itself should enforce the singleton pattern
+        */
+//        vertx.sharedData().getLocalMap("sessions", { AsyncResult<AsyncMap> ar ->
+//            AsyncMap m = ar.result()
+//            m.keys(new Handler<AsyncResult<Set>>() {
+//                @Override
+//                void call(AsyncResult<Set> event) {
+//                    assert event.succeeded()
+//                    assert event.result().size() == 0
+//
+//
+//                }
+//            })
+////
+////
+////            c.incrementAndGet({ AsyncResult<Long> igr ->
+////                LoggerFactory.getLogger(this.class.getName()).error("SESSION NUMBER:" + igr.result())
+////            })
+//        })
+//anyway should not have async code in a constructor
 
         this.vertx = vertx
         JsonObject Vconfig = this.vertx.getOrCreateContext().config()
-        logger.trace("VERTX CONFIG:" + Vconfig.encodePrettily())
+        logger.trace("VERTX CONFIG: ${Vconfig.encodePrettily()}")
         config = Vconfig.getJsonObject('kvdn') ?: new JsonObject()
 
-        logger.trace("KVDN CONFIG:" + config.encodePrettily())
+        logger.trace("KVDN CONFIG: ${config.encodePrettily()}")
 
         txflags = []
         outstandingTX = new HashSet()
@@ -146,7 +205,7 @@ class KvdnSession implements KvdnSessionInterface {
         String configured_data = config.getString('data_implementation') ?:
                 'net.iowntheinter.kvdn.storage.kv.data.DefaultDataImpl'
         try {
-            this.D = txHookLoader(configured_data) as KVData
+            this.D = DataImplLoader(configured_data) as KVData
             this.preHooks.addAll((D as KVData).getPreHooks())
             this.postHooks.addAll((D as KVData).getPostHooks())
         } catch (e) {
@@ -175,28 +234,49 @@ class KvdnSession implements KvdnSessionInterface {
         if (this.keyprov == null)
             this.keyprov = new LocalKeyProvider(this.vertx, D as KVData)
 
-        logger.debug("CONFIGURED PROVIDER: " + this.keyprov)
+        logger.debug("CONFIGURED PROVIDER: ${this.keyprov}")
 
         logger.trace("starting new kvdn session with clustered = ${this.vertx.isClustered()} keyprovider = ${this.keyprov}")
 
     }
 
-    void init(Handler cb, Handler error_cb) {
-        zeroState(vertx, { KvdnSession s ->
-            s.initalized = true
-            cb.handle(Future.succeededFuture())
-        }, error_cb)
+    void init(Handler<AsyncResult> cb, Handler<Throwable> error_cb) {
+
+        logger.debug("Calling session INIT")
+        //this should verify everyting is setup (outstanding admin ops have finished, req cluster members have joined
+        if (vertx.isClustered()) {
+            SharedDataImpl sdlocal = new SharedDataImpl(vertx as VertxInternal, null)
+            //@todo this is where we check if we are the only Session for this vertx instance
+
+        }
+        checkInternalState(vertx, new Handler<AsyncResult<KvdnSession>>() {
+            @Override
+            void handle(AsyncResult<KvdnSession> event) {
+
+                System.err.println("success handler in zerostate")
+                KvdnSession s = event.result()
+                s.initalized = true
+                cb.handle(Future.succeededFuture(s))
+
+
+            }
+        })
+        logger.debug("post zerostate call")
     }
     /*
-     * This is the entrypoint to using the kv api, get your transactions here.
+     * This is the entrypoint to using the kv api, take your transactions here.
      *
      * @param strAddr storage address
-     * @return KvdnTX your transaction
+     * @return KvdnOperation your transaction
      */
 
-    KvdnTX newTx(String strAddr, datatype = DATATYPE.KV, String mimeType = null) {
+    KvOp newKvOp(String strAddr, datatype = DATATYPE.KV, String mimeType = null, String transactionID = null) {
+        return newOp(strAddr, datatype, mimeType, transactionID) as KvOp
+    }
+
+    KvdnOperation newOp(String strAddr, datatype = DATATYPE.KV, String mimeType = null, String transactionID = null) {
         if (mimeType != null && DATATYPE != DATATYPE.KV)
-            throw new Exception("CANNOT DECLARE A MIMETYPE ON ${DATATYPE.toString()}")
+            throw new Exception("CANNOT DECLARE A MIMETYPE ON ${datatype.toString()}")
 
         if (datatype == DATATYPE.KV && mimeType == null)
             mimeType = "text/plain"
@@ -208,16 +288,19 @@ class KvdnSession implements KvdnSessionInterface {
             outstandingTX.add(txid)
             switch (datatype) {
                 case DATATYPE.KV:
-                    return (new KvTx(strAddr, mimeType, txid, this, vertx))
+                    return (new KvOp(strAddr, mimeType, txid, this, vertx))
                     break
                 case DATATYPE.CTR:
-                    return null //(new CtrTx(strAddr, txid, this, vertx))
+                    return (new CtrOp(strAddr, txid, this, vertx))
+                    break
+                case DATATYPE.QUE:
+                    return (new QueOp(strAddr, txid, this, vertx))
                     break
                 case DATATYPE.LCK:
-                    return null //(new LTx(strAddr, txid, this, vertx))
+                    return null //(new LOperation(strAddr, txid, this, vertx))
                     break
                 default:
-                    return (null)
+                    throw new Exception("transaction data type ${datatype.toString()} not available")
             }
         }
     }
@@ -225,14 +308,23 @@ class KvdnSession implements KvdnSessionInterface {
  * you must call this as the last action
  */
 
-    void finishTx(KvdnTX tx, Handler cb) {
-        outstandingTX.remove(tx.txid)
-        txEndHandler(tx, {
-            if (tracking)
-                accessCache.put(tx.strAddr, tx.txid)
-            else
-                accessCache.putIfAbsent(tx.strAddr, true)
-            cb.handle(Future.succeededFuture())
+    void finishOp(KvdnOperation op, Handler cb) {
+        outstandingTX.remove(op.txid)
+        opCompletionHandler(op, new Handler<AsyncResult>() {
+            @Override
+            void handle(AsyncResult event) {
+                if (event.succeeded()) {
+                    if (tracking)
+                        accessCache.put(op.strAddr, op.txid)
+                    else
+                        accessCache.putIfAbsent(op.strAddr, true)
+                    cb.handle(Future.succeededFuture())
+                } else {
+                    logger.error(event.cause())
+                    cb.handle(event)
+                }
+            }
+
         })
     }
 
@@ -278,32 +370,13 @@ class KvdnSession implements KvdnSessionInterface {
         })
     }
 
-    private void zeroState(Vertx vertx, Handler cb, Handler error_cb) {
-        boolean goodstate = false
-        assert (!txflags.contains(TXFLAGS.READ_ONLY) && !roMode && !transition)
-        //when initializing a session, there should be no outstanding admin operations
-        vertx.sharedData().getCounter("_KVDN_ADMIN_OPERATIONS", { AsyncResult<Counter> ar ->
-            try {
-                assert ar.succeeded()
-            } catch (gce) {
-                error_cb.handle(gce)
-            }
-            Counter l = ar.result()
-            l.get({ AsyncResult r ->
-                try {
-                    assert r.succeeded()
-                } catch (gre) {
-                    error_cb.handle(gre)
-                }
-                try {
-                    assert r.result() == 0
-                    goodstate = true
-                } catch (ase) {
-                    error_cb.handle(ase)
-                }
-                if (goodstate)
-                    cb.handle(this)
-            })
-        })
+    QueryProvider getQueryEngine(String id) {
+        if (!queryEngines.containsKey(id))
+            throw new Exception("Requested query engine ${id} but engine is not registered")
+    }
+
+    private void checkInternalState(Vertx vertx, Handler<AsyncResult<KvdnSession>> cb) {
+        cb.handle(Future.succeededFuture(this))
+        //@todo unimplemented
     }
 }

@@ -5,5 +5,5 @@ import io.vertx.core.Handler
 
 
 interface AbstractServer {
-    void init(Handler<AsyncResult> cb)
+    void init(Map<String,Object> config, Handler<AsyncResult> cb)
 }

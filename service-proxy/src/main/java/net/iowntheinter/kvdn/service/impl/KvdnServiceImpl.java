@@ -10,12 +10,24 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import net.iowntheinter.kvdn.service.KvdnService;
 import net.iowntheinter.kvdn.storage.KvdnSession;
-import net.iowntheinter.kvdn.storage.kv.impl.KvTx;
+import net.iowntheinter.kvdn.storage.kv.AsyncIterator;
+import net.iowntheinter.kvdn.storage.kv.impl.KvOp;
+import net.iowntheinter.kvdn.storage.counter.impl.CtrOp;
+import net.iowntheinter.kvdn.storage.queue.impl.QueOp;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
+/*
+    serverside interface
+    (client) < - eventbus - > (KvdnServiceImpl -> ( KvOp ( under the hood DB ) )
+
+   everything get stored as buffers by default
+   you can tell get() you are retrieving a string or JsonObject ....
+
+
+ */
 public class KvdnServiceImpl implements KvdnService {
     private Vertx vertx;
     private KvdnSession session;
@@ -26,12 +38,18 @@ public class KvdnServiceImpl implements KvdnService {
         logger.info("started kvdnservice");
     }
 
-    public void setup(Handler cb) {
+    public void setup(Handler<AsyncResult> cb) {
         logger.info("service setup called");
 
         try {
-            this.session = new KvdnSession(vertx);
-            session.init(cb, (Handler<Throwable>) logger::error);
+            this.session = new KvdnSession(vertx, KvdnSession.SESSIONTYPE.PROXY_SERVER);
+            session.init(cb, new Handler<Throwable>() {
+                @Override
+                public void handle(Throwable event) {
+                    logger.fatal(event);
+                    System.err.println(event.toString());
+                }
+            });
 
         } catch (Exception e) {
             System.out.println("problem getting cassandra session: ");
@@ -39,44 +57,38 @@ public class KvdnServiceImpl implements KvdnService {
         }
 
     }
+    //@todo implement transaction control (rate limit, etc)
+
 
     @Override
-    public void set(String straddr, String key, String value, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
+    public void set(String straddr, String key, String value, JsonObject options, Handler<AsyncResult<String>> resultHandler) {
         //  mapjsonintercepter mji = new mapjsonintercepter().setCb(resultHandler);
-        KvTx tx = (KvTx) this.session.newTx(straddr, KvdnSession.DATATYPE.KV);
-        tx.set(key, value, resultHandler);
+        KvOp op = (KvOp) this.session.newOp(straddr, KvdnSession.DATATYPE.KV);
+        op.set(key, value, options.getMap(), resultHandler);
     }
 
     @Override
-    public void submit(String straddr, String value, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
+    public void submit(String straddr, String value, JsonObject options, Handler<AsyncResult<String>> resultHandler) {
         //   mapjsonintercepter mji = new mapjsonintercepter().setCb(resultHandler);
-        KvTx tx = (KvTx) this.session.newTx(straddr, KvdnSession.DATATYPE.KV);
-
-
-        tx.submit(value, resultHandler);
+        KvOp op = (KvOp) this.session.newOp(straddr, KvdnSession.DATATYPE.KV);
+        op.submit(value, options.getMap(), resultHandler);
     }
 
     @Override
     public void get(String straddr, String key, JsonObject options, Handler<AsyncResult<String>> resultHandler) {
         //     mapjsonintercepter mji = new mapjsonintercepter().setCb(resultHandler);
-        KvTx tx = (KvTx) this.session.newTx(straddr, KvdnSession.DATATYPE.KV);
-        tx.get(key, new Handler<AsyncResult<String>>() {
-            @Override
-            public void handle(AsyncResult<String> event) {
-                logger.trace("inside service get with result:  " + event.result());
-                resultHandler.handle(event);
+        KvOp op = (KvOp) this.session.newOp(straddr, KvdnSession.DATATYPE.KV);
 
-            }
-
-        });
+        //fuck this mess
+        op.get(key, options.getMap(), resultHandler);
     }
 
     @Override
     public void getKeys(String straddr, JsonObject options, Handler<AsyncResult<JsonArray>> resultHandler) {
         logger.trace("getting keys request " + straddr);
         setjsoninterceptor sji = new setjsoninterceptor().setCb(resultHandler);
-        KvTx tx = (KvTx) this.session.newTx(straddr, KvdnSession.DATATYPE.KV);
-        tx.getKeys(sji);
+        KvOp op = (KvOp) this.session.newOp(straddr, KvdnSession.DATATYPE.KV);
+        op.getKeys(options.getMap(), sji);
 
     }
 
@@ -84,20 +96,76 @@ public class KvdnServiceImpl implements KvdnService {
     public void size(String straddr, JsonObject options, Handler<AsyncResult<Integer>> resultHandler) {
         logger.trace("getting keys request " + straddr);
         //mapjsonintercepter mji = new mapjsonintercepter().setCb(resultHandler);
-        KvTx tx = (KvTx) this.session.newTx(straddr, KvdnSession.DATATYPE.KV);
-        tx.size(resultHandler);
+        KvOp op = (KvOp) this.session.newOp(straddr, KvdnSession.DATATYPE.KV);
+        op.size(options.getMap(), resultHandler);
     }
 
     @Override
-    public void del(String straddr, String key, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
+    public void del(String straddr, String key, JsonObject options, Handler<AsyncResult<String>> resultHandler) {
         // mapjsonintercepter mji = new mapjsonintercepter().setCb(resultHandler);
-        KvTx tx = (KvTx) this.session.newTx(straddr, KvdnSession.DATATYPE.KV);
-        tx.del(key, resultHandler);
+        KvOp op = (KvOp) this.session.newOp(straddr, KvdnSession.DATATYPE.KV);
+        op.del(key, options.getMap(), resultHandler);
     }
 
     @Override
     public void query(String stradd, JsonObject query, JsonObject options, Handler<AsyncResult<JsonObject>> resultHandler) {
         logger.fatal("no query provider loaded");
+    }
+
+    @Override
+    public void clear(String straddr, JsonObject options, Handler<AsyncResult<Boolean>> resultHandler) {
+        KvOp op = (KvOp) this.session.newOp(straddr, KvdnSession.DATATYPE.KV);
+        op.clear(options.getMap(), resultHandler);
+    }
+
+    @Override
+    public void ctrGet(String straddr, JsonObject options, Handler<AsyncResult<Long>> cb) {
+        CtrOp op = (CtrOp) this.session.newOp(straddr, KvdnSession.DATATYPE.CTR);
+        op.get(cb);
+
+
+    }
+
+    @Override
+    public void addAndGet(String straddr, long value, JsonObject options, Handler<AsyncResult<Long>> cb) {
+        CtrOp op = (CtrOp) this.session.newOp(straddr, KvdnSession.DATATYPE.CTR);
+        op.addAndGet(value, cb);
+    }
+
+    @Override
+    public void getAndAdd(String straddr, long value, JsonObject options, Handler<AsyncResult<Long>> cb) {
+        CtrOp op = (CtrOp) this.session.newOp(straddr, KvdnSession.DATATYPE.CTR);
+        op.getAndAdd(value, cb);
+    }
+
+    @Override
+    public void ctrCompareAndSet(String straddr, long oldv, long newv, JsonObject options, Handler<AsyncResult<Boolean>> cb) {
+        CtrOp op = (CtrOp) this.session.newOp(straddr, KvdnSession.DATATYPE.CTR);
+        op.compareAndSet(oldv, newv, cb);
+    }
+
+    @Override
+    public void enqueue(String straddr, JsonObject options, String value, Handler<AsyncResult<Long>> cb) {
+        QueOp op = (QueOp) this.session.newOp(straddr, KvdnSession.DATATYPE.QUE);
+        op.enqueue(value, cb);
+    }
+
+    @Override
+    public void dequeue(String straddr, JsonObject options, Handler<AsyncResult<String>> cb) {
+        QueOp op = (QueOp) this.session.newOp(straddr, KvdnSession.DATATYPE.QUE);
+        op.dequeue(cb);
+    }
+
+    @Override
+    public void qPeek(String straddr, JsonObject options, Handler<AsyncResult<String>> cb) {
+        QueOp op = (QueOp) this.session.newOp(straddr, KvdnSession.DATATYPE.QUE);
+        op.peek(cb);
+    }
+
+    @Override
+    public void qArrayView(String straddr, JsonObject options, Handler<AsyncResult<JsonObject>> cb) {
+        QueOp op = (QueOp) this.session.newOp(straddr, KvdnSession.DATATYPE.QUE);
+        op.arrayView(cb);
     }
 
     //for get keys the service should return the wire-serializeable representation, so a JsonArray instead of a set of keys
@@ -137,6 +205,18 @@ public class KvdnServiceImpl implements KvdnService {
             cb.handle(Future.succeededFuture(j.toString()));
         }
 
-
     }
+
+    Handler<AsyncResult<Object>> stringToObj(Handler<AsyncResult<String>> h) {
+        return new Handler<AsyncResult<Object>>() {
+            @Override
+            public void handle(AsyncResult<Object> event) {
+                if (event.succeeded())
+                    h.handle(Future.succeededFuture((String) event.result()));
+                else
+                    h.handle(Future.failedFuture(event.cause()));
+            }
+        };
+    }
+
 }

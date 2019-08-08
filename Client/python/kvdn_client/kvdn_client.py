@@ -1,7 +1,12 @@
+from abc import ABC, abstractmethod
+
+import six
 import traceback
 import logging
 import requests
 import sys
+import json
+import shelve
 
 ch = logging.StreamHandler()
 ch.setLevel(logging.ERROR)
@@ -29,18 +34,170 @@ CONF = {
 }
 
 
-class kvdn_client:
-    kvdn_py_version = '2.0.3'
+class AbstractClient(ABC):
+    kvdn_py_version = '2.8.0'
+
+    @abstractmethod
+    def set(self, straddr, key, data, **kwargs):
+        pass
+
+    @abstractmethod
+    def version(self):
+        pass
+
+    @abstractmethod
+    def get(self, straddr, key, **kwargs):
+        pass
+
+    @abstractmethod
+    def setRaw(self, straddr, key, data, type='text/plain', **kwargs):
+        pass
+
+    @abstractmethod
+    def setJson(self, straddr, key, data, type='application/json', **kwargs):
+        pass
+
+    @abstractmethod
+    def getKeys(self, straddr, **kwargs):
+        pass
+
+    @abstractmethod
+    def delete(self, straddr, key, **kwargs):
+        pass
+
+    @abstractmethod
+    def submit_cas(self, straddr, data, type='text/plain', **kwargs):
+        pass
+
+    @abstractmethod
+    def submit_bulk(self, straddr, data, type='text/plain', **kwargs):
+        pass
+
+    @abstractmethod
+    def submit_uuid(self, straddr, data, type='text/plain', **kwargs):
+        pass
+
+    def _close_hook(self):
+        pass
+
+
+class local_storage(AbstractClient):
+    kvdn_py_version = '2.8.0'
+    CONF = {}
+    db: shelve.Shelf = None
 
     def __init__(self, **kwargs):
-        for key, value in kwargs.iteritems():
+        for key, value in six.iteritems(kwargs):
+            CONF[key] = value
+        print(json.dumps(list(CONF.keys())))
+        self.db = shelve.open(CONF["dbpath"])
+
+    def _close_hook(self):
+        # self.db.close()
+        pass
+
+    def _getmap(self, straddr) -> dict:
+        map: dict = {}
+        try:
+            map: dict = self.db[straddr]
+            return map
+        except(KeyError):
+            return {}
+
+    def set(self, straddr, key, data, **kwargs):
+        map: dict = self._getmap(straddr)
+
+        map[key] = data
+        self.db[straddr] = map
+        return key
+
+    def version(self):
+        return "2.8.0"
+
+    def get(self, straddr, key, **kwargs):
+        try:
+            map: dict = self._getmap(straddr)
+            return map[key]
+        except(KeyError):
+            return None
+
+    def setRaw(self, straddr, key, data, type='text/plain', **kwargs):
+        map: dict = self._getmap(straddr)
+
+        map[key] = data
+        self.db[straddr] = map
+
+        return key
+
+    def setJson(self, straddr, key, data, type='application/json', **kwargs):
+        map: dict = self._getmap(straddr)
+
+        map[key] = data
+        self.db[straddr] = map
+
+        return key
+
+    def getKeys(self, straddr, **kwargs):
+
+        map: dict = self._getmap(straddr)
+        if straddr == '_/METADATA_MAP':
+            return json.dumps(list(self.db.keys()))
+        return json.dumps(list(map.keys()))
+
+    def delete(self, straddr, key, **kwargs):
+        map: dict = self._getmap(straddr)
+
+        map[key] = None
+        self.db[straddr] = map
+
+        return key
+
+    def submit_cas(self, straddr, data: str, type='text/plain', **kwargs):
+        import hashlib
+        key = hashlib.sha256(data.encode("UTF-8")).hexdigest()
+
+        map: dict = self._getmap(straddr)
+
+        map[key] = data
+        self.db[straddr] = map
+
+        return key
+
+    def submit_bulk(self, straddr, data, type='text/plain', **kwargs):
+        map: dict = self._getmap(straddr)
+
+        d: dict = json.loads(data)
+        for k, v in d.items():
+            map[k] = v
+        self.db[straddr] = map
+
+        return True
+
+    def submit_uuid(self, straddr, data, type='text/plain', **kwargs):
+        import uuid
+        u = str(uuid.uuid4())
+        map: dict = self._getmap(straddr)
+
+        map[u] = data
+        self.db[straddr] = map
+
+        return u
+
+    def __del__(self):
+        self.db.close()
+
+
+class kvdn_client(AbstractClient):
+    kvdn_py_version = '2.8.0'
+
+    def __init__(self, **kwargs):
+        for key, value in six.iteritems(kwargs):
             CONF[key] = value
         if CONF['token'] is not None:
             CONF['headers'].update({'Authorization': 'Bearer %s' % CONF['token']})
         self.session = requests.Session()
         self.SVER = self.session.get(CONF['baseurl'] + CONF['prefix'] + '/__VERSION', verify=CONF['verify'],
                                      timeout=CONF['timeout'], cert=CONF['cert'], headers=CONF['headers'])
-
 
     def set(self, straddr, key, data, **kwargs):
         if CONF['set_mode'] == 'raw':
@@ -78,6 +235,11 @@ class kvdn_client:
 
     def submit_cas(self, straddr, data, type='text/plain', **kwargs):
         resp, content = kvdn_req(self.session, CONF['baseurl'] + CONF['prefix'] + '/X/' + straddr, method='POST',
+                                 data=data, headers=CONF['headers'].update({'Content-Type': type}))
+        return content  # the returned content should be the hash of data as a key
+
+    def submit_bulk(self, straddr, data, type='text/plain', **kwargs):
+        resp, content = kvdn_req(self.session, CONF['baseurl'] + CONF['prefix'] + '/X/' + straddr + '/', method='POST',
                                  data=data, headers=CONF['headers'].update({'Content-Type': type}))
         return content  # the returned content should be the hash of data as a key
 

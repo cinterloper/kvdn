@@ -11,6 +11,7 @@ import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
+import net.iowntheinter.kvdn.def.KvdnSessionInterface
 
 import java.util.function.Function
 
@@ -30,6 +31,13 @@ class DistributedWaitGroup {
     EventBus eb
     Logger logger
 
+
+    /*
+    distributed wait group gets its own (temporary?) storage map
+    stores data from each ack?
+    how would this work?
+
+     */
     DistributedWaitGroup(Set tokens, long timeout = 0, Handler triggercb, Handler abortcb = {}, Vertx v) {
         this.logger = LoggerFactory.getLogger(this.class.getName())
         logger.debug("initalized new DistributedWaitGroup with tokens: $tokens ")
@@ -43,6 +51,10 @@ class DistributedWaitGroup {
         tokens.each { token ->
             events[token] = false
         }
+    }
+
+    void abort(Object token, Throwable e ){
+        abortcb.handle(e)
     }
 
     void ack(token) {

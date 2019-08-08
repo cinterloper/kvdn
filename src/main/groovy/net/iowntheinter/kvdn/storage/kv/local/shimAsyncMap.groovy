@@ -2,21 +2,23 @@ package net.iowntheinter.kvdn.storage.kv.local
 
 import groovy.transform.CompileStatic
 import groovy.transform.TypeChecked
+import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
-import io.vertx.core.shareddata.AsyncMap
 import io.vertx.core.shareddata.LocalMap
 import io.vertx.core.shareddata.SharedData
+import net.iowntheinter.kvdn.KvdnOperation
+import net.iowntheinter.kvdn.storage.kv.data.TypedAsyncMap
 
 /**
  * Created by g on 7/17/16.
  */
 @TypeChecked
 @CompileStatic
-class shimAsyncMap implements AsyncMap {
+class shimAsyncMap implements TypedAsyncMap {
     LocalMap sham
     SharedData sd
     Logger logger
@@ -176,5 +178,11 @@ class shimAsyncMap implements AsyncMap {
     @Override
     void entries(Handler handler) {
         handler.handle(Future.succeededFuture(sham))
+    }
+
+    @Override
+    void getTyped(Object object, Handler<AsyncResult<KvdnOperation.VALUETYPE>> handler) {
+
+
     }
 }
